@@ -37,7 +37,8 @@
 #include <univalue.h>
 #include <tinyformat.h>
 
-void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry, bool expanded = false)
+//void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry, bool expanded = false)
+void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry)
 {
     // Call into TxToUniv() in raven-common to decode the transaction hex.
     //
@@ -45,7 +46,7 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry, 
     // available to code in raven-common, so we query them here and push the
     // data into the returned UniValue.
     TxToUniv(tx, uint256(), entry, true, RPCSerializationFlags());
-
+/*
     if (expanded) {
         uint256 txid = tx.GetHash();
         if (!(tx.IsCoinBase())) {
@@ -92,7 +93,7 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry, 
         }
         entry.pushKV("vout", newVout);
     }
-
+*/
     if (!hashBlock.IsNull()) {
         entry.pushKV("blockhash", hashBlock.GetHex());
         BlockMap::iterator mi = mapBlockIndex.find(hashBlock);
@@ -217,7 +218,8 @@ UniValue getrawtransaction(const JSONRPCRequest& request)
         return EncodeHexTx(*tx, RPCSerializationFlags());
 
     UniValue result(UniValue::VOBJ);
-    TxToJSON(*tx, hashBlock, result, true);
+    //TxToJSON(*tx, hashBlock, result, true);
+    TxToJSON(*tx, hashBlock, result);
 
     return result;
 }

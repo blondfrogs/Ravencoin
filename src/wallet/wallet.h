@@ -209,6 +209,11 @@ public:
     CTransactionRef tx;
     uint256 hashBlock;
 
+    // Ravencoin: SegWit removed the coinbase merkle tree and only included it for
+    // Ravencoin: backwards compatibility with older bitcoin clients.
+    // Ravencoin: Ravencoin still needs it here
+    std::vector<uint256> vMerkleBranch;
+    
     /* An nIndex == -1 means that hashBlock (in nonzero) refers to the earliest
      * block in the chain we know this or any in-wallet dependency conflicts
      * with. Older clients interpret nIndex == -1 as unconfirmed for backward

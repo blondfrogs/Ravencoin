@@ -85,6 +85,10 @@ RAVEN_CORE_H = \
   spentindex.h \
   timestampindex.h \
   addrman.h \
+  auxpow/auxpow.h \
+  auxpow/check.h \
+  auxpow/consensus.h \
+  auxpow/serialize.h \
   assets/assets.h \
   assets/assetdb.h \
   assets/assettypes.h \
@@ -197,6 +201,7 @@ libraven_server_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 libraven_server_a_SOURCES = \
   addrdb.cpp \
   addrman.cpp \
+  auxpow/auxpow.cpp \
   bloom.cpp \
   blockencodings.cpp \
   chain.cpp \
@@ -336,6 +341,7 @@ libraven_consensus_a_SOURCES = \
   amount.h \
   arith_uint256.cpp \
   arith_uint256.h \
+  auxpow/auxpow.cpp \
   consensus/merkle.cpp \
   consensus/merkle.h \
   consensus/params.h \
@@ -345,6 +351,7 @@ libraven_consensus_a_SOURCES = \
   prevector.h \
   primitives/block.cpp \
   primitives/block.h \
+  primitives/blockheader.h \
   primitives/transaction.cpp \
   primitives/transaction.h \
   pubkey.cpp \

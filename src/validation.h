@@ -19,6 +19,7 @@
 #include "script/script_error.h"
 #include "sync.h"
 #include "versionbits.h"
+#include "chain.h"
 #include "spentindex.h"
 #include "addressindex.h"
 #include "timestampindex.h"

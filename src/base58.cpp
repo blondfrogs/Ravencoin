@@ -273,6 +273,16 @@ CTxDestination CRavenAddress::Get() const
         return CNoDestination();
 }
 
+bool CRavenAddress::GetKeyID(CKeyID& keyID) const
+{
+    if (!IsValid() || vchVersion != Params().Base58Prefix(CChainParams::PUBKEY_ADDRESS))
+        return false;
+    uint160 id;
+    memcpy(&id, vchData.data(), 20);
+    keyID = CKeyID(id);
+    return true;
+}
+
 bool CRavenAddress::GetIndexKey(uint160& hashBytes, int& type) const
 {
     if (!IsValid()) {
