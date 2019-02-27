@@ -8,6 +8,8 @@
 #define RAVEN_CHAIN_H
 
 #include "arith_uint256.h"
+#include "auxpow/auxpow.h"
+#include "auxpow/serialize.h"
 #include "primitives/block.h"
 #include "pow.h"
 #include "tinyformat.h"
@@ -269,6 +271,24 @@ public:
         return ret;
     }
 
+    ADD_SERIALIZE_METHODS;
+
+    template <typename Stream, typename Operation>
+    inline void SerializationOp(Stream& s, Operation ser_action) {
+        /* mutable stuff goes here, immutable stuff
+         * has SERIALIZE functions in CDiskBlockIndex */
+        if (!(s.GetType() & SER_GETHASH))
+            READWRITE(VARINT(nVersion));
+
+        READWRITE(VARINT(nStatus));
+        if (nStatus & (BLOCK_HAVE_DATA | BLOCK_HAVE_UNDO))
+            READWRITE(VARINT(nFile));
+        if (nStatus & BLOCK_HAVE_DATA)
+            READWRITE(VARINT(nDataPos));
+        if (nStatus & BLOCK_HAVE_UNDO)
+            READWRITE(VARINT(nUndoPos));
+    }
+
     CDiskBlockPos GetUndoPos() const {
         CDiskBlockPos ret;
         if (nStatus & BLOCK_HAVE_UNDO) {
@@ -278,18 +298,7 @@ public:
         return ret;
     }
 
-    CBlockHeader GetBlockHeader() const
-    {
-        CBlockHeader block;
-        block.nVersion       = nVersion;
-        if (pprev)
-            block.hashPrevBlock = pprev->GetBlockHash();
-        block.hashMerkleRoot = hashMerkleRoot;
-        block.nTime          = nTime;
-        block.nBits          = nBits;
-        block.nNonce         = nNonce;
-        return block;
-    }
+    CBlockHeader GetBlockHeader(const std::map<uint256, std::shared_ptr<CAuxPow> >& auxpows) const;
 
     uint256 GetBlockHash() const
     {
@@ -374,12 +383,16 @@ class CDiskBlockIndex : public CBlockIndex
 public:
     uint256 hashPrev;
 
+    // if this is an aux work block
+    std::shared_ptr<CAuxPow> auxpow;
+
     CDiskBlockIndex() {
         hashPrev = uint256();
     }
 
-    explicit CDiskBlockIndex(const CBlockIndex* pindex) : CBlockIndex(*pindex) {
+    explicit CDiskBlockIndex(const CBlockIndex* pindex, const std::shared_ptr<CAuxPow>& auxpow) : CBlockIndex(*pindex) {
         hashPrev = (pprev ? pprev->GetBlockHash() : uint256());
+        this->auxpow = auxpow;
     }
 
     ADD_SERIALIZE_METHODS;
@@ -407,6 +420,9 @@ public:
         READWRITE(nTime);
         READWRITE(nBits);
         READWRITE(nNonce);
+        // auxpow is not part of the block hash
+        if ((!(s.GetType() & SER_GETHASH)) && this->IsAuxPow())
+            READWRITE(auxpow);
     }
 
     uint256 GetBlockHash() const
@@ -421,6 +437,10 @@ public:
         return block.GetHash();
     }
 
+    inline bool IsAuxPow() const
+    {
+        return nVersion & AuxPow::BLOCK_VERSION_AUXPOW;
+    }
 
     std::string ToString() const
     {

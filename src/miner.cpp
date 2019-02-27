@@ -149,6 +149,11 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     pblock->nTime = GetAdjustedTime();
     const int64_t nMedianTimePast = pindexPrev->GetMedianTimePast();
 
+    // Ravencoin: CHAIN_ID and BLOCK_VERSION_AUXPOW bits are reserved for Ravencoin merged mining
+    // Ravencoin: and can safely be OR'd into the block version without overwriting BIP9 deployment
+    // Ravencoin: bits. BIP9 deployments on Ravencoin can use any other bits
+    pblock->nVersion |= (AuxPow::CHAIN_ID * AuxPow::BLOCK_VERSION_CHAIN_START);
+
     nLockTimeCutoff = (STANDARD_LOCKTIME_VERIFY_FLAGS & LOCKTIME_MEDIAN_TIME_PAST)
                        ? nMedianTimePast
                        : pblock->GetBlockTime();
