@@ -332,12 +332,12 @@ if [ `%{_sbindir}/sestatus |grep -c "disabled"` -eq 0 ]; then
 for selinuxvariant in %{selinux_variants}; do
 	%{_sbindir}/semodule -s ${selinuxvariant} -i %{_datadir}/selinux/${selinuxvariant}/raven.pp &> /dev/null || :
 done
-%{_sbindir}/semanage port -a -t raven_port_t -p tcp 8766
-%{_sbindir}/semanage port -a -t raven_port_t -p tcp 8767
-%{_sbindir}/semanage port -a -t raven_port_t -p tcp 18766
-%{_sbindir}/semanage port -a -t raven_port_t -p tcp 18767
-%{_sbindir}/semanage port -a -t raven_port_t -p tcp 18443
-%{_sbindir}/semanage port -a -t raven_port_t -p tcp 18444
+%{_sbindir}/semanage port -a -t raven_port_t -p tcp 64639
+%{_sbindir}/semanage port -a -t raven_port_t -p tcp 64640
+%{_sbindir}/semanage port -a -t raven_port_t -p tcp 64319
+%{_sbindir}/semanage port -a -t raven_port_t -p tcp 64320
+%{_sbindir}/semanage port -a -t raven_port_t -p tcp 32319
+%{_sbindir}/semanage port -a -t raven_port_t -p tcp 32320
 %{_sbindir}/fixfiles -R raven-server restore &> /dev/null || :
 %{_sbindir}/restorecon -R %{_localstatedir}/lib/raven || :
 fi
@@ -353,12 +353,12 @@ fi
 # SELinux
 if [ $1 -eq 0 ]; then
 	if [ `%{_sbindir}/sestatus |grep -c "disabled"` -eq 0 ]; then
-	%{_sbindir}/semanage port -d -p tcp 8766
-	%{_sbindir}/semanage port -d -p tcp 8767
-	%{_sbindir}/semanage port -d -p tcp 18766
-	%{_sbindir}/semanage port -d -p tcp 18767
-	%{_sbindir}/semanage port -d -p tcp 18443
-	%{_sbindir}/semanage port -d -p tcp 18444
+	%{_sbindir}/semanage port -d -p tcp 64639
+	%{_sbindir}/semanage port -d -p tcp 64640
+	%{_sbindir}/semanage port -d -p tcp 64319
+	%{_sbindir}/semanage port -d -p tcp 64320
+	%{_sbindir}/semanage port -d -p tcp 32319
+	%{_sbindir}/semanage port -d -p tcp 32320
 	for selinuxvariant in %{selinux_variants}; do
 		%{_sbindir}/semodule -s ${selinuxvariant} -r raven &> /dev/null || :
 	done

@@ -32,7 +32,7 @@ cli = "raven-cli"
 
 #mode = "-testnet"
 mode = ""
-rpc_port = 8766
+rpc_port = 64639
 #Set this information in your raven.conf file (in datadir, not testnet3)
 rpc_user = 'rpcuser'
 rpc_pass = 'rpcpass555'
@@ -364,7 +364,7 @@ def monitor_zmq():
 	socket = context.socket(zmq.SUB)
 
 	print("Getting Ravencoin msgs")
-	socket.connect("tcp://localhost:28766")
+	socket.connect("tcp://localhost:26464")
 
 	#socket.setsockopt_string(zmq.SUBSCRIBE, u'hashtx')
 	#socket.setsockopt_string(zmq.SUBSCRIBE, u'hashblock')

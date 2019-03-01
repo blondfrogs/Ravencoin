@@ -27,9 +27,9 @@ import hashlib
 cli = "raven-cli"
 
 mode =  "-testnet"
-rpc_port = 18766
+rpc_port = 64319
 #mode =  "-regtest"
-#rpc_port = 18443
+#rpc_port = 32319
 csv_file = "Raven Assets - Sheet1.csv"
 #Set this information in your raven.conf file (in datadir, not testnet3)
 rpc_user = 'rpcuser'
