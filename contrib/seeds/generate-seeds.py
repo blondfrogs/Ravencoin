@@ -45,7 +45,6 @@ pchOnionCat = bytearray([0xFD,0x87,0xD8,0x7E,0xEB,0x43])
 def name_to_ipv6(addr):
     if len(addr)>6 and addr.endswith('.onion'):
         vchAddr = b32decode(addr[0:-6], True)
-        print(vchAddr)
         if len(vchAddr) != 16-len(pchOnionCat):
             raise ValueError('Invalid onion %s' % s)
         return pchOnionCat + vchAddr
