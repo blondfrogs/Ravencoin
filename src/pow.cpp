@@ -241,10 +241,8 @@ bool CheckProofOfWork(uint256 hash, unsigned int nBits, const Consensus::Params&
         return false;
 
     // Check proof of work matches claimed amount
-    if (UintToArith256(hash) > bnTarget)
-        return false;
+    return UintToArith256(hash) <= bnTarget;
 
-    return true;
 }
 
 bool CheckBlockProofOfWork(const CBlockHeader *pblock, const Consensus::Params& params)
@@ -253,7 +251,7 @@ bool CheckBlockProofOfWork(const CBlockHeader *pblock, const Consensus::Params& 
 
     if (pblock->auxpow && (pblock->auxpow.get() != nullptr))
     {
-        if (!CheckAuxpow(pblock->auxpow, pblock->GetHash(), pblock->GetChainID(), params))
+        if (params.fStrictChainId && !CheckAuxpow(pblock->auxpow, pblock->GetHash(), pblock->GetChainID(), params))
             return error("CheckBlockProofOfWork() : AUX POW is not valid");
         // Check proof of work matches claimed amount
         if (!CheckProofOfWork(pblock->auxpow->GetParentBlockHash(), pblock->nBits, params))
@@ -272,7 +270,7 @@ bool CheckAuxPowValidity(const CBlockHeader* pblock, const Consensus::Params& pa
 {
     if (!params.fPowAllowMinDifficultyBlocks)
     {
-        if (pblock->GetChainID() != AuxPow::CHAIN_ID)
+        if (pblock->GetChainID() != params.nAuxpowChainId && pblock->GetChainID() != params.nAlternateChainId)
             return error("CheckAuxPowValidity() : block does not have our chain ID");
     }
     return true;

@@ -45,7 +45,13 @@ struct Params {
     bool nBIP34Enabled;
     bool nBIP65Enabled;
     bool nBIP66Enabled;
-    // uint256 BIP34Hash;
+    /** Used to check majorities for block version upgrade */
+    int nMajorityEnforceBlockUpgrade;
+    int nMajorityRejectBlockOutdated;
+    int nMajorityWindow;
+    /** Block height and hash at which BIP34 becomes active */
+    int BIP34Height;
+    uint256 BIP34Hash;
     /** Block height at which BIP65 becomes active */
     // int BIP65Height;
     /** Block height at which BIP66 becomes active */
@@ -73,6 +79,15 @@ struct Params {
     uint256 defaultAssumeValid;
     bool nSegwitEnabled;
     bool nCSVEnabled;
+
+    // BLAST: Auxpow chain ID parameter
+    int32_t nAuxpowChainId;
+    int32_t nAlternateChainId;
+    int nChainIdUpgradeHeight;
+    bool fStrictChainId;
+
+    // BLAST: Block v4 Upgrade Height
+    int nBlockV4UpgradeHeight;
 };
 } // namespace Consensus
 

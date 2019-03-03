@@ -3,6 +3,7 @@
 
 #include "auxpow/consensus.h"
 #include "auxpow/serialize.h"
+#include "versionbits.h"
 
 /** Nodes collect new transactions into a block, hash them into a hash tree,
  * and scan through nonce values to make the block's hash satisfy proof-of-work
@@ -70,7 +71,8 @@ public:
 
     inline int GetChainID() const
     {
-        return nVersion / AuxPow::BLOCK_VERSION_CHAIN_START;
+        // return nVersion / AuxPow::BLOCK_VERSION_CHAIN_START;
+        return (nVersion & ~VERSIONBITS_TOP_MASK) / AuxPow::BLOCK_VERSION_CHAIN_START;
     }
 
     inline bool IsAuxPow() const
