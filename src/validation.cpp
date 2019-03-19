@@ -3718,12 +3718,19 @@ bool CheckBlock(const CBlock& block, CValidationState& state, const Consensus::P
 
 bool IsWitnessEnabled(const CBlockIndex* pindexPrev, const Consensus::Params& params)
 {
+    LOCK(cs_main);
+    return (VersionBitsState(pindexPrev, params, Consensus::DEPLOYMENT_SEGWIT, versionbitscache) == THRESHOLD_ACTIVE);
+}
+/*
+bool IsWitnessEnabled(const CBlockIndex* pindexPrev, const Consensus::Params& params)
+{
     return params.nSegwitEnabled;
 }
 
 bool IsWitnessEnabled(const Consensus::Params& params) {
 	return params.nSegwitEnabled;
 }
+*/
 // Compute at which vout of the block's coinbase transaction the witness
 // commitment occurs, or -1 if not found.
 static int GetWitnessCommitmentIndex(const CBlock& block)
@@ -3756,8 +3763,9 @@ std::vector<unsigned char> GenerateCoinbaseCommitment(CBlock& block, const CBloc
     std::vector<unsigned char> commitment;
     int commitpos = GetWitnessCommitmentIndex(block);
     std::vector<unsigned char> ret(32, 0x00);
-    if(consensusParams.nSegwitEnabled) { // if (consensusParams.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout != 0) {
-		if (commitpos == -1) {
+    //if(consensusParams.nSegwitEnabled) { // 
+    if (consensusParams.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout != 0) 
+{		if (commitpos == -1) {
 			uint256 witnessroot = BlockWitnessMerkleRoot(block, nullptr);
 			CHash256().Write(witnessroot.begin(), 32).Write(ret.data(), 32).Finalize(witnessroot.begin());
 			CTxOut out;
@@ -3927,7 +3935,7 @@ static bool ContextualCheckBlock(const CBlock& block, CValidationState& state, c
     //   {0xaa, 0x21, 0xa9, 0xed}, and the following 32 bytes are SHA256^2(witness root, witness nonce). In case there are
     //   multiple, the last one is used.
     bool fHaveWitness = false;
-    if(IsWitnessEnabled(consensusParams)) {
+    if(IsWitnessEnabled(pindexPrev, consensusParams)) {
 		int commitpos = GetWitnessCommitmentIndex(block);
 		if (commitpos != -1) {
 			bool malleated = false;

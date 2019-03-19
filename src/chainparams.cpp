@@ -268,9 +268,9 @@ public:
         consensus.nMajorityRejectBlockOutdated = 950;
         consensus.nMajorityWindow = 1000;
         consensus.BIP34Height = 0;
-        consensus.BIP34Hash = uint256S("0x000000001d03315ec89ac7895ad122e3ae9c3c92a2ec5f63000794cdd6c18095"); // Genesis hash (height 0)
+        consensus.BIP34Hash = uint256S("0x0000000077062645faa71f32cd3fe871f4ca4f145d16781ff3ccaedf3ad2f1cd"); // Genesis hash (height 0)
         
-        consensus.nBIP34Enabled = true; // 00000000a6a47e28b4fea2ab47262d9a420bb1600dee375cad30fa54c9f6ec90
+        consensus.nBIP34Enabled = true; //  
         consensus.nBIP65Enabled = false; // 000000000000000004c2b624ed5d7756c508d90fd0da2c7c679febfa6c4735f0
         consensus.nBIP66Enabled = true;
         consensus.nSegwitEnabled = false;
@@ -297,18 +297,18 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 1199145601; // January 1, 2008
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 1230767999; // December 31, 2008
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].bit = 5;
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 9999999999; // GMT: Friday, August 10, 2018 6:00:00 PM
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 9999999999; // GMT: Sunday, September 30, 2018 11:59:59 PM
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 1552781253; // GMT: Sunday, March 17, 2019 12:07:33 AM
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 1584403653; // GMT: Tuesday, March 17, 2020 12:07:33 AM
 
         // Deployment of BIP68, BIP112, and BIP113.
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].bit = 0;
-        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nStartTime = 1512550966; // December 6th, 2017
-        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nTimeout = 1546300799; // December 31, 2018
+        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nStartTime = 1552781253; // GMT: Sunday, March 17, 2019 12:07:33 AM
+        consensus.vDeployments[Consensus::DEPLOYMENT_CSV].nTimeout = 1584403653; // GMT: Tuesday, March 17, 2020 12:07:33 AM
 
         // Deployment of SegWit (BIP141, BIP143, and BIP147)
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].bit = 1;
-        consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nStartTime = 1512550966; // December 6th, 2017
-        consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout = 1546300799; // December 31, 2018
+        consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nStartTime = 1552781253; // GMT: Sunday, March 17, 2019 12:07:33 AM
+        consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout = 1584403653; // GMT: Tuesday, March 17, 2020 12:07:33 AM
 
 
         // The best chain should have at least this much work.
@@ -325,7 +325,7 @@ public:
         nDefaultPort = 64320;
         nPruneAfterHeight = 1000;
 
-        uint32_t nGenesisTime = 1536875774;  // Thursday, September 13, 2018 2:56:14 PM GMT-07:00 DST
+        uint32_t nGenesisTime = 1552795319;  // GMT: Sunday, March 17, 2019 4:01:59 AM
 
         // This is used inorder to mine the genesis block. Once found, we can use the nonce and block hash found to create a valid genesis block
 //        /////////////////////////////////////////////////////////////////
@@ -387,11 +387,11 @@ public:
 
 //        /////////////////////////////////////////////////////////////////
 
-        genesis = CreateGenesisBlock(nGenesisTime, 1514596784, 0x1d00ffff, 1, 1 * COIN);
+        genesis = CreateGenesisBlock(nGenesisTime, 497372947, 0x1d00ffff, 1, 1 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
 
         //Test MerkleRoot and GenesisBlock
-        assert(consensus.hashGenesisBlock == uint256S("0x000000001d03315ec89ac7895ad122e3ae9c3c92a2ec5f63000794cdd6c18095"));
+        assert(consensus.hashGenesisBlock == uint256S("0x0000000077062645faa71f32cd3fe871f4ca4f145d16781ff3ccaedf3ad2f1cd"));
         assert(genesis.hashMerkleRoot == uint256S("0xccc9ed60efe7224e7ea404369d246390d1b8f09f33268dcb6d66f3c5707232ae"));
 
         vFixedSeeds.clear();

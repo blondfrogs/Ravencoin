@@ -1672,7 +1672,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
         }
     }
 
-    if(chainparams.GetConsensus().nSegwitEnabled) {
+    if(chainparams.GetConsensus().vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout != 0) {
     		nLocalServices = ServiceFlags(nLocalServices | NODE_WITNESS);
     }
     // ********************************************************* Step 10: import blocks
