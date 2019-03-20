@@ -506,9 +506,8 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
     // If the caller is indicating segwit support, then allow CreateNewBlock()
     // to select witness transactions, after segwit activates (otherwise
     // don't).
-    // bool fSupportsSegwit = Params().GetConsensus().nSegwitEnabled;
     bool fSupportsSegwit = setClientRules.find(segwit_info.name) != setClientRules.end();
-
+    
     // Update block
     static CBlockIndex* pindexPrev;
     static int64_t nStart;
@@ -546,7 +545,6 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
     pblock->nNonce = 0;
 
     // NOTE: If at some point we support pre-segwit miners post-segwit-activation, this needs to take segwit support into consideration
-    // const bool fPreSegWit = false;
     const bool fPreSegWit = (THRESHOLD_ACTIVE != VersionBitsState(pindexPrev, consensusParams, Consensus::DEPLOYMENT_SEGWIT, versionbitscache));
 
     UniValue aCaps(UniValue::VARR); aCaps.push_back("proposal");
