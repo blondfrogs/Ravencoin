@@ -507,7 +507,7 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
     // to select witness transactions, after segwit activates (otherwise
     // don't).
     bool fSupportsSegwit = setClientRules.find(segwit_info.name) != setClientRules.end();
-    
+
     // Update block
     static CBlockIndex* pindexPrev;
     static int64_t nStart;

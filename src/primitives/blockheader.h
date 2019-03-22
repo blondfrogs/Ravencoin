@@ -69,6 +69,49 @@ public:
         return (int64_t)nTime;
     }
 
+    /* Below are methods to interpret the version with respect to
+       auxpow data and chain ID.  This used to be in the CBlockVersion
+       class, but was moved here when we switched back to nVersion being
+       a pure int member as preparation to undoing the "abuse" and
+       allowing BIP9 to work.  */
+
+    /**
+     * Extract the base version (without modifiers and chain ID).
+     * @return The base version./
+     */
+    inline int32_t GetBaseVersion() const
+    {
+        return GetBaseVersion(nVersion);
+    }
+    static inline int32_t GetBaseVersion(int32_t ver)
+    {
+        return ver % AuxPow::BLOCK_VERSION_AUXPOW;
+    }
+
+    /**
+     * Set the base version (apart from chain ID and auxpow flag) to
+     * the one given.  This should only be called when auxpow is not yet
+     * set, to initialise a block!
+     * @param nBaseVersion The base version.
+     * @param nChainId The auxpow chain ID.
+     */
+    void SetBaseVersion(int32_t nBaseVersion, int32_t nChainId);
+
+    /**
+     * Set the chain ID.  This is used for the test suite.
+     * @param ch The chain ID to set.
+     */
+    inline void SetChainId(int32_t chainId)
+    {
+        nVersion %= AuxPow::BLOCK_VERSION_CHAIN_START;
+        nVersion |= chainId * AuxPow::BLOCK_VERSION_CHAIN_START;
+    }
+
+    /**
+     * Check if the auxpow flag is set in the version.
+     * @return True iff this block version is marked as auxpow.
+     */
+
     inline int GetChainID() const
     {
         // return nVersion / AuxPow::BLOCK_VERSION_CHAIN_START;
@@ -78,6 +121,15 @@ public:
     inline bool IsAuxPow() const
     {
         return static_cast<bool>(nVersion & AuxPow::BLOCK_VERSION_AUXPOW);
+    }
+
+    /**
+     * Check whether this is a "legacy" block without chain ID.
+     * @return True iff it is.
+     */
+    inline bool IsLegacy() const
+    {
+        return nVersion == 1;
     }
 
     void SetAuxPow(CAuxPow*);

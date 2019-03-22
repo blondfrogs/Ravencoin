@@ -26,7 +26,10 @@ uint256 CAuxPow::CheckMerkleBranch(const uint256& hash, const std::vector<uint25
   return thash;
 }
 
-
+void CBlockHeader::SetBaseVersion(int32_t nBaseVersion, int32_t nChainId)
+{
+    nVersion = nBaseVersion | (nChainId * AuxPow::BLOCK_VERSION_CHAIN_START);
+}
 void CBlockHeader::SetAuxPow(CAuxPow* pow)
 {
     if (pow != nullptr)
