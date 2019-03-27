@@ -300,7 +300,7 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].bit = 6;
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 9999999999; // GMT: Sunday, March 17, 2019 12:07:33 AM
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 9999999999; // GMT: Tuesday, March 17, 2020 12:07:33 AM
-        consensus.nAssetsActivationHeight = 645; // Activate assets after height 645
+        consensus.nAssetsActivationHeight = 672; // Activate assets after height 645
 
         // Deployment of BIP68, BIP112, and BIP113.
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].bit = 0;
