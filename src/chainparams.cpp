@@ -155,6 +155,7 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].bit = 6;  //Assets (RIP2)
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 9999999999; // Oct 31, 2018
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 9999999999; // Oct 31, 2019
+        consensus.nAssetsActivationHeight = 2000000; // Activate assets after height 2000000
 
         // Deployment of BIP68, BIP112, and BIP113.
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].bit = 0;
@@ -289,16 +290,17 @@ public:
         consensus.nRuleChangeActivationThreshold = 54; // 95% of 60
         consensus.nMinerConfirmationWindow = 60; // nPowTargetTimespan / nPowTargetSpacing
 
-        consensus.nBlockV4UpgradeHeight = 20; // Miners produce v4 blocks after height 20
+        consensus.nBlockV4UpgradeHeight = 216; // Miners produce v4 blocks after height 216 (after CSV/SEGWIT activation)
 
         consensus.nAuxPowStartHeight = AuxPow::START_TESTNET;
 
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 1199145601; // January 1, 2008
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 1230767999; // December 31, 2008
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].bit = 5;
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 1552781253; // GMT: Sunday, March 17, 2019 12:07:33 AM
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 1584403653; // GMT: Tuesday, March 17, 2020 12:07:33 AM
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].bit = 6;
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 1553495467; // GMT: Sunday, March 17, 2019 12:07:33 AM
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 1583495467; // GMT: Tuesday, March 17, 2020 12:07:33 AM
+        consensus.nAssetsActivationHeight = 645; // Activate assets after height 645
 
         // Deployment of BIP68, BIP112, and BIP113.
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].bit = 0;
@@ -429,19 +431,19 @@ public:
 
         /** RVN Start **/
         // Burn Amounts
-        nIssueAssetBurnAmount = 500 * COIN;
-        nReissueAssetBurnAmount = 100 * COIN;
-        nIssueSubAssetBurnAmount = 100 * COIN;
-        nIssueUniqueAssetBurnAmount = 5 * COIN;
+        nIssueAssetBurnAmount = 2 * COIN;
+        nReissueAssetBurnAmount = 1 * COIN;
+        nIssueSubAssetBurnAmount = 1 * COIN;
+        nIssueUniqueAssetBurnAmount = 1 * COIN;
 
         // Burn Addresses
-        strIssueAssetBurnAddress = "n1issueAssetXXXXXXXXXXXXXXXXWdnemQ";
-        strReissueAssetBurnAddress = "n1ReissueAssetXXXXXXXXXXXXXXWG9NLd";
-        strIssueSubAssetBurnAddress = "n1issueSubAssetXXXXXXXXXXXXXbNiH6v";
-        strIssueUniqueAssetBurnAddress = "n1issueUniqueAssetXXXXXXXXXXS4695i";
+        strIssueAssetBurnAddress = "8bFeRHiDB7osjka9yHKt4nJquokEzrFya8"; // "n1issueAssetXXXXXXXXXXXXXXXXWdnemQ";
+        strReissueAssetBurnAddress = "8bFeRHiDB7osjka9yHKt4nJquokEzrFya8"; // "n1ReissueAssetXXXXXXXXXXXXXXWG9NLd";
+        strIssueSubAssetBurnAddress = "8bFeRHiDB7osjka9yHKt4nJquokEzrFya8"; // "n1issueSubAssetXXXXXXXXXXXXXbNiH6v";
+        strIssueUniqueAssetBurnAddress = "8bFeRHiDB7osjka9yHKt4nJquokEzrFya8"; // "n1issueUniqueAssetXXXXXXXXXXS4695i";
 
         // Global Burn Address
-        strGlobalBurnAddress = "n1BurnXXXXXXXXXXXXXXXXXXXXXXU1qejP";
+        strGlobalBurnAddress = "8bFeRHiDB7osjka9yHKt4nJquokEzrFya8"; // "n1BurnXXXXXXXXXXXXXXXXXXXXXXU1qejP";
 
         // DGW Activation
         nDGWActivationBlock = 0;
@@ -497,6 +499,7 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].bit = 6;
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 0;
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 999999999999ULL;
+        consensus.nAssetsActivationHeight = 20; // Activate assets after height 10
 
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x00");

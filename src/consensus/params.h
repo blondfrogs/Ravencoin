@@ -88,6 +88,9 @@ struct Params {
 
     // BLAST: Block v4 Upgrade Height
     int nBlockV4UpgradeHeight;
+
+    // BLAST: Activate Assets and Deactivate Previous V4 Upgrade Effectss
+    int nAssetsActivationHeight;
 };
 } // namespace Consensus
 

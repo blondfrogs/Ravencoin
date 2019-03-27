@@ -876,6 +876,10 @@ UniValue getauxblock(const JSONRPCRequest& request)
         result.push_back(Pair("target", HexStr(BEGIN(hashTarget), END(hashTarget))));
         result.push_back(Pair("hash", pblock->GetHash().GetHex()));
         result.push_back(Pair("chainid", pblock->GetChainID()));
+        result.push_back(Pair("previousblockhash", pblock->hashPrevBlock.GetHex()));
+        result.push_back(Pair("coinbasevalue", (int64_t)pblock->vtx[0]->vout[0].nValue));
+        result.push_back(Pair("bits", strprintf("%08x", pblock->nBits)));
+        result.push_back(Pair("height", static_cast<int64_t> (pindexPrev->nHeight + 1)));
         return result;
     }
     else
