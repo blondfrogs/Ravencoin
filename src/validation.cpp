@@ -3869,7 +3869,7 @@ static bool ContextualCheckBlockHeader(const CBlockHeader& block, CValidationSta
                                 strprintf("rejected nVersion=0x%08x block", version - 1));
 
     // Reject outdated version blocks onces assets are active.
-    if (AreAssetsDeployed() && block.nVersion < VERSIONBITS_TOP_BITS_ASSETS && nHeight < consensusParams.nBlockV4UpgradeHeight && nHeight > consensusParams.nAssetsActivationHeight)
+    if (AreAssetsDeployed() && block.nVersion < VERSIONBITS_TOP_BITS_ASSETS && nHeight < consensusParams.nBlockV4UpgradeHeight && nHeight > consensusParams.nBlockVersionRevertHeight)
         return state.Invalid(false, REJECT_OBSOLETE, strprintf("bad-version(0x%08x)", block.nVersion), strprintf("rejected nVersion=0x%08x block, height= %i", nHeight));
 
     return true;
@@ -5438,9 +5438,8 @@ bool AreAssetsDeployed() {
     if (fAssetsIsActive)
         return true;
 
-    // const ThresholdState thresholdState = VersionBitsTipState(Params().GetConsensus(), Consensus::DEPLOYMENT_ASSETS);
-    //if (thresholdState == THRESHOLD_ACTIVE)
-    //if (nBlockNumber >= Params().nAssetsActivationHeight)
+    const ThresholdState thresholdState = VersionBitsTipState(Params().GetConsensus(), Consensus::DEPLOYMENT_ASSETS);
+    if (thresholdState == THRESHOLD_ACTIVE)
         fAssetsIsActive = true;
 
     return fAssetsIsActive;

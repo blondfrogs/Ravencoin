@@ -146,6 +146,7 @@ public:
         consensus.nMinerConfirmationWindow = 60; // nPowTargetTimespan / nPowTargetSpacing
 
         consensus.nBlockV4UpgradeHeight = 470000; // Miners produce v4 blocks after height 470000
+        consensus.nBlockVersionRevertHeight = 2000000; // Stop forcing block v4 to allow asset activation
 
         consensus.nAuxPowStartHeight = AuxPow::START_MAINNET;
 
@@ -155,7 +156,6 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].bit = 6;  //Assets (RIP2)
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 9999999999; // Oct 31, 2018
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 9999999999; // Oct 31, 2019
-        consensus.nAssetsActivationHeight = 2000000; // Activate assets after height 2000000
 
         // Deployment of BIP68, BIP112, and BIP113.
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].bit = 0;
@@ -290,17 +290,17 @@ public:
         consensus.nRuleChangeActivationThreshold = 54; // 95% of 60
         consensus.nMinerConfirmationWindow = 60; // nPowTargetTimespan / nPowTargetSpacing
 
-        consensus.nBlockV4UpgradeHeight = 216; // Miners produce v4 blocks after height 216 (after CSV/SEGWIT activation)
-
+        consensus.nBlockV4UpgradeHeight = 200; // Miners produce v4 blocks after height 200 (after CSV/SEGWIT activation at 180)
+        consensus.nBlockVersionRevertHeight = 300; // Stop forcing block v4 to allow asset activation
+        
         consensus.nAuxPowStartHeight = AuxPow::START_TESTNET;
 
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 1199145601; // January 1, 2008
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 1230767999; // December 31, 2008
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].bit = 6;
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 9999999999; // GMT: Sunday, March 17, 2019 12:07:33 AM
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 9999999999; // GMT: Tuesday, March 17, 2020 12:07:33 AM
-        consensus.nAssetsActivationHeight = 672; // Activate assets after height 645
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 1553495467; // GMT: Monday, March 25, 2019 6:31:07 AM
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 1584403653; // GMT: Tuesday, March 17, 2020 12:07:33 AM
 
         // Deployment of BIP68, BIP112, and BIP113.
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].bit = 0;
@@ -486,10 +486,11 @@ public:
 
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = true;
-        consensus.nRuleChangeActivationThreshold = 45; // 75% for testchains
-        consensus.nMinerConfirmationWindow = 60; // Faster than normal for regtest (144 instead of 2016)
+        consensus.nRuleChangeActivationThreshold = 24; // 75% for testchains
+        consensus.nMinerConfirmationWindow = 32; // Faster than normal for regtest (32 instead of 60)
 
-        consensus.nBlockV4UpgradeHeight = 20; // Miners produce v4 blocks after height 20
+        consensus.nBlockV4UpgradeHeight = 100; // Miners produce v4 blocks after height 100
+        consensus.nBlockVersionRevertHeight = 120; // Stop forcing block v4 to allow asset activation
 
         consensus.nAuxPowStartHeight = AuxPow::START_REGTEST;
         
@@ -499,7 +500,6 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].bit = 6;
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 0;
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 999999999999ULL;
-        consensus.nAssetsActivationHeight = 20; // Activate assets after height 10
 
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x00");
