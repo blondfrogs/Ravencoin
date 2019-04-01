@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_AUXPOW_SERIALIZE_H
-#define RAVEN_AUXPOW_SERIALIZE_H
+#ifndef BITCOIN_AUXPOW_SERIALIZE_H
+#define BITCOIN_AUXPOW_SERIALIZE_H
 
 class CAuxPow;
 
@@ -16,4 +16,4 @@ void SerReadWrite(S& s, std::shared_ptr<CAuxPow>& pobj, CSerActionUnserialize se
 /** Global dirty block merged mining entries. */
 extern std::map<uint256, std::shared_ptr<CAuxPow> > mapDirtyAuxPow;
 
-#endif // RAVEN_AUXPOW_SERIALIZE_H
+#endif // BITCOIN_AUXPOW_SERIALIZE_H

@@ -7,8 +7,8 @@
 """
     ZMQ example using python3's asyncio
 
-    Raven should be started with the command line arguments:
-        ravend -testnet -daemon \
+    BLAST should be started with the command line arguments:
+        blastd -testnet -daemon \
                 -zmqpubhashblock=tcp://127.0.0.1:26464 \
                 -zmqpubrawtx=tcp://127.0.0.1:26464 \
                 -zmqpubhashtx=tcp://127.0.0.1:26464 \
@@ -25,7 +25,7 @@ import codecs
 context = zmq.Context()
 socket = context.socket(zmq.SUB)
 
-print("Getting Ravencoin msgs")
+print("Getting BLAST msgs")
 socket.connect("tcp://localhost:26464")
 
 socket.setsockopt_string(zmq.SUBSCRIBE, "hashtx")
@@ -58,8 +58,8 @@ while True:
 		while(pos != -1):
 			pos = astr.find('72766e', start)
 			if (pos > -1):
-				print("FOUND RVN issuance at " + str(pos))
-				print("After RVN: " + astr[pos+6:pos+8])
+				print("FOUND BLAST issuance at " + str(pos))
+				print("After BLAST: " + astr[pos+6:pos+8])
 				sizestr = astr[pos+8:pos+10]
 				print("sizestr: " + sizestr)
 				#print(str(astr[pos+8:pos+10]))
@@ -68,7 +68,7 @@ while True:
 				print("Name: " + bytes.fromhex(astr[pos+10:pos+10+size*2]).decode('utf-8'))
 			pos = astr.find('72766e', start)
 			if (pos > -1):
-				print("FOUND RVN something at " + str(pos))
+				print("FOUND BLAST something at " + str(pos))
 			start += pos+8
 			print(astr)
 

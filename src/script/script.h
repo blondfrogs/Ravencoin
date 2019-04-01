@@ -1,11 +1,12 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
 // Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The BLAST Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_SCRIPT_SCRIPT_H
-#define RAVEN_SCRIPT_SCRIPT_H
+#ifndef BITCOIN_SCRIPT_SCRIPT_H
+#define BITCOIN_SCRIPT_SCRIPT_H
 
 #include "crypto/common.h"
 #include "prevector.h"
@@ -184,9 +185,9 @@ enum opcodetype
     OP_NOP9 = 0xb8,
     OP_NOP10 = 0xb9,
 
-    /** RVN START */
-    OP_RVN_ASSET = 0xc0,
-    /** RVN END */
+    /** BLAST START */
+    OP_BLAST_ASSET = 0xc0,
+    /** BLAST END */
 
 
     // template matching params
@@ -633,7 +634,7 @@ public:
     }
 
     /**
-     * Pre-version-0.6, Raven always counted CHECKMULTISIGs
+     * Pre-version-0.6, Bitcoin always counted CHECKMULTISIGs
      * as 20 sigops. With pay-to-script-hash, that changed:
      * CHECKMULTISIGs serialized in scriptSigs are
      * counted more accurately, assuming they are of the form
@@ -653,7 +654,7 @@ public:
     bool IsPayToWitnessScriptHash() const;
     bool IsWitnessProgram(int& version, std::vector<unsigned char>& program) const;
 
-    /** RVN START */
+    /** BLAST START */
     enum class txnouttype;
     bool IsAssetScript(int& nType, bool& fIsOwner, int& nStartingIndex) const;
     bool IsAssetScript(int& nType, bool& fIsOwner) const;
@@ -663,7 +664,7 @@ public:
     bool IsReissueAsset() const;
     bool IsTransferAsset() const;
     bool IsAsset() const;
-    /** RVN END */
+    /** BLAST END */
 
     /** Used for obsolete pay-to-pubkey addresses indexing. */
     bool IsPayToPublicKey() const;
@@ -726,4 +727,4 @@ bool ScriptNewAsset(const CScript& scriptPubKey, int& nStartingIndex);
 bool ScriptTransferAsset(const CScript& scriptPubKey, int& nStartingIndex);
 bool ScriptReissueAsset(const CScript& scriptPubKey, int& nStartingIndex);
 
-#endif // RAVEN_SCRIPT_SCRIPT_H
+#endif // BITCOIN_SCRIPT_SCRIPT_H

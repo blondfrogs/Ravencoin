@@ -1,10 +1,11 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
 // Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The BLAST Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_QT_GUICONSTANTS_H
-#define RAVEN_QT_GUICONSTANTS_H
+#ifndef BITCOIN_QT_GUICONSTANTS_H
+#define BITCOIN_QT_GUICONSTANTS_H
 
 /* Milliseconds between model updates */
 static const int MODEL_UPDATE_DELAY = 250;
@@ -12,7 +13,7 @@ static const int MODEL_UPDATE_DELAY = 250;
 /* AskPassphraseDialog -- Maximum passphrase length */
 static const int MAX_PASSPHRASE_SIZE = 1024;
 
-/* RavenGUI -- Size of icons in status bar */
+/* BLASTGUI -- Size of icons in status bar */
 static const int STATUSBAR_ICONSIZE = 16;
 
 static const bool DEFAULT_SPLASHSCREEN = true;
@@ -41,44 +42,50 @@ static const bool DEFAULT_SPLASHSCREEN = true;
 #define COLOR_WALLETFRAME_SHADOW QColor(0,0,0,71)
 
 /* Color of labels */
+//#define COLOR_LABELS QColor("#c8c8c8")
 #define COLOR_LABELS QColor("#4960ad")
 
 /** LIGHT MODE */
 /* Background color, very light gray */
 #define COLOR_BACKGROUND_LIGHT QColor("#fbfbfe")
-/* Ravencoin dark orange */
+/* BLAST dark orange */
 #define COLOR_DARK_ORANGE QColor("#f05339")
-/* Ravencoin light orange */
+/* BLAST light orange */
 #define COLOR_LIGHT_ORANGE QColor("#f79433")
-/* Ravencoin dark blue */
+/* BLAST dark blue */
 #define COLOR_DARK_BLUE QColor("#475eaa")
-/* Ravencoin light blue */
+/* BLAST light blue */
 #define COLOR_LIGHT_BLUE QColor("#5874cf")
-/* Ravencoin asset text */
+/* BLAST asset text */
 #define COLOR_ASSET_TEXT QColor(255, 255, 255)
-/* Ravencoin shadow color - light mode */
+/* BLAST shadow color - light mode */
 #define COLOR_SHADOW_LIGHT QColor("#e1e6f3")
 /* Toolbar not selected text color */
 #define COLOR_TOOLBAR_NOT_SELECTED_TEXT QColor("#a5b7f3")
+// #define COLOR_TOOLBAR_NOT_SELECTED_TEXT QColor("#c8c8c8")
 /* Toolbar selected text color */
 #define COLOR_TOOLBAR_SELECTED_TEXT COLOR_WHITE
+/* BLAST light grey */
+#define COLOR_LIGHT_GREY QColor("#2b3e50")
+/* BLAST dark grey */
+#define COLOR_DARK_GREY QColor("#39384a")
 
 /** DARK MODE */
 /* Widget background color, dark mode */
 #define COLOR_WIDGET_BACKGROUND_DARK QColor("#1c2535")
-/* Ravencoin shadow color - dark mode */
+/* BLAST shadow color - dark mode */
 #define COLOR_SHADOW_DARK QColor("#0c1b3d")
-/* Ravencoin Light blue - dark mode - dark mode */
+/* BLAST Light blue - dark mode - dark mode */
 #define COLOR_LIGHT_BLUE_DARK QColor("#1e2636")
-/* Ravencoin Dark blue - dark mode - dark mode */
+/* BLAST Dark blue - dark mode - dark mode */
 #define COLOR_DARK_BLUE_DARK QColor("#0b1018")
 /* Pricing widget background color */
 #define COLOR_PRICING_WIDGET QColor("#161e2d")
-/* Ravencoin dark mode administrator background color */
+/* BLAST dark mode administrator background color */
 #define COLOR_ADMIN_CARD_DARK COLOR_BLACK
-/* Ravencoin dark mode regular asset background color */
+/* BLAST dark mode regular asset background color */
 #define COLOR_REGULAR_CARD_DARK_BLUE_DARK_MODE QColor("#06132a")
-/* Ravencoin dark mode regular asset background color */
+/* BLAST dark mode regular asset background color */
 #define COLOR_REGULAR_CARD_LIGHT_BLUE_DARK_MODE QColor("#0e1b3b")
 /* Toolbar not selected text color */
 #define COLOR_TOOLBAR_NOT_SELECTED_TEXT_DARK_MODE QColor("#6c80c5")
@@ -86,9 +93,9 @@ static const bool DEFAULT_SPLASHSCREEN = true;
 #define COLOR_TOOLBAR_SELECTED_TEXT_DARK_MODE QColor("#c5ccdf")
 
 
-/* Ravencoin label color as a string */
+/* BLAST label color as a string */
 #define STRING_LABEL_COLOR "color: #4960ad"
-
+// #define STRING_LABEL_COLOR "color: #c8c8c8"
 
 
 
@@ -110,9 +117,9 @@ static const int MAX_URI_LENGTH = 255;
 /* Number of frames in spinner animation */
 #define SPINNER_FRAMES 36
 
-#define QAPP_ORG_NAME "Raven"
-#define QAPP_ORG_DOMAIN "raven.org"
-#define QAPP_APP_NAME_DEFAULT "Raven-Qt"
-#define QAPP_APP_NAME_TESTNET "Raven-Qt-testnet"
+#define QAPP_ORG_NAME "Blast"
+#define QAPP_ORG_DOMAIN "blastblastblast.com"
+#define QAPP_APP_NAME_DEFAULT "Blast-Qt"
+#define QAPP_APP_NAME_TESTNET "Blast-Qt-testnet"
 
-#endif // RAVEN_QT_GUICONSTANTS_H
+#endif // BLAST_QT_GUICONSTANTS_H

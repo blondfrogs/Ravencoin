@@ -1,5 +1,5 @@
-#ifndef RAVEN_BLOCKHEADER_H
-#define RAVEN_BLOCKHEADER_H
+#ifndef BITCOIN_BLOCKHEADER_H
+#define BITCOIN_BLOCKHEADER_H
 
 #include "auxpow/consensus.h"
 #include "auxpow/serialize.h"
@@ -136,4 +136,4 @@ public:
 };
 
 
-#endif //RAVEN_BLOCKHEADER_H
+#endif //BITCOIN_BLOCKHEADER_H

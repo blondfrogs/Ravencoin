@@ -259,6 +259,21 @@ QColor PlatformStyle::SingleColor() const
     return singleColor;
 }
 
+QColor PlatformStyle::LightGreyColor() const
+{
+    if (darkModeEnabled)
+        return COLOR_LIGHT_BLUE_DARK;
+
+    return COLOR_LIGHT_GREY;
+}
+
+QColor PlatformStyle::DarkGreyColor() const
+{
+    if (darkModeEnabled)
+        return COLOR_DARK_BLUE_DARK;
+
+    return COLOR_DARK_GREY;
+}
 
 const PlatformStyle *PlatformStyle::instantiate(const QString &platformId)
 {

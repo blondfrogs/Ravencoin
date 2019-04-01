@@ -332,7 +332,7 @@ bool CBlockTreeDB::ReadAddressUnspentIndex(uint160 addressHash, int type,
         if (pcursor->GetKey(key) && key.first == DB_ADDRESSUNSPENTINDEX && key.second.hashBytes == addressHash) {
             CAddressUnspentValue nValue;
             if (pcursor->GetValue(nValue)) {
-                if (key.second.asset != "RVN") {
+                if (key.second.asset != "BLAST") {
                     unspentOutputs.push_back(std::make_pair(key.second, nValue));
                 }
                 pcursor->Next();
@@ -479,10 +479,15 @@ bool CBlockTreeDB::LoadBlockIndexGuts(const Consensus::Params& consensusParams, 
         boost::this_thread::interruption_point();
         std::pair<std::pair<char, uint256>, char> key;
         if (pcursor->GetKey(key) && key.first.first == DB_BLOCK_INDEX) {
+
+            assert(key.second == DB_BLOCK_INDEX_AUXPOW);
+
             CDiskBlockIndex diskindex;
             if (pcursor->GetValue(diskindex)) {
                 // Construct block index object
-                CBlockIndex* pindexNew = insertBlockIndex(key.first.second);
+                uint256 hash              = key.first.second;
+                CBlockIndex* pindexNew = insertBlockIndex(hash);
+                // CBlockIndex* pindexNew = insertBlockIndex(key.first.second);
                 pindexNew->pprev          = insertBlockIndex(diskindex.hashPrev);
                 pindexNew->nHeight        = diskindex.nHeight;
                 pindexNew->nFile          = diskindex.nFile;

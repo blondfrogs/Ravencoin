@@ -1,0 +1,11 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=Raven Core
+Comment=Connect to the Raven P2P Network
+Exec=raven-qt %u
+Terminal=false
+Type=Application
+Icon=raven128
+MimeType=x-scheme-handler/raven;
+Categories=Office;Finance;
+Name[en_US]=bitcoin-qt.desktop

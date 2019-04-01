@@ -1,10 +1,11 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
 // Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The BLAST Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_QT_GUIUTIL_H
-#define RAVEN_QT_GUIUTIL_H
+#ifndef BITCOIN_QT_GUIUTIL_H
+#define BITCOIN_QT_GUIUTIL_H
 
 #include "amount.h"
 #include "fs.h"
@@ -31,7 +32,7 @@ class QWidget;
 class QGraphicsDropShadowEffect;
 QT_END_NAMESPACE
 
-/** Utility functions used by the Raven Qt UI.
+/** Utility functions used by the Blast Qt UI.
  */
 namespace GUIUtil
 {
@@ -57,10 +58,10 @@ namespace GUIUtil
     void setupAddressWidget(QValidatedLineEdit *widget, QWidget *parent);
     void setupAmountWidget(QLineEdit *widget, QWidget *parent);
 
-    // Parse "raven:" URI into recipient object, return true on successful parsing
-    bool parseRavenURI(const QUrl &uri, SendCoinsRecipient *out);
-    bool parseRavenURI(QString uri, SendCoinsRecipient *out);
-    QString formatRavenURI(const SendCoinsRecipient &info);
+    // Parse "blast:" URI into recipient object, return true on successful parsing
+    bool parseBitcoinURI(const QUrl &uri, SendCoinsRecipient *out);
+    bool parseBitcoinURI(QString uri, SendCoinsRecipient *out);
+    QString formatBitcoinURI(const SendCoinsRecipient &info);
 
     // Returns true if given address+amount meets "dust" definition
     bool isDust(const QString& address, const CAmount& amount);
@@ -127,7 +128,7 @@ namespace GUIUtil
     void openDebugLogfile();
 
     // Open the config file
-    bool openRavenConf();
+    bool openBitcoinConf();
 
     // Replace invalid default fonts with known good ones
     void SubstituteFonts(const QString& language);
@@ -260,4 +261,4 @@ namespace GUIUtil
 
 } // namespace GUIUtil
 
-#endif // RAVEN_QT_GUIUTIL_H
+#endif // BITCOIN_QT_GUIUTIL_H

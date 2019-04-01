@@ -6,7 +6,7 @@
 #include "overviewpage.h"
 #include "ui_overviewpage.h"
 
-#include "ravenunits.h"
+#include "bitcoinunits.h"
 #include "clientmodel.h"
 #include "guiconstants.h"
 #include "guiutil.h"
@@ -37,7 +37,7 @@ class TxViewDelegate : public QAbstractItemDelegate
     Q_OBJECT
 public:
     explicit TxViewDelegate(const PlatformStyle *_platformStyle, QObject *parent=nullptr):
-        QAbstractItemDelegate(parent), unit(RavenUnits::RVN),
+        QAbstractItemDelegate(parent), unit(BitcoinUnits::BLAST),
         platformStyle(_platformStyle)
     {
 
@@ -140,7 +140,7 @@ class AssetViewDelegate : public QAbstractItemDelegate
 Q_OBJECT
 public:
     explicit AssetViewDelegate(const PlatformStyle *_platformStyle, QObject *parent=nullptr):
-            QAbstractItemDelegate(parent), unit(RavenUnits::RVN),
+            QAbstractItemDelegate(parent), unit(BitcoinUnits::BLAST),
             platformStyle(_platformStyle)
     {
 
@@ -197,8 +197,8 @@ public:
                 gradient.setColorAt(0, COLOR_REGULAR_CARD_LIGHT_BLUE_DARK_MODE);
                 gradient.setColorAt(1, COLOR_REGULAR_CARD_DARK_BLUE_DARK_MODE);
             } else {
-                gradient.setColorAt(0, COLOR_LIGHT_BLUE);
-                gradient.setColorAt(1, COLOR_DARK_BLUE);
+                gradient.setColorAt(0, COLOR_LIGHT_GREY); // gradient.setColorAt(0, COLOR_LIGHT_BLUE);
+                gradient.setColorAt(1, COLOR_DARK_GREY); // gradient.setColorAt(1, COLOR_DARK_BLUE);
             }
         }
 
@@ -276,7 +276,7 @@ public:
 
 };
 #include "overviewpage.moc"
-#include "ravengui.h"
+#include "bitcoingui.h"
 #include <QFontDatabase>
 
 OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) :
@@ -345,7 +345,7 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
 
     /** Update the labels colors */
     ui->assetBalanceLabel->setStyleSheet(STRING_LABEL_COLOR);
-    ui->rvnBalancesLabel->setStyleSheet(STRING_LABEL_COLOR);
+    ui->btcBalancesLabel->setStyleSheet(STRING_LABEL_COLOR);
     ui->labelBalanceText->setStyleSheet(STRING_LABEL_COLOR);
     ui->labelPendingText->setStyleSheet(STRING_LABEL_COLOR);
     ui->labelImmatureText->setStyleSheet(STRING_LABEL_COLOR);
@@ -355,7 +355,7 @@ OverviewPage::OverviewPage(const PlatformStyle *platformStyle, QWidget *parent) 
     ui->recentTransactionsLabel->setStyleSheet(STRING_LABEL_COLOR);
 
     /** Update the labels font */
-    ui->rvnBalancesLabel->setFont(GUIUtil::getTopLabelFont());
+    ui->btcBalancesLabel->setFont(GUIUtil::getTopLabelFont());
     ui->assetBalanceLabel->setFont(GUIUtil::getTopLabelFont());
     ui->recentTransactionsLabel->setFont(GUIUtil::getTopLabelFont());
 
@@ -494,14 +494,14 @@ void OverviewPage::setBalance(const CAmount& balance, const CAmount& unconfirmed
     currentWatchOnlyBalance = watchOnlyBalance;
     currentWatchUnconfBalance = watchUnconfBalance;
     currentWatchImmatureBalance = watchImmatureBalance;
-    ui->labelBalance->setText(RavenUnits::formatWithUnit(unit, balance, false, RavenUnits::separatorAlways));
-    ui->labelUnconfirmed->setText(RavenUnits::formatWithUnit(unit, unconfirmedBalance, false, RavenUnits::separatorAlways));
-    ui->labelImmature->setText(RavenUnits::formatWithUnit(unit, immatureBalance, false, RavenUnits::separatorAlways));
-    ui->labelTotal->setText(RavenUnits::formatWithUnit(unit, balance + unconfirmedBalance + immatureBalance, false, RavenUnits::separatorAlways));
-    ui->labelWatchAvailable->setText(RavenUnits::formatWithUnit(unit, watchOnlyBalance, false, RavenUnits::separatorAlways));
-    ui->labelWatchPending->setText(RavenUnits::formatWithUnit(unit, watchUnconfBalance, false, RavenUnits::separatorAlways));
-    ui->labelWatchImmature->setText(RavenUnits::formatWithUnit(unit, watchImmatureBalance, false, RavenUnits::separatorAlways));
-    ui->labelWatchTotal->setText(RavenUnits::formatWithUnit(unit, watchOnlyBalance + watchUnconfBalance + watchImmatureBalance, false, RavenUnits::separatorAlways));
+    ui->labelBalance->setText(BitcoinUnits::formatWithUnit(unit, balance, false, BitcoinUnits::separatorAlways));
+    ui->labelUnconfirmed->setText(BitcoinUnits::formatWithUnit(unit, unconfirmedBalance, false, BitcoinUnits::separatorAlways));
+    ui->labelImmature->setText(BitcoinUnits::formatWithUnit(unit, immatureBalance, false, BitcoinUnits::separatorAlways));
+    ui->labelTotal->setText(BitcoinUnits::formatWithUnit(unit, balance + unconfirmedBalance + immatureBalance, false, BitcoinUnits::separatorAlways));
+    ui->labelWatchAvailable->setText(BitcoinUnits::formatWithUnit(unit, watchOnlyBalance, false, BitcoinUnits::separatorAlways));
+    ui->labelWatchPending->setText(BitcoinUnits::formatWithUnit(unit, watchUnconfBalance, false, BitcoinUnits::separatorAlways));
+    ui->labelWatchImmature->setText(BitcoinUnits::formatWithUnit(unit, watchImmatureBalance, false, BitcoinUnits::separatorAlways));
+    ui->labelWatchTotal->setText(BitcoinUnits::formatWithUnit(unit, watchOnlyBalance + watchUnconfBalance + watchImmatureBalance, false, BitcoinUnits::separatorAlways));
 
     // only show immature (newly mined) balance if it's non-zero, so as not to complicate things
     // for the non-mining users
@@ -577,7 +577,7 @@ void OverviewPage::setWalletModel(WalletModel *model)
         connect(model, SIGNAL(notifyWatchonlyChanged(bool)), this, SLOT(updateWatchOnlyLabels(bool)));
     }
 
-    // update the display unit, to not use the default ("RVN")
+    // update the display unit, to not use the default ("BLAST")
     updateDisplayUnit();
 }
 
@@ -626,7 +626,7 @@ void OverviewPage::showAssets()
         ui->assetBalanceLabel->hide();
         ui->labelAssetStatus->hide();
 
-        // This keeps the RVN balance grid from expanding and looking terrible when asset balance is hidden
+        // This keeps the BLAST balance grid from expanding and looking terrible when asset balance is hidden
         ui->assetVerticalSpaceWidget->show();
         ui->assetVerticalSpaceWidget2->show();
     }

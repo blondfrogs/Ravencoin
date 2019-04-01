@@ -11,7 +11,7 @@
 #include "sendcoinsdialog.h"
 #include "coincontroldialog.h"
 #include "guiutil.h"
-#include "ravenunits.h"
+#include "bitcoinunits.h"
 #include "clientmodel.h"
 #include "optionsmodel.h"
 #include "guiconstants.h"
@@ -45,7 +45,7 @@ CreateAssetDialog::CreateAssetDialog(const PlatformStyle *_platformStyle, QWidge
         platformStyle(_platformStyle)
 {
     ui->setupUi(this);
-    setWindowTitle("Create Assets");
+    setWindowTitle("Create CryptoMech");
     connect(ui->ipfsBox, SIGNAL(clicked()), this, SLOT(ipfsStateChanged()));
     connect(ui->availabilityButton, SIGNAL(clicked()), this, SLOT(checkAvailabilityClicked()));
     connect(ui->nameText, SIGNAL(textChanged(QString)), this, SLOT(onNameChanged(QString)));
@@ -252,9 +252,9 @@ void CreateAssetDialog::setUpValues()
 
     // Setup the asset types
     QStringList list;
-    list.append(tr("Main Asset") + " (" + RavenUnits::formatWithUnit(model->getOptionsModel()->getDisplayUnit(), GetBurnAmount(AssetType::ROOT)) + ")");
-    list.append(tr("Sub Asset") + " (" + RavenUnits::formatWithUnit(model->getOptionsModel()->getDisplayUnit(), GetBurnAmount(AssetType::SUB)) + ")");
-    list.append(tr("Unique Asset") + " (" + RavenUnits::formatWithUnit(model->getOptionsModel()->getDisplayUnit(), GetBurnAmount(AssetType::UNIQUE)) + ")");
+    list.append(tr("Main Asset") + " (" + BitcoinUnits::formatWithUnit(model->getOptionsModel()->getDisplayUnit(), GetBurnAmount(AssetType::ROOT)) + ")");
+    list.append(tr("Sub Asset") + " (" + BitcoinUnits::formatWithUnit(model->getOptionsModel()->getDisplayUnit(), GetBurnAmount(AssetType::SUB)) + ")");
+    list.append(tr("Unique Asset") + " (" + BitcoinUnits::formatWithUnit(model->getOptionsModel()->getDisplayUnit(), GetBurnAmount(AssetType::UNIQUE)) + ")");
     ui->assetType->addItems(list);
     type = IntFromAssetType(AssetType::ROOT);
     ui->assetTypeLabel->setText(tr("Asset Type") + ":");
@@ -388,7 +388,7 @@ void CreateAssetDialog::setBalance(const CAmount& balance, const CAmount& unconf
 
     if(model && model->getOptionsModel())
     {
-        ui->labelBalance->setText(RavenUnits::formatWithUnit(model->getOptionsModel()->getDisplayUnit(), balance));
+        ui->labelBalance->setText(BitcoinUnits::formatWithUnit(model->getOptionsModel()->getDisplayUnit(), balance));
     }
 }
 
@@ -506,7 +506,7 @@ void CreateAssetDialog::CheckFormState()
 
     if (!(ui->addressText->text().isEmpty() || IsValidDestination(dest)) && assetNameValid) {
         ui->addressText->setStyleSheet(STYLE_INVALID);
-        showMessage(tr("Warning: Invalid Raven address"));
+        showMessage(tr("Warning: Invalid BLAST address"));
         return;
     }
 
@@ -682,7 +682,7 @@ void CreateAssetDialog::onCreateAssetClicked()
     QStringList formatted;
 
     // generate bold amount string
-    QString amount = "<b>" + QString::fromStdString(ValueFromAmountString(GetBurnAmount(type), 8)) + " RVN";
+    QString amount = "<b>" + QString::fromStdString(ValueFromAmountString(GetBurnAmount(type), 8)) + " BLAST";
     amount.append("</b>");
     // generate monospace address string
     QString addressburn = "<span style='font-family: monospace;'>" + QString::fromStdString(GetBurnAddress(type));
@@ -711,7 +711,7 @@ void CreateAssetDialog::onCreateAssetClicked()
     {
         // append fee string if a fee is required
         questionString.append("<hr /><span style='color:#aa0000;'>");
-        questionString.append(RavenUnits::formatHtmlWithUnit(model->getOptionsModel()->getDisplayUnit(), nFeeRequired));
+        questionString.append(BitcoinUnits::formatHtmlWithUnit(model->getOptionsModel()->getDisplayUnit(), nFeeRequired));
         questionString.append("</span> ");
         questionString.append(tr("added as transaction fee"));
 
@@ -723,13 +723,13 @@ void CreateAssetDialog::onCreateAssetClicked()
     questionString.append("<hr />");
     CAmount totalAmount = GetBurnAmount(type) + nFeeRequired;
     QStringList alternativeUnits;
-    for (RavenUnits::Unit u : RavenUnits::availableUnits())
+    for (BitcoinUnits::Unit u : BitcoinUnits::availableUnits())
     {
         if(u != model->getOptionsModel()->getDisplayUnit())
-            alternativeUnits.append(RavenUnits::formatHtmlWithUnit(u, totalAmount));
+            alternativeUnits.append(BitcoinUnits::formatHtmlWithUnit(u, totalAmount));
     }
     questionString.append(tr("Total Amount %1")
-                                  .arg(RavenUnits::formatHtmlWithUnit(model->getOptionsModel()->getDisplayUnit(), totalAmount)));
+                                  .arg(BitcoinUnits::formatHtmlWithUnit(model->getOptionsModel()->getDisplayUnit(), totalAmount)));
     questionString.append(QString("<span style='font-size:10pt;font-weight:normal;'><br />(=%2)</span>")
                                   .arg(alternativeUnits.join(" " + tr("or") + "<br />")));
 
@@ -919,7 +919,7 @@ void CreateAssetDialog::updateSmartFeeLabel()
     FeeCalculation feeCalc;
     CFeeRate feeRate = CFeeRate(GetMinimumFee(1000, coin_control, ::mempool, ::feeEstimator, &feeCalc));
 
-    ui->labelSmartFee->setText(RavenUnits::formatWithUnit(model->getOptionsModel()->getDisplayUnit(), feeRate.GetFeePerK()) + "/kB");
+    ui->labelSmartFee->setText(BitcoinUnits::formatWithUnit(model->getOptionsModel()->getDisplayUnit(), feeRate.GetFeePerK()) + "/kB");
 
     if (feeCalc.reason == FeeReason::FALLBACK) {
         ui->labelSmartFee2->show(); // (Smart fee not initialized yet. This usually takes a few blocks...)
@@ -1042,7 +1042,7 @@ void CreateAssetDialog::coinControlChangeEdited(const QString& text)
         }
         else if (!IsValidDestination(dest)) // Invalid address
         {
-            ui->labelCoinControlChangeLabel->setText(tr("Warning: Invalid Raven address"));
+            ui->labelCoinControlChangeLabel->setText(tr("Warning: Invalid BLAST address"));
         }
         else // Valid address
         {
@@ -1158,7 +1158,7 @@ void CreateAssetDialog::updateFeeMinimizedLabel()
     if (ui->radioSmartFee->isChecked())
         ui->labelFeeMinimized->setText(ui->labelSmartFee->text());
     else {
-        ui->labelFeeMinimized->setText(RavenUnits::formatWithUnit(model->getOptionsModel()->getDisplayUnit(), ui->customFee->value()) + "/kB");
+        ui->labelFeeMinimized->setText(BitcoinUnits::formatWithUnit(model->getOptionsModel()->getDisplayUnit(), ui->customFee->value()) + "/kB");
     }
 }
 
@@ -1166,7 +1166,7 @@ void CreateAssetDialog::updateMinFeeLabel()
 {
     if (model && model->getOptionsModel())
         ui->checkBoxMinimumFee->setText(tr("Pay only the required fee of %1").arg(
-                RavenUnits::formatWithUnit(model->getOptionsModel()->getDisplayUnit(), GetRequiredFee(1000)) + "/kB")
+                BitcoinUnits::formatWithUnit(model->getOptionsModel()->getDisplayUnit(), GetRequiredFee(1000)) + "/kB")
         );
 }
 

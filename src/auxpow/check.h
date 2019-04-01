@@ -1,5 +1,5 @@
-#ifndef RAVEN_AUXPOW_CHECK_H
-#define RAVEN_AUXPOW_CHECK_H
+#ifndef BITCOIN_AUXPOW_CHECK_H
+#define BITCOIN_AUXPOW_CHECK_H
 
 #include "util.h"
 #include "uint256.h"
@@ -98,4 +98,4 @@ bool CheckAuxpow(const std::shared_ptr<CAuxPow> auxPow, const uint256& hashAuxBl
 }
 
 
-#endif //RAVEN_AUXPOW_CHECK_H
+#endif //BITCOIN_AUXPOW_CHECK_H

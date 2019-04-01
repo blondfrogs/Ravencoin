@@ -16,12 +16,12 @@
 #include <unordered_map>
 #include <list>
 
-#define RVN_R 114
-#define RVN_V 118
-#define RVN_N 110
-#define RVN_Q 113
-#define RVN_T 116
-#define RVN_O 111
+#define BLAST_R 114
+#define BLAST_V 118
+#define BLAST_N 110
+#define BLAST_Q 113
+#define BLAST_T 116
+#define BLAST_O 111
 
 #define DEFAULT_UNITS 0
 #define DEFAULT_REISSUABLE 1

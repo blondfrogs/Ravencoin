@@ -1,11 +1,12 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
 // Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The BLAST Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_CONSENSUS_PARAMS_H
-#define RAVEN_CONSENSUS_PARAMS_H
+#ifndef BITCOIN_CONSENSUS_PARAMS_H
+#define BITCOIN_CONSENSUS_PARAMS_H
 
 #include "uint256.h"
 #include <map>
@@ -57,7 +58,7 @@ struct Params {
     /** Block height at which BIP66 becomes active */
     // int BIP66Height;
 
-    /** AuxPow starting height for Ravencoin */
+    /** AuxPow starting height for BLAST */
     int nAuxPowStartHeight;
 
     /**
@@ -94,4 +95,4 @@ struct Params {
 };
 } // namespace Consensus
 
-#endif // RAVEN_CONSENSUS_PARAMS_H
+#endif // BITCOIN_CONSENSUS_PARAMS_H

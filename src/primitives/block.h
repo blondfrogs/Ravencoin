@@ -1,11 +1,12 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
 // Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The BLAST Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_PRIMITIVES_BLOCK_H
-#define RAVEN_PRIMITIVES_BLOCK_H
+#ifndef BITCOIN_PRIMITIVES_BLOCK_H
+#define BITCOIN_PRIMITIVES_BLOCK_H
 
 #include "primitives/transaction.h"
 #include "primitives/blockheader.h"
@@ -97,4 +98,4 @@ struct CBlockLocator
     }
 };
 
-#endif // RAVEN_PRIMITIVES_BLOCK_H
+#endif // BITCOIN_PRIMITIVES_BLOCK_H

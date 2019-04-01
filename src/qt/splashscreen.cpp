@@ -4,7 +4,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #if defined(HAVE_CONFIG_H)
-#include "config/raven-config.h"
+#include "config/bitcoin-config.h"
 #endif
 
 #include "splashscreen.h"
@@ -31,7 +31,7 @@ SplashScreen::SplashScreen(Qt::WindowFlags f, const NetworkStyle *networkStyle) 
     QWidget(0, f), curAlignment(0)
 {
     // set reference point, paddings
-    int paddingRight            = 50;
+    int paddingRight            = 25;
     int paddingTop              = 50;
     int titleVersionVSpace      = 17;
     int titleCopyrightVSpace    = 40;
@@ -60,17 +60,17 @@ SplashScreen::SplashScreen(Qt::WindowFlags f, const NetworkStyle *networkStyle) 
 #endif
 
     QPainter pixPaint(&pixmap);
-    pixPaint.setPen(QColor(100,100,100));
+    pixPaint.setPen(QColor(200,200,200));
 
     // draw a slightly radial gradient
     QRadialGradient gradient(QPoint(0,0), splashSize.width()/devicePixelRatio);
-    gradient.setColorAt(0, Qt::white);
-    gradient.setColorAt(1, QColor(247,247,247));
+    gradient.setColorAt(0, QColor(43,62,80));
+    gradient.setColorAt(1, QColor(57,56,74));
     QRect rGradient(QPoint(0,0), splashSize);
     pixPaint.fillRect(rGradient, gradient);
 
-    // draw the raven icon, expected size of PNG: 1024x1024
-    QRect rectIcon(QPoint(-40,0), QSize(310,310));
+    // draw the BLAST icon, expected size of PNG: 1024x1024
+    QRect rectIcon(QPoint(-60,-43), QSize(375,375));
 
     const QSize requiredSize(1024,1024);
     QPixmap icon(networkStyle->getSplashIcon().pixmap(requiredSize));
@@ -168,7 +168,7 @@ static void InitMessage(SplashScreen *splash, const std::string &message)
         Qt::QueuedConnection,
         Q_ARG(QString, QString::fromStdString(message)),
         Q_ARG(int, Qt::AlignBottom|Qt::AlignHCenter),
-        Q_ARG(QColor, QColor(55,55,55)));
+        Q_ARG(QColor, QColor(200,200,200)));
 }
 
 static void ShowProgress(SplashScreen *splash, const std::string &title, int nProgress, bool resume_possible)

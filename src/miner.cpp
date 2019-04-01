@@ -671,7 +671,7 @@ void static RavenMiner(const CChainParams& chainparams)
     }
 }
 
-int GenerateRavens(bool fGenerate, int nThreads, const CChainParams& chainparams)
+int GenerateBitcoins(bool fGenerate, int nThreads, const CChainParams& chainparams)
 {
 
     static boost::thread_group* minerThreads = NULL;

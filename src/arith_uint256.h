@@ -1,11 +1,12 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
 // Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The BLAST Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_ARITH_UINT256_H
-#define RAVEN_ARITH_UINT256_H
+#ifndef BITCOIN_ARITH_UINT256_H
+#define BITCOIN_ARITH_UINT256_H
 
 #include <assert.h>
 #include <cstring>
@@ -294,4 +295,4 @@ public:
 uint256 ArithToUint256(const arith_uint256 &);
 arith_uint256 UintToArith256(const uint256 &);
 
-#endif // RAVEN_ARITH_UINT256_H
+#endif // BITCOIN_ARITH_UINT256_H

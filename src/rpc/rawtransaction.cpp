@@ -63,9 +63,9 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, UniValue& entry)
                     in.pushKV("value", ValueFromAmount(spentInfo.satoshis));
                     in.pushKV("valueSat", spentInfo.satoshis);
                     if (spentInfo.addressType == 1) {
-                        in.pushKV("address", CRavenAddress(CKeyID(spentInfo.addressHash)).ToString());
+                        in.pushKV("address", CBitcoinAddress(CKeyID(spentInfo.addressHash)).ToString());
                     } else if (spentInfo.addressType == 2) {
-                        in.pushKV("address", CRavenAddress(CScriptID(spentInfo.addressHash)).ToString());
+                        in.pushKV("address", CBitcoinAddress(CScriptID(spentInfo.addressHash)).ToString());
                     }
                 }
                 newVin.push_back(in);
@@ -349,13 +349,13 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
         throw std::runtime_error(
             "createrawtransaction [{\"txid\":\"id\",\"vout\":n},...] {\"address\":(amount or object),\"data\":\"hex\",...} ( locktime ) ( replaceable )\n"
             "\nCreate a transaction spending the given inputs and creating new outputs.\n"
-            "Outputs are addresses (paired with a RVN amount, data or object specifying an asset operation) or data.\n"
+            "Outputs are addresses (paired with a BLAST amount, data or object specifying an asset operation) or data.\n"
             "Returns hex-encoded raw transaction.\n"
             "Note that the transaction's inputs are not signed, and\n"
             "it is not stored in the wallet or transmitted to the network.\n"
 
             "\nPaying for Asset Operations:\n"
-            "  Some operations require an amount of RVN to be sent to a burn address:\n"
+            "  Some operations require an amount of BLAST to be sent to a burn address:\n"
             "    transfer:       0\n"
             "    issue:        500 to Issue Burn Address\n"
             "    issue_unique    5 to Issue Unique Burn Address\n"
@@ -386,7 +386,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
             "2. \"outputs\"                               (object, required) a json object with outputs\n"
             "     {\n"
             "       \"address\":                          (string, required) The destination raven address.  Each output must have a different address.\n"
-            "         x.xxx                             (numeric or string, required) The RVN amount\n"
+            "         x.xxx                             (numeric or string, required) The BLAST amount\n"
             "           or\n"
             "         {                                 (object) A json object of assets to send\n"
             "           \"transfer\":\n"
@@ -540,7 +540,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
                 CTxOut out(nAmount, scriptPubKey);
                 rawTx.vout.push_back(out);
             }
-            /** RVN COIN START **/
+            /** BLAST COIN START **/
             else if (sendTo[name_].type() == UniValue::VOBJ) {
                 auto asset_ = sendTo[name_].get_obj();
                 auto assetKey_ = asset_.getKeys()[0];
@@ -788,7 +788,7 @@ UniValue createrawtransaction(const JSONRPCRequest& request)
             } else {
                 throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid parameter, Output must be of the type object"));
             }
-            /** RVN COIN STOP **/
+            /** BLAST COIN STOP **/
         }
     }
 
@@ -922,7 +922,7 @@ UniValue decodescript(const JSONRPCRequest& request)
         r.push_back(Pair("p2sh", EncodeDestination(CScriptID(script))));
     }
 
-    /** RVN START */
+    /** BLAST START */
     if (type.isStr() && type.get_str() == ASSET_TRANSFER_STRING) {
         if (!AreAssetsDeployed())
             throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Assets are not active");
@@ -990,7 +990,7 @@ UniValue decodescript(const JSONRPCRequest& request)
     } else {
 
     }
-    /** RVN END */
+    /** BLAST END */
 
     return r;
 }
@@ -1199,7 +1199,7 @@ UniValue signrawtransaction(const JSONRPCRequest& request)
         UniValue keys = request.params[2].get_array();
         for (unsigned int idx = 0; idx < keys.size(); idx++) {
             UniValue k = keys[idx];
-            CRavenSecret vchSecret;
+            CBitcoinSecret vchSecret;
             bool fGood = vchSecret.SetString(k.get_str());
             if (!fGood)
                 throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid private key");

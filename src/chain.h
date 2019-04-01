@@ -4,8 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_CHAIN_H
-#define RAVEN_CHAIN_H
+#ifndef BITCOIN_CHAIN_H
+#define BITCOIN_CHAIN_H
 
 #include "arith_uint256.h"
 #include "auxpow/auxpow.h"
@@ -518,4 +518,4 @@ public:
     CBlockIndex* FindEarliestAtLeast(int64_t nTime) const;
 };
 
-#endif // RAVEN_CHAIN_H
+#endif // BITCOIN_CHAIN_H

@@ -231,7 +231,7 @@ public:
             2700.0      // * estimated number of transactions per second after that timestamp
         };
 
-        /** RVN Start **/
+        /** BLAST Start **/
         // Burn Amounts
         nIssueAssetBurnAmount = 500 * COIN;
         nReissueAssetBurnAmount = 100 * COIN;
@@ -253,7 +253,7 @@ public:
         nMaxReorganizationDepth = 60; // 60 at 32 second block timespan is +/- 32 minutes.
         nMinReorganizationPeers = 4;
         nMinReorganizationAge = 60 * 60 * 12; // 12 hours
-        /** RVN End **/
+        /** BLAST End **/
     }
 };
 
@@ -299,7 +299,7 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 1199145601; // January 1, 2008
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 1230767999; // December 31, 2008
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].bit = 6;
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 1553495467; // GMT: Monday, March 25, 2019 6:31:07 AM
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 1553835600; // GMT: Friday, March 29, 2019 5:00:00 AM
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 1584403653; // GMT: Tuesday, March 17, 2020 12:07:33 AM
 
         // Deployment of BIP68, BIP112, and BIP113.
@@ -429,7 +429,7 @@ public:
             1           // * estimated number of transactions per second after that timestamp
         };
 
-        /** RVN Start **/
+        /** BLAST Start **/
         // Burn Amounts
         nIssueAssetBurnAmount = 2 * COIN;
         nReissueAssetBurnAmount = 1 * COIN;
@@ -437,13 +437,13 @@ public:
         nIssueUniqueAssetBurnAmount = 1 * COIN;
 
         // Burn Addresses
-        strIssueAssetBurnAddress = "8bFeRHiDB7osjka9yHKt4nJquokEzrFya8"; // "n1issueAssetXXXXXXXXXXXXXXXXWdnemQ";
-        strReissueAssetBurnAddress = "8bFeRHiDB7osjka9yHKt4nJquokEzrFya8"; // "n1ReissueAssetXXXXXXXXXXXXXXWG9NLd";
-        strIssueSubAssetBurnAddress = "8bFeRHiDB7osjka9yHKt4nJquokEzrFya8"; // "n1issueSubAssetXXXXXXXXXXXXXbNiH6v";
-        strIssueUniqueAssetBurnAddress = "8bFeRHiDB7osjka9yHKt4nJquokEzrFya8"; // "n1issueUniqueAssetXXXXXXXXXXS4695i";
+        strIssueAssetBurnAddress = "8R6xzzuVcDWM4KM1xC47AgvWF3nGSp5E4b"; // "n1issueAssetXXXXXXXXXXXXXXXXWdnemQ";
+        strReissueAssetBurnAddress = "8R6xzzuVcDWM4KM1xC47AgvWF3nGSp5E4b"; // "n1ReissueAssetXXXXXXXXXXXXXXWG9NLd";
+        strIssueSubAssetBurnAddress = "8R6xzzuVcDWM4KM1xC47AgvWF3nGSp5E4b"; // "n1issueSubAssetXXXXXXXXXXXXXbNiH6v";
+        strIssueUniqueAssetBurnAddress = "8R6xzzuVcDWM4KM1xC47AgvWF3nGSp5E4b"; // "n1issueUniqueAssetXXXXXXXXXXS4695i";
 
         // Global Burn Address
-        strGlobalBurnAddress = "8bFeRHiDB7osjka9yHKt4nJquokEzrFya8"; // "n1BurnXXXXXXXXXXXXXXXXXXXXXXU1qejP";
+        strGlobalBurnAddress = "8R6xzzuVcDWM4KM1xC47AgvWF3nGSp5E4b"; // "n1BurnXXXXXXXXXXXXXXXXXXXXXXU1qejP";
 
         // DGW Activation
         nDGWActivationBlock = 0;
@@ -451,7 +451,7 @@ public:
         nMaxReorganizationDepth = 60; // 60 at 32 second block timespan is +/- 32 minutes.
         nMinReorganizationPeers = 4;
         nMinReorganizationAge = 60 * 60 * 12; // 12 hours
-        /** RVN End **/
+        /** BLAST End **/
 
     }
 };
@@ -606,7 +606,7 @@ public:
         base58Prefixes[EXT_SECRET_KEY] = {0x04, 0x35, 0x83, 0x94};
 
 
-        /** RVN Start **/
+        /** BLAST Start **/
         // Burn Amounts
         nIssueAssetBurnAmount = 500 * COIN;
         nReissueAssetBurnAmount = 100 * COIN;
@@ -628,7 +628,7 @@ public:
         nMaxReorganizationDepth = 60; // 60 at 32 second block timespan is +/- 32 minutes.
         nMinReorganizationPeers = 4;
         nMinReorganizationAge = 60 * 60 * 12; // 12 hours
-        /** RVN End **/
+        /** BLAST End **/
     }
 };
 

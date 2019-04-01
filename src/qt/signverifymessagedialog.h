@@ -1,10 +1,11 @@
 // Copyright (c) 2011-2015 The Bitcoin Core developers
 // Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The BLAST Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_QT_SIGNVERIFYMESSAGEDIALOG_H
-#define RAVEN_QT_SIGNVERIFYMESSAGEDIALOG_H
+#ifndef BITCOIN_QT_SIGNVERIFYMESSAGEDIALOG_H
+#define BITCOIN_QT_SIGNVERIFYMESSAGEDIALOG_H
 
 #include <QDialog>
 
@@ -51,4 +52,4 @@ private Q_SLOTS:
     void on_clearButton_VM_clicked();
 };
 
-#endif // RAVEN_QT_SIGNVERIFYMESSAGEDIALOG_H
+#endif // BITCOIN_QT_SIGNVERIFYMESSAGEDIALOG_H

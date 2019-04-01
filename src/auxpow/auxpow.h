@@ -2,8 +2,8 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file license.txt or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_AUXPOW_AUXPOW_H
-#define RAVEN_AUXPOW_AUXPOW_H
+#ifndef BITCOIN_AUXPOW_AUXPOW_H
+#define BITCOIN_AUXPOW_AUXPOW_H
 
 #include "versionbits.h"
 #include "consensus/params.h"
@@ -58,4 +58,4 @@ template<typename Stream> void SerReadWrite(Stream& s, std::shared_ptr<CAuxPow>&
     ::Unserialize(s, *pobj);
 }
 
-#endif // RAVEN_AUXPOW_AUXPOW_H
+#endif // BITCOIN_AUXPOW_AUXPOW_H
