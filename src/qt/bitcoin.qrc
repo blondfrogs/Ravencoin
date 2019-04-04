@@ -68,7 +68,6 @@
         <file alias="asset_manage_selected">res/icons/asset_manage_selected.png</file>
         <file alias="asset_transfer">res/icons/asset_transfer.png</file>
         <file alias="asset_transfer_selected">res/icons/asset_transfer_selected.png</file>
-        <!-- <file alias="ravencointext">res/icons/ravencointext.png</file> -->
         <file alias="blasttext">res/icons/blasttext.png</file>
     </qresource>
     <qresource prefix="/movies">
