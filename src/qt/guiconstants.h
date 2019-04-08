@@ -122,4 +122,4 @@ static const int MAX_URI_LENGTH = 255;
 #define QAPP_APP_NAME_DEFAULT "Blast-Qt"
 #define QAPP_APP_NAME_TESTNET "Blast-Qt-testnet"
 
-#endif // BLAST_QT_GUICONSTANTS_H
+#endif // BITCOIN_QT_GUICONSTANTS_H

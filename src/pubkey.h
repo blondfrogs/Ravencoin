@@ -5,8 +5,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef BLAST_PUBKEY_H
-#define BLAST_PUBKEY_H
+#ifndef BITCOIN_PUBKEY_H
+#define BITCOIN_PUBKEY_H
 
 #include "hash.h"
 #include "serialize.h"
@@ -249,4 +249,4 @@ public:
     ~ECCVerifyHandle();
 };
 
-#endif // BLAST_PUBKEY_H
+#endif // BITCOIN_PUBKEY_H
