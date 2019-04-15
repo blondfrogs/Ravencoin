@@ -8,9 +8,8 @@
 #include "versionbits.h"
 #include "consensus/params.h"
 #include "wallet/wallet.h"
-#include "primitives/blockheader.h"
+#include "primitives/pureheader.h"
 #include "auxpow/consensus.h"
-
 
 class CAuxPow : public CMerkleTx
 {
@@ -25,7 +24,7 @@ public:
 
     // Index of chain in chains merkle tree
     unsigned int nChainIndex;
-    CBlockHeader parentBlockHeader;
+    CPureBlockHeader parentBlockHeader;
 
     ADD_SERIALIZE_METHODS;
 
@@ -34,9 +33,13 @@ public:
         READWRITE(*(CMerkleTx*)this);
         READWRITE(vChainMerkleBranch);
         READWRITE(nChainIndex);
+		/*if (CBlockHeader::dump)
+			std::cout << "Auxpow: ChainIndex: " << nChainIndex << std::endl;*/
         // Always serialize the saved parent block as header so that the size of CAuxPow
         // is consistent.
         READWRITE(parentBlockHeader);
+		/*if (CBlockHeader::dump)
+			std::cout << "Auxpow: isauxpow: " << parentBlockHeader.IsAuxPow() << std::endl;*/
     }
 
     uint256 CheckMerkleBranch(const uint256& hash, const std::vector<uint256>& vMerkleBranch, int nIndex) const;

@@ -137,6 +137,7 @@ BITCOIN_CORE_H = \
   policy/rbf.h \
   pow.h \
   protocol.h \
+  primitives/pureheader.h \
   random.h \
   reverse_iterator.h \
   reverselock.h \
@@ -349,8 +350,11 @@ libbitcoin_consensus_a_SOURCES = \
   hash.cpp \
   hash.h \
   prevector.h \
+  primitives/pureheader.cpp \
+  primitives/pureheader.h \
   primitives/block.cpp \
   primitives/block.h \
+  primitives/blockheader.cpp \
   primitives/blockheader.h \
   primitives/transaction.cpp \
   primitives/transaction.h \

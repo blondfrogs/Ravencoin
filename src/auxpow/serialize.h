@@ -6,6 +6,10 @@
 #ifndef BITCOIN_AUXPOW_SERIALIZE_H
 #define BITCOIN_AUXPOW_SERIALIZE_H
 
+#include <memory>
+#include "uint256.h"
+#include "../serialize.h"
+
 class CAuxPow;
 
 template<typename S>

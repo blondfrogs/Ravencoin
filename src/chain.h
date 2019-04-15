@@ -11,6 +11,7 @@
 #include "auxpow/auxpow.h"
 #include "auxpow/serialize.h"
 #include "primitives/block.h"
+#include "primitives/pureheader.h"
 #include "pow.h"
 #include "tinyformat.h"
 #include "uint256.h"
@@ -371,7 +372,7 @@ public:
     // BLAST
     inline int GetBaseVersion() const
     {
-        return CBlockHeader::GetBaseVersion(nVersion);
+        return CPureBlockHeader::GetBaseVersion(nVersion);
     }
 };
 
