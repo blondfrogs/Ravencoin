@@ -71,6 +71,8 @@ public:
     uint64_t PruneAfterHeight() const { return nPruneAfterHeight; }
     /** Make miner stop after a block is found. In RPC, don't return until nGenProcLimit blocks are generated */
     bool MineBlocksOnDemand() const { return fMineBlocksOnDemand; }
+    /** Allow nodes with the same address and multiple ports */
+    bool AllowMultiplePorts() const { return fAllowMultiplePorts; }
     /** Return the BIP70 network string (main, test or regtest) */
     std::string NetworkIDString() const { return strNetworkID; }
     const std::vector<CDNSSeedData>& DNSSeeds() const { return vSeeds; }
@@ -106,6 +108,7 @@ public:
     int MaxReorganizationDepth() const { return nMaxReorganizationDepth; }
     int MinReorganizationPeers() const { return nMinReorganizationPeers; }
     int MinReorganizationAge() const { return nMinReorganizationAge; }
+    int FulfilledRequestExpireTime() const { return nFulfilledRequestExpireTime; }
     /** BLAST End **/
 
 protected:
@@ -148,6 +151,8 @@ protected:
     int nMaxReorganizationDepth;
     int nMinReorganizationPeers;
     int nMinReorganizationAge;
+    bool fAllowMultiplePorts;
+    int nFulfilledRequestExpireTime;
     /** BLAST End **/
 };
 
@@ -157,6 +162,11 @@ protected:
  * @throws a std::runtime_error if the chain is not supported.
  */
 std::unique_ptr<CChainParams> CreateChainParams(const std::string& chain);
+
+/**
+ * @returns CChainParams for the given BIP70 chain name.
+ */
+CChainParams& Params(const std::string& chain);
 
 /**
  * Return the currently selected parameters. This won't change after app

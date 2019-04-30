@@ -116,6 +116,7 @@ public:
     CTxDestination Get() const;
     bool GetIndexKey(uint160& hashBytes, int& type) const;
     bool GetKeyID(CKeyID &keyID) const;
+    bool IsScript() const;
 };
 
 /**

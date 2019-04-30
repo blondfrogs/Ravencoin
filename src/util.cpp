@@ -79,9 +79,16 @@
 #endif
 
 #include <boost/algorithm/string/case_conv.hpp> // for to_lower()
+#include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/predicate.hpp> // for startswith() and endswith()
+#include <boost/algorithm/string/split.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
+#include <boost/foreach.hpp>
+#include <boost/algorithm/string/classification.hpp>
 #include <boost/program_options/detail/config_file.hpp>
 #include <boost/thread.hpp>
+#include <boost/lexical_cast.hpp>
 #include <openssl/crypto.h>
 #include <openssl/rand.h>
 #include <openssl/conf.h>
@@ -93,6 +100,7 @@ const char *const BITCOIN_CONF_FILENAME = "blast.conf";
 const char *const BITCOIN_PID_FILENAME = "blastd.pid";
 
 ArgsManager gArgs;
+bool fDebug = false;
 bool fPrintToConsole = false;
 bool fPrintToDebugLog = true;
 
@@ -225,6 +233,59 @@ struct CLogCategoryDesc
     uint32_t flag;
     std::string category;
 };
+
+bool LogAcceptCategory(const char* category)
+{
+    if (category != NULL)
+    {
+        // Give each thread quick access to -debug settings.
+        // This helps prevent issues debugging global destructors,
+        // where mapMultiArgs might be deleted before another
+        // global destructor calls LogPrint()
+        static boost::thread_specific_ptr<std::set<std::string> > ptrCategory;
+
+        if (!fDebug) {
+            if (ptrCategory.get() != NULL) {
+                LogPrintf("debug turned off: thread %s\n", GetThreadName());
+                ptrCategory.release();
+            }
+            return false;
+        }
+
+        if (ptrCategory.get() == NULL)
+        {
+            if (gArgs.GetArgs("-debug").size() > 0) {
+                std::string strThreadName = GetThreadName();
+                LogPrintf("debug turned on:\n");
+                for (int i = 0; i < (int)gArgs.GetArgs("-debug").size(); ++i)
+                    LogPrintf("  thread %s category %s\n", strThreadName, gArgs.GetArgs("-debug")[i]);
+                const std::vector<std::string>& categories = gArgs.GetArgs("-debug");
+                ptrCategory.reset(new std::set<std::string>(categories.begin(), categories.end()));
+                // thread_specific_ptr automatically deletes the set when the thread ends.
+                // "syscoin" is a composite category enabling all Syscoin-related debug output
+                if(ptrCategory->count(std::string("syscoin"))) {
+                    ptrCategory->insert(std::string("privatesend"));
+                    ptrCategory->insert(std::string("instantsend"));
+                    ptrCategory->insert(std::string("masternode"));
+                    ptrCategory->insert(std::string("spork"));
+                    ptrCategory->insert(std::string("keepass"));
+                    ptrCategory->insert(std::string("mnpayments"));
+                    ptrCategory->insert(std::string("gobject"));
+                }
+            } else {
+                ptrCategory.reset(new std::set<std::string>());
+            }
+        }
+        const std::set<std::string>& setCategories = *ptrCategory.get();
+
+        // if not debugging everything and not debugging specific category, LogPrint does nothing.
+        if (setCategories.count(std::string("")) == 0 &&
+            setCategories.count(std::string("1")) == 0 &&
+            setCategories.count(std::string(category)) == 0)
+            return false;
+    }
+    return true;
+}
 
 const CLogCategoryDesc LogCategories[] =
         {
@@ -619,6 +680,14 @@ fs::path GetConfigFile(const std::string &confPath)
     return pathConfigFile;
 }
 
+boost::filesystem::path GetMasternodeConfigFile()
+{
+    boost::filesystem::path pathConfigFile(gArgs.GetArg("-mnconf", "masternode.conf"));
+    if (!pathConfigFile.is_complete())
+        pathConfigFile = GetDataDir() / pathConfigFile;
+    return pathConfigFile;
+}
+
 void ArgsManager::ReadConfigFile(const std::string &confPath)
 {
     fs::ifstream streamConfig(GetConfigFile(confPath));
@@ -863,6 +932,21 @@ void RenameThread(const char *name)
 #endif
 }
 
+std::string GetThreadName()
+{
+    char name[16];
+#if defined(PR_GET_NAME)
+    // Only the first 15 characters are used (16 - NUL terminator)
+    ::prctl(PR_GET_NAME, name, 0, 0, 0);
+#elif defined(MAC_OSX)
+    pthread_getname_np(pthread_self(), name, 16);
+// #elif (defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__DragonFly__))
+// #else
+    // no get_name here
+#endif
+    return std::string(name);
+}
+
 void SetupEnvironment()
 {
 #ifdef HAVE_MALLOPT_ARENA_MAX
@@ -944,4 +1028,52 @@ void SetThreadPriority(int nPriority)
     setpriority(PRIO_PROCESS, 0, nPriority);
 #endif // PRIO_THREAD
 #endif // WIN32
+}
+
+uint32_t StringVersionToInt(const std::string& strVersion)
+{
+    std::vector<std::string> tokens;
+    boost::split(tokens, strVersion, boost::is_any_of("."));
+    if(tokens.size() != 3)
+        throw std::bad_cast();
+    uint32_t nVersion = 0;
+    for(unsigned idx = 0; idx < 3; idx++)
+    {
+        if(tokens[idx].length() == 0)
+            throw std::bad_cast();
+        uint32_t value = boost::lexical_cast<uint32_t>(tokens[idx]);
+        if(value > 255)
+            throw std::bad_cast();
+        nVersion <<= 8;
+        nVersion |= value;
+    }
+    return nVersion;
+}
+
+std::string IntVersionToString(uint32_t nVersion)
+{
+    if((nVersion >> 24) > 0) // MSB is always 0
+        throw std::bad_cast();
+    if(nVersion == 0)
+        throw std::bad_cast();
+    std::array<std::string, 3> tokens;
+    for(unsigned idx = 0; idx < 3; idx++)
+    {
+        unsigned shift = (2 - idx) * 8;
+        uint32_t byteValue = (nVersion >> shift) & 0xff;
+        tokens[idx] = boost::lexical_cast<std::string>(byteValue);
+    }
+    return boost::join(tokens, ".");
+}
+
+std::string SafeIntVersionToString(uint32_t nVersion)
+{
+    try
+    {
+        return IntVersionToString(nVersion);
+    }
+    catch(const std::bad_cast&)
+    {
+        return "invalid_version";
+    }
 }

@@ -123,6 +123,18 @@ public:
         consensus.nMajorityEnforceBlockUpgrade = 750;
         consensus.nMajorityRejectBlockOutdated = 950;
         consensus.nMajorityWindow = 1000;
+        consensus.nMasternodePaymentsStartBlock = 2; // not true, but it's ok as long as it's less then nMasternodePaymentsIncreaseBlock
+        consensus.nMasternodePaymentsIncreaseBlock = 2; // actual historical value
+        consensus.nMasternodePaymentsIncreasePeriod = 576*30; // 17280 - actual historical value
+        consensus.nMasternodeMinimumConfirmations = 15;
+        consensus.nSuperblockStartBlock = 0; // The block at which 12.1 goes live (end of final 12.0 budget cycle)
+		consensus.nSuperblockStartHash = uint256();
+        consensus.nSuperblockCycle = 43800; // ~(60*24*30)/2.6, actual number of blocks per month is 200700 / 12 = 16725
+        consensus.nGovernanceMinQuorum = 10;
+        consensus.nGovernanceFilterElements = 20000;
+        consensus.nShareFeeBlock = 175000;
+        consensus.nSeniorityInterval = 43800 * 4; // seniority increases every 4
+		consensus.nTotalSeniorityIntervals = 9;
         consensus.BIP34Height = 0;
         consensus.BIP34Hash = uint256S("0x000000001d03315ec89ac7895ad122e3ae9c3c92a2ec5f63000794cdd6c18095"); // Genesis hash (height 0)
 
@@ -209,6 +221,8 @@ public:
         fRequireStandard = true;
         fMineBlocksOnDemand = false;
         fMiningRequiresPeers = true;
+        fAllowMultiplePorts = false;
+        nFulfilledRequestExpireTime = 60*60; // fulfilled requests expire in 1 hour
 
         checkpointData = (CCheckpointData) {
             {
@@ -256,6 +270,7 @@ public:
         /** BLAST End **/
     }
 };
+static CMainParams mainParams;
 
 /**
  * Testnet (v6)
@@ -268,6 +283,18 @@ public:
         consensus.nMajorityEnforceBlockUpgrade = 750;
         consensus.nMajorityRejectBlockOutdated = 950;
         consensus.nMajorityWindow = 1000;
+        consensus.nMasternodePaymentsStartBlock = 2;
+        consensus.nMasternodePaymentsIncreaseBlock = 2; 
+        consensus.nMasternodePaymentsIncreasePeriod = 10;
+        consensus.nMasternodeMinimumConfirmations = 1;
+        consensus.nSuperblockStartBlock = 1; // NOTE: Should satisfy nSuperblockStartBlock > nBudgetPeymentsStartBlock
+        consensus.nSuperblockStartHash = uint256();
+        consensus.nSuperblockCycle = 60; // Superblocks can be issued hourly on testnet
+        consensus.nGovernanceMinQuorum = 1;
+        consensus.nGovernanceFilterElements = 500;
+        consensus.nShareFeeBlock = 1000;
+        consensus.nSeniorityInterval = 60; // seniority increases every hour
+		consensus.nTotalSeniorityIntervals = 9;
         consensus.BIP34Height = 0;
         consensus.BIP34Hash = uint256S("0x0000000077062645faa71f32cd3fe871f4ca4f145d16781ff3ccaedf3ad2f1cd"); // Genesis hash (height 0)
         
@@ -413,6 +440,8 @@ public:
         fRequireStandard = false;
         fMineBlocksOnDemand = false;
         fMiningRequiresPeers = true;
+        fAllowMultiplePorts = false;
+        nFulfilledRequestExpireTime = 5*60; // fulfilled requests expire in 5 minutes
 
         checkpointData = (CCheckpointData) {
             {
@@ -455,6 +484,7 @@ public:
 
     }
 };
+static CTestNetParams testNetParams;
 
 /**
  * Regression test
@@ -467,6 +497,18 @@ public:
         consensus.nMajorityEnforceBlockUpgrade = 750;
         consensus.nMajorityRejectBlockOutdated = 950;
         consensus.nMajorityWindow = 1000;
+        consensus.nMasternodePaymentsStartBlock = 4010; // not true, but it's ok as long as it's less then nMasternodePaymentsIncreaseBlock
+        consensus.nMasternodePaymentsIncreaseBlock = 4030;
+        consensus.nMasternodePaymentsIncreasePeriod = 10;
+        consensus.nMasternodeMinimumConfirmations = 1;
+        consensus.nSuperblockStartBlock = 1;
+        consensus.nSuperblockStartHash = uint256(); // do not check this on regtest
+        consensus.nSuperblockCycle = 10;
+        consensus.nGovernanceMinQuorum = 1;
+        consensus.nGovernanceFilterElements = 100;
+        consensus.nShareFeeBlock = 1;
+        consensus.nSeniorityInterval = 60; // seniority increases every hour
+		consensus.nTotalSeniorityIntervals = 9;
         consensus.BIP34Height = -1; // BIP34 has not necessarily activated on regtest
         consensus.BIP34Hash = uint256();
         
@@ -587,6 +629,8 @@ public:
         fDefaultConsistencyChecks = true;
         fRequireStandard = false;
         fMineBlocksOnDemand = true;
+        fAllowMultiplePorts = false;
+        nFulfilledRequestExpireTime = 5*60; // fulfilled requests expire in 5 minutes
 
         checkpointData = (CCheckpointData) {
             {
@@ -631,6 +675,7 @@ public:
         /** BLAST End **/
     }
 };
+static CRegTestParams regTestParams;
 
 static std::unique_ptr<CChainParams> globalChainParams;
 
@@ -648,6 +693,18 @@ std::unique_ptr<CChainParams> CreateChainParams(const std::string& chain)
     else if (chain == CBaseChainParams::REGTEST)
         return std::unique_ptr<CChainParams>(new CRegTestParams());
     throw std::runtime_error(strprintf("%s: Unknown chain %s.", __func__, chain));
+}
+
+CChainParams& Params(const std::string& chain)
+{
+    if (chain == CBaseChainParams::MAIN)
+            return mainParams;
+    else if (chain == CBaseChainParams::TESTNET)
+            return testNetParams;
+    else if (chain == CBaseChainParams::REGTEST)
+            return regTestParams;
+    else
+        throw std::runtime_error(strprintf("%s: Unknown chain %s.", __func__, chain));
 }
 
 void SelectParams(const std::string& network)

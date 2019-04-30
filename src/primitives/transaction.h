@@ -56,6 +56,7 @@ public:
     }
 
     std::string ToString() const;
+    std::string ToStringShort() const;
 };
 
 /** An input of a transaction.  It contains the location of the previous
@@ -403,6 +404,8 @@ struct CMutableTransaction
      */
     uint256 GetHash() const;
 
+    std::string ToString() const;
+    
     friend bool operator==(const CMutableTransaction& a, const CMutableTransaction& b)
     {
         return a.GetHash() == b.GetHash();

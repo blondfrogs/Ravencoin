@@ -42,10 +42,12 @@ static const int CLIENT_VERSION =
                          +     100 * CLIENT_VERSION_REVISION
                          +       1 * CLIENT_VERSION_BUILD;
 
+static const int CLIENT_MASTERNODE_VERSION = 3000000;
+
 extern const std::string CLIENT_NAME;
 extern const std::string CLIENT_BUILD;
 
-
+std::string FormatVersion(int nVersion);
 std::string FormatFullVersion();
 std::string FormatSubVersion(const std::string& name, int nClientVersion, const std::vector<std::string>& comments);
 

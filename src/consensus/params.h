@@ -50,6 +50,19 @@ struct Params {
     int nMajorityEnforceBlockUpgrade;
     int nMajorityRejectBlockOutdated;
     int nMajorityWindow;
+    int nMasternodePaymentsStartBlock;
+    int nMasternodePaymentsIncreaseBlock;
+    int nMasternodePaymentsIncreasePeriod; // in blocks
+    int nMasternodeMinimumConfirmations;
+    int nSuperblockStartBlock;
+    uint256 nSuperblockStartHash;
+    int nSuperblockCycle; // in blocks
+    int nGovernanceMinQuorum; // Min absolute vote count to trigger an action
+    int nGovernanceFilterElements;
+    int nShareFeeBlock; // when to start enforcing 50/50 sharing of tx fees with masternodes
+   	int nSeniorityInterval;
+	int nTotalSeniorityIntervals;
+
     /** Block height and hash at which BIP34 becomes active */
     int BIP34Height;
     uint256 BIP34Hash;

@@ -22,6 +22,7 @@
 #include <string.h>
 #include <utility>
 #include <vector>
+#include <list>
 
 #include "prevector.h"
 
@@ -790,7 +791,29 @@ void Unserialize(Stream& is, std::set<K, Pred, A>& m)
     }
 }
 
+/**
+ * list
+ */
+template<typename Stream, typename T, typename A>
+void Serialize(Stream& os, const std::list<T, A>& l)
+{
+    WriteCompactSize(os, l.size());
+    for (typename std::list<T, A>::const_iterator it = l.begin(); it != l.end(); ++it)
+        Serialize(os, (*it));
+}
 
+template<typename Stream, typename T, typename A>
+void Unserialize(Stream& is, std::list<T, A>& l)
+{
+    l.clear();
+    unsigned int nSize = ReadCompactSize(is);
+    for (unsigned int i = 0; i < nSize; i++)
+    {
+        T val;
+        Unserialize(is, val);
+        l.push_back(val);
+    }
+}
 
 /**
  * unique_ptr

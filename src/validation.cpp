@@ -103,6 +103,8 @@ CAmount maxTxFee = DEFAULT_TRANSACTION_MAXFEE;
 CBlockPolicyEstimator feeEstimator;
 CTxMemPool mempool(&feeEstimator);
 
+std::map<uint256, int64_t> mapRejectedBlocks GUARDED_BY(cs_main);
+
 /**
  * Returns true if there are nRequired or more blocks of minVersion or above
  * in the last Consensus::Params::nMajorityWindow blocks, starting at pstart and going backwards.
@@ -466,6 +468,26 @@ static bool CheckInputsFromMempoolAndCache(const CTransaction& tx, CValidationSt
     }
 
     return CheckInputs(tx, state, view, true, flags, cacheSigStore, true, txdata);
+}
+
+bool GetUTXOCoin(const COutPoint& outpoint, Coin& coin)
+{
+    LOCK(cs_main);
+	return pcoinsTip->GetCoin(outpoint, coin);
+}
+
+int GetUTXOHeight(const COutPoint& outpoint)
+{
+    // -1 means UTXO is yet unknown or already spent
+    Coin coin;
+    return GetUTXOCoin(outpoint, coin) ? coin.nHeight : -1;
+}
+
+int GetUTXOConfirmations(const COutPoint& outpoint)
+{
+    // -1 means UTXO is yet unknown or already spent
+    int nPrevoutHeight = GetUTXOHeight(outpoint);
+    return (nPrevoutHeight > -1 && chainActive.Tip()) ? chainActive.Height() - nPrevoutHeight + 1 : -1;
 }
 
 static bool AcceptToMemoryPoolWorker(const CChainParams& chainparams, CTxMemPool& pool, CValidationState& state, const CTransactionRef& ptx,
@@ -1184,26 +1206,57 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus
     return true;
 }
 
-CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams)
+CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams, CAmount &nTotalRewardWithMasternodes, bool fSuperblockPartOnly, bool fMasternodePartOnly, unsigned int nStartHeight)
 {
-    // 1       - 64        Reward = Block Height
-    // 65      - 640000    50
-    // 640001  - 1280000   25
-    // 1280001 - 1920000   12.5
-    // 1920001 - 2560000   6.25
-    // 2560001 - ..        Halving every 640000 blocks (~237 days)
+	if (nHeight == 0)
+		return 8.88*COIN;
+	if (nHeight == 1)
+	{
+		std::string chain = ChainNameFromCommandLine();
+		// SYSCOIN 3 snapshot
+		nTotalRewardWithMasternodes = 533000000 * COIN;
+		return nTotalRewardWithMasternodes;
+	}
+	CAmount nSubsidy = 38.5 * COIN;
+	int reductions = nHeight / consensusParams.nSubsidyHalvingInterval;
+	if (reductions >= 50) {
+		nTotalRewardWithMasternodes = 0;
+		return nTotalRewardWithMasternodes;
+	}
+	// Subsidy is cut in half every 525600 blocks which will occur approximately every year.
+	// yearly decline of production by 5% per year, projected ~888M coins max by year 2067+.
+	for (int i = 0; i < reductions; i++) {
+		nSubsidy -= nSubsidy / 20;
+	}
+	// Reduce the block reward of miners (allowing budget/superblocks)
+	const CAmount &nSuperblockPart = (nSubsidy*0.1);
 
-    if (nHeight == 0      ) { return    1 * COIN; }
-    if (nHeight <= 64     ) { return nHeight * COIN; }
-    int halvings = nHeight / consensusParams.nSubsidyHalvingInterval;
-    // Force block reward to zero when right shift is undefined.
-    if (halvings >= 64)
-        return 0;
+	if (fSuperblockPartOnly)
+		return nSuperblockPart;
+	nSubsidy -= nSuperblockPart;
+	nTotalRewardWithMasternodes = nSubsidy;
+	if (fMasternodePartOnly) {
+		nSubsidy *= 0.75;
+		if (nHeight > 0 && nStartHeight > 0) {
+			unsigned int nDifferenceInBlocks = 0;
+			if (nHeight > (int)nStartHeight)
+				nDifferenceInBlocks = (nHeight - (int)nStartHeight);
+			// the first three intervals should discount rewards to incentivize bonding over longer terms (we add 3% premium every interval)
+			double fSubsidyAdjustmentPercentage = 0;
+			for (int i = 1; i <= consensusParams.nTotalSeniorityIntervals; i++) {
+				const unsigned int &nTotalSeniorityBlocks = i*consensusParams.nSeniorityInterval;
+				if (nDifferenceInBlocks <= nTotalSeniorityBlocks)
+					break;
+				fSubsidyAdjustmentPercentage += 0.03;
+			}
+			const CAmount &nChange = nSubsidy*fSubsidyAdjustmentPercentage;
+			nSubsidy += nChange;
+			nTotalRewardWithMasternodes += nChange;
+		}
+	}
 
-    CAmount nSubsidy = 50 * COIN;
-    // Subsidy is cut in half every 640000 blocks which will occur approximately every 237 days.
-    nSubsidy >>= halvings;
-    return nSubsidy;
+	return nSubsidy;
+
 }
 
 bool IsInitialBlockDownload()
@@ -2538,7 +2591,8 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     int64_t nTime3 = GetTimeMicros(); nTimeConnect += nTime3 - nTime2;
     LogPrint(BCLog::BENCH, "      - Connect %u transactions: %.2fms (%.3fms/tx, %.3fms/txin) [%.2fs (%.2fms/blk)]\n", (unsigned)block.vtx.size(), MILLI * (nTime3 - nTime2), MILLI * (nTime3 - nTime2) / block.vtx.size(), nInputs <= 1 ? 0 : MILLI * (nTime3 - nTime2) / (nInputs-1), nTimeConnect * MICRO, nTimeConnect * MILLI / nBlocksTotal);
 
-    CAmount blockReward = nFees + GetBlockSubsidy(pindex->nHeight, chainparams.GetConsensus());
+    // TODO: sandip correct GetBlockSubsidy call
+    CAmount blockReward = nFees; //+ GetBlockSubsidy(pindex->nHeight, chainparams.GetConsensus());
     if (block.vtx[0]->GetValueOut() > blockReward)
         return state.DoS(100,
                          error("ConnectBlock(): coinbase pays too much (actual=%d vs limit=%d)",
@@ -3786,6 +3840,53 @@ std::vector<unsigned char> GenerateCoinbaseCommitment(CBlock& block, const CBloc
     }
 	UpdateUncommittedBlockStructures(block, pindexPrev, consensusParams);
     return commitment;
+}
+
+bool DisconnectBlocks(int blocks)
+{
+    LOCK(cs_main);
+
+    CValidationState state;
+    const CChainParams& chainparams = Params();
+
+    LogPrintf("DisconnectBlocks -- Got command to replay %d blocks\n", blocks);
+    DisconnectedBlockTransactions disconnectpool;
+    for(int i = 0; i < blocks; i++) {
+        if(!DisconnectTip(state, chainparams, &disconnectpool)) {
+            // This is likely a fatal error, but keep the mempool consistent,
+            // just in case. Only remove from the mempool in this case.
+            UpdateMempoolForReorg(disconnectpool, false);
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void ReprocessBlocks(int nBlocks)
+{
+    LOCK(cs_main);
+
+    std::map<uint256, int64_t>::iterator it = mapRejectedBlocks.begin();
+    while(it != mapRejectedBlocks.end()){
+        //use a window twice as large as is usual for the nBlocks we want to reset
+        if((*it).second  > GetTime() - (nBlocks*60*5)) {
+            BlockMap::iterator mi = mapBlockIndex.find((*it).first);
+            if (mi != mapBlockIndex.end() && (*mi).second) {
+
+                CBlockIndex* pindex = (*mi).second;
+                LogPrintf("ReprocessBlocks -- %s\n", (*it).first.ToString());
+
+                ResetBlockFailureFlags(pindex);
+            }
+        }
+        ++it;
+    }
+
+    DisconnectBlocks(nBlocks);
+
+    CValidationState state;
+    ActivateBestChain(state, Params());
 }
 
 /** Context-dependent validity checks.
@@ -5430,6 +5531,16 @@ double GuessVerificationProgress(const ChainTxData& data, CBlockIndex *pindex) {
     }
 
     return pindex->nChainTx / fTxTotal;
+}
+
+bool GetBlockHash(uint256& hashRet, int nBlockHeight)
+{
+    LOCK(cs_main);
+    if(chainActive.Tip() == NULL) return false;
+    if(nBlockHeight < -1 || nBlockHeight > chainActive.Height()) return false;
+    if(nBlockHeight == -1) nBlockHeight = chainActive.Height();
+    hashRet = chainActive[nBlockHeight]->GetBlockHash();
+    return true;
 }
 
 /** BLAST START */
