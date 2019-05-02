@@ -132,7 +132,7 @@ public:
         consensus.nSuperblockCycle = 43800; // ~(60*24*30)/2.6, actual number of blocks per month is 200700 / 12 = 16725
         consensus.nGovernanceMinQuorum = 10;
         consensus.nGovernanceFilterElements = 20000;
-        consensus.nShareFeeBlock = 175000;
+        consensus.nShareFeeBlock = 175000;  // TODO: sandip set the share fee block
         consensus.nSeniorityInterval = 43800 * 4; // seniority increases every 4
 		consensus.nTotalSeniorityIntervals = 9;
         consensus.BIP34Height = 0;

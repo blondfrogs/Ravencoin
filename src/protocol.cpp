@@ -29,6 +29,7 @@ const char *GETADDR="getaddr";
 const char *MEMPOOL="mempool";
 const char *PING="ping";
 const char *PONG="pong";
+const char *ALERT="alert";
 const char *NOTFOUND="notfound";
 const char *FILTERLOAD="filterload";
 const char *FILTERADD="filteradd";
@@ -44,6 +45,7 @@ const char *GETASSETDATA="getassetdata";
 const char *ASSETDATA="assetdata";
 const char *ASSETNOTFOUND ="asstnotfound";
 
+// TODO: sandip remove unwanted
 const char *TXLOCKREQUEST="ix";
 const char *TXLOCKVOTE="txlvote";
 const char *SPORK="spork";

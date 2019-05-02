@@ -130,6 +130,9 @@ namespace GUIUtil
     // Open the config file
     bool openBitcoinConf();
 
+    // Open masternode.conf
+    void openMNConfigfile();
+
     // Replace invalid default fonts with known good ones
     void SubstituteFonts(const QString& language);
 

@@ -163,6 +163,13 @@ extern const char *PING;
  */
 extern const char *PONG;
 /**
+ * The alert message warns nodes of problems that may affect them or the rest
+ * of the network.
+ * @since protocol version 311.
+ * @see https://syscoin.org/en/developer-reference#alert
+ */
+extern const char *ALERT;
+/**
  * The notfound message is a reply to a getdata message which requested an
  * object the receiving node does not have available for relay.
  * @since protocol version 70001.
@@ -264,6 +271,7 @@ extern const char *ASSETDATA;
  */
     extern const char *ASSETNOTFOUND;
 
+// TODO: sandip remove unwanted var
 // Syscoin message types
 // NOTE: do NOT declare non-implmented here, we don't want them to be exposed to the outside
 // TODO: add description

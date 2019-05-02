@@ -47,6 +47,7 @@ int64_t GetStartupTime();
 extern bool fDebug;
 extern bool fMasternodeMode;
 extern bool fLiteMode;
+extern bool fUnitTest;
 
 static const bool DEFAULT_LOGTIMEMICROS = false;
 static const bool DEFAULT_LOGIPS        = false;

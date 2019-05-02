@@ -27,6 +27,7 @@
 #include "utilstrencodings.h"
 #include "validationinterface.h"
 #include "warnings.h"
+#include "spork.h"
 
 #include <memory>
 #include <stdint.h>
@@ -685,6 +686,37 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
     if (!pblocktemplate->vchCoinbaseCommitment.empty() && fSupportsSegwit) {
         result.push_back(Pair("default_witness_commitment", HexStr(pblocktemplate->vchCoinbaseCommitment.begin(), pblocktemplate->vchCoinbaseCommitment.end())));
     }
+
+    UniValue masternodeObj(UniValue::VOBJ);
+    if(pblocktemplate->txoutMasternode != CTxOut()) {
+        CTxDestination address1;
+        ExtractDestination(pblocktemplate->txoutMasternode.scriptPubKey, address1);
+        CBitcoinAddress address2(address1);
+        masternodeObj.push_back(Pair("payee", address2.ToString().c_str()));
+        masternodeObj.push_back(Pair("script", HexStr(pblocktemplate->txoutMasternode.scriptPubKey)));
+        masternodeObj.push_back(Pair("amount", pblocktemplate->txoutMasternode.nValue));
+    }
+
+    result.push_back(Pair("masternode", masternodeObj));
+    result.push_back(Pair("masternode_payments_started", pindexPrev->nHeight + 1 > consensusParams.nMasternodePaymentsStartBlock));
+    result.push_back(Pair("masternode_payments_enforced", sporkManager.IsSporkActive(SPORK_8_MASTERNODE_PAYMENT_ENFORCEMENT)));
+
+    UniValue superblockObjArray(UniValue::VARR);
+    if(pblocktemplate->voutSuperblock.size()) {
+        for (const auto& txout : pblocktemplate->voutSuperblock) {
+            UniValue entry(UniValue::VOBJ);
+            CTxDestination address1;
+            ExtractDestination(txout.scriptPubKey, address1);
+            CBitcoinAddress address2(address1);
+            entry.push_back(Pair("payee", address2.ToString().c_str()));
+            entry.push_back(Pair("script", HexStr(txout.scriptPubKey)));
+            entry.push_back(Pair("amount", txout.nValue));
+            superblockObjArray.push_back(entry);
+        }
+    }
+    result.push_back(Pair("superblock", superblockObjArray));
+    result.push_back(Pair("superblocks_started", pindexPrev->nHeight + 1 > consensusParams.nSuperblockStartBlock));
+    result.push_back(Pair("superblocks_enabled", sporkManager.IsSporkActive(SPORK_9_SUPERBLOCKS_ENABLED)));
 
     return result;
 }

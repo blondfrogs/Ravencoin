@@ -9,6 +9,7 @@
 #endif
 
 #include "utiltime.h"
+#include "tinyformat.h"
 
 #include <atomic>
 

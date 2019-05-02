@@ -27,6 +27,9 @@
 #include "util.h"
 #include "utilmoneystr.h"
 #include "validationinterface.h"
+#include "masternode-sync.h"
+#include "masternode-payments.h"
+#include "spork.h"
 
 #include "wallet/wallet.h"
 //#include "wallet/rpcwallet.h"
@@ -182,9 +185,26 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     coinbaseTx.vin[0].prevout.SetNull();
     coinbaseTx.vout.resize(1);
     coinbaseTx.vout[0].scriptPubKey = scriptPubKeyIn;
-    // TODO: sandip add code to support masternode and dev payment
-    //coinbaseTx.vout[0].nValue = nFees + GetBlockSubsidy(nHeight, chainparams.GetConsensus());
+    
+    CAmount nTotalRewardWithMasternodes;
+	CAmount blockReward = GetBlockSubsidy(nHeight, Params().GetConsensus(), nTotalRewardWithMasternodes);
+
+    coinbaseTx.vout[0].nValue = nFees + blockReward;
     coinbaseTx.vin[0].scriptSig = CScript() << nHeight << OP_0;
+    if (!chainparams.MineBlocksOnDemand() && nHeight > 1 && !IsInitialBlockDownload() && !fUnitTest) {
+		if (masternodeSync.IsFailed()) {
+			throw std::runtime_error("Masternode information has failed to sync, please restart your node!");
+		}
+		if (!masternodeSync.IsSynced()) {
+			throw std::runtime_error("Masternode information has not synced, please wait until it finishes before mining!");
+		}
+	}
+    // Update coinbase transaction with additional info about masternode and governance payments,
+    // get some info back to pass to getblocktemplate
+    FillBlockPayments(coinbaseTx, nHeight, blockReward, nFees, pblocktemplate->txoutMasternode, pblocktemplate->voutSuperblock);
+    // LogPrintf("CreateNewBlock -- nBlockHeight %d blockReward %lld txoutMasternode %s coinbaseTx %s",
+    //             nHeight, blockReward, pblocktemplate->txoutMasternode.ToString(), coinbaseTx.ToString());
+
     pblock->vtx[0] = MakeTransactionRef(std::move(coinbaseTx));
     pblocktemplate->vchCoinbaseCommitment = GenerateCoinbaseCommitment(*pblock, pindexPrev, chainparams.GetConsensus());
     pblocktemplate->vTxFees[0] = -nFees;

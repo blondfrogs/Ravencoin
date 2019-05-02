@@ -1669,8 +1669,7 @@ void CMasternodeMan::WarnMasternodeDaemonUpdates()
     // notify GetWarnings(), called by Qt and the JSON-RPC code to warn the user
     SetMiscWarning(strWarning);
     // trigger GUI update
-    // TODO: sandip uncomment below line
-    //uiInterface.NotifyAlertChanged(SerializeHash(strWarning), CT_NEW);
+    uiInterface.NotifyAlertChanged(SerializeHash(strWarning), CT_NEW);
     // trigger cmd-line notification
     CAlert::Notify(strWarning);
 

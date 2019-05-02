@@ -29,7 +29,9 @@ struct CBlockTemplate
     CBlock block;
     std::vector<CAmount> vTxFees;
     std::vector<int64_t> vTxSigOpsCost;
-    std::vector<unsigned char> vchCoinbaseCommitment;
+    std::vector<unsigned char> vchCoinbaseCommitment; // TODO: sandip check these tree parameters
+    CTxOut txoutMasternode; // masternode payment
+    std::vector<CTxOut> voutSuperblock; // superblock payment
 };
 
 // Container for tracking updates to ancestor feerate as we include (parent)

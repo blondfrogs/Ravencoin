@@ -43,6 +43,8 @@
 #include "versionbits.h"
 #include "warnings.h"
 #include "net.h"
+#include "masternode-payments.h"
+#include "alert.h"
 
 #include <atomic>
 #include <sstream>
@@ -1337,7 +1339,7 @@ bool IsInitialSyncSpeedUp()
 
 CBlockIndex *pindexBestForkTip = nullptr, *pindexBestForkBase = nullptr;
 
-static void AlertNotify(const std::string& strMessage)
+/*static void AlertNotify(const std::string& strMessage)
 {
     uiInterface.NotifyAlertChanged();
     std::string strCmd = gArgs.GetArg("-alertnotify", "");
@@ -1352,7 +1354,7 @@ static void AlertNotify(const std::string& strMessage)
     boost::replace_all(strCmd, "%s", safeStatus);
 
     boost::thread t(runCommand, strCmd); // thread runs free
-}
+}*/
 
 static void CheckForkWarningConditions()
 {
@@ -1373,7 +1375,7 @@ static void CheckForkWarningConditions()
         {
             std::string warning = std::string("'Warning: Large-work fork detected, forking after block ") +
                 pindexBestForkBase->phashBlock->ToString() + std::string("'");
-            AlertNotify(warning);
+            CAlert::Notify(warning);
         }
         if (pindexBestForkTip && pindexBestForkBase)
         {
@@ -2591,13 +2593,21 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     int64_t nTime3 = GetTimeMicros(); nTimeConnect += nTime3 - nTime2;
     LogPrint(BCLog::BENCH, "      - Connect %u transactions: %.2fms (%.3fms/tx, %.3fms/txin) [%.2fs (%.2fms/blk)]\n", (unsigned)block.vtx.size(), MILLI * (nTime3 - nTime2), MILLI * (nTime3 - nTime2) / block.vtx.size(), nInputs <= 1 ? 0 : MILLI * (nTime3 - nTime2) / (nInputs-1), nTimeConnect * MICRO, nTimeConnect * MILLI / nBlocksTotal);
 
-    // TODO: sandip correct GetBlockSubsidy call
-    CAmount blockReward = nFees; //+ GetBlockSubsidy(pindex->nHeight, chainparams.GetConsensus());
-    if (block.vtx[0]->GetValueOut() > blockReward)
-        return state.DoS(100,
-                         error("ConnectBlock(): coinbase pays too much (actual=%d vs limit=%d)",
-                               block.vtx[0]->GetValueOut(), blockReward),
-                               REJECT_INVALID, "bad-cb-amount");
+    CAmount nTotalRewardWithMasternodes;
+    CAmount blockReward = nFees + GetBlockSubsidy(pindex->nHeight, chainparams.GetConsensus(), nTotalRewardWithMasternodes);
+    if (!IsBlockPayeeValid(*block.vtx[0], pindex->nHeight, blockReward, nFees, nTotalRewardWithMasternodes)) {
+		{
+			LOCK(cs_main);
+			mapRejectedBlocks.insert(std::make_pair(block.GetHash(), GetTime()));
+		}
+		return state.DoS(0, error("ConnectBlock(SYS): couldn't find masternode or superblock payments"),
+			REJECT_INVALID, "bad-cb-payee");
+	}
+
+    std::string strError = "";
+    if (!IsBlockValueValid(block, pindex->nHeight, nTotalRewardWithMasternodes, nFees, strError)) {
+        return state.DoS(0, error("ConnectBlock(SYS): %s", strError), REJECT_INVALID, "bad-cb-amount");
+    }
 
     if (!control.Wait())
         return state.DoS(100, error("%s: CheckQueue failed", __func__), REJECT_INVALID, "block-validation-failed");
@@ -2860,7 +2870,7 @@ static void DoWarning(const std::string& strWarning)
     static bool fWarned = false;
     SetMiscWarning(strWarning);
     if (!fWarned) {
-        AlertNotify(strWarning);
+        CAlert::Notify(strWarning);
         fWarned = true;
     }
 }

@@ -222,6 +222,7 @@ libbitcoin_server_a_SOURCES = \
   activemasternode.cpp \
   addrdb.cpp \
   addrman.cpp \
+  alert.cpp \
   auxpow/auxpow.cpp \
   bloom.cpp \
   blockencodings.cpp \

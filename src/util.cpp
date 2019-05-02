@@ -101,9 +101,11 @@ const char *const BITCOIN_PID_FILENAME = "blastd.pid";
 
 ArgsManager gArgs;
 bool fDebug = false;
+bool fLiteMode = false;
+bool fMasternodeMode = false;
 bool fPrintToConsole = false;
 bool fPrintToDebugLog = true;
-
+bool fUnitTest = false;
 bool fLogTimestamps = DEFAULT_LOGTIMESTAMPS;
 bool fLogTimeMicros = DEFAULT_LOGTIMEMICROS;
 bool fLogIPs = DEFAULT_LOGIPS;
