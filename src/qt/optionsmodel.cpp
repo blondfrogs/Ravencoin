@@ -20,6 +20,7 @@
 #include "txdb.h" // for -dbcache defaults
 #include "intro.h" 
 #include "platformstyle.h"
+#include "masternodeconfig.h"
 
 #ifdef ENABLE_WALLET
 #include "wallet/wallet.h"
@@ -119,6 +120,9 @@ void OptionsModel::Init(bool resetSettings)
         settings.setValue("bSpendZeroConfChange", true);
     if (!gArgs.SoftSetBoolArg("-spendzeroconfchange", settings.value("bSpendZeroConfChange").toBool()))
         addOverriddenOption("-spendzeroconfchange");
+    if (!settings.contains("fShowMasternodesTab"))
+        settings.setValue("fShowMasternodesTab", masternodeConfig.getCount());
+ 
 #endif
 
     // Network
@@ -264,6 +268,8 @@ QVariant OptionsModel::data(const QModelIndex & index, int role) const
 #ifdef ENABLE_WALLET
         case SpendZeroConfChange:
             return settings.value("bSpendZeroConfChange");
+        case ShowMasternodesTab:
+            return settings.value("fShowMasternodesTab");
 #endif
         case DisplayUnit:
             return nDisplayUnit;
@@ -388,6 +394,12 @@ bool OptionsModel::setData(const QModelIndex & index, const QVariant & value, in
         case SpendZeroConfChange:
             if (settings.value("bSpendZeroConfChange") != value) {
                 settings.setValue("bSpendZeroConfChange", value);
+                setRestartRequired(true);
+            }
+            break;
+        case ShowMasternodesTab:
+            if (settings.value("fShowMasternodesTab") != value) {
+                settings.setValue("fShowMasternodesTab", value);
                 setRestartRequired(true);
             }
             break;

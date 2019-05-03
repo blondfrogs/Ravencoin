@@ -6,7 +6,7 @@
 #include "qrdialog.h"
 #include "ui_qrdialog.h"
 
-#include "syscoinunits.h"
+#include "bitcoinunits.h"
 #include "guiconstants.h"
 #include "guiutil.h"
 #include "optionsmodel.h"
@@ -23,7 +23,7 @@
 #endif
 
 #if defined(HAVE_CONFIG_H)
-#include "config/syscoin-config.h" /* for USE_QRCODE */
+#include "config/bitcoin-config.h" /* for USE_QRCODE */
 #endif
 
 #ifdef USE_QRCODE

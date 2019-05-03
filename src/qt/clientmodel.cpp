@@ -21,6 +21,9 @@
 #include "util.h"
 #include "warnings.h"
 
+#include "masternodeman.h"
+#include "masternode-sync.h"
+
 #include <stdint.h>
 
 #include <QDebug>
@@ -46,6 +49,11 @@ ClientModel::ClientModel(OptionsModel *_optionsModel, QObject *parent) :
     connect(pollTimer, SIGNAL(timeout()), this, SLOT(updateTimer()));
     pollTimer->start(MODEL_UPDATE_DELAY);
 
+    pollMnTimer = new QTimer(this);
+    connect(pollMnTimer, SIGNAL(timeout()), this, SLOT(updateMnTimer()));
+    // no need to update as frequent as data for balances/txes/blocks
+    pollMnTimer->start(MODEL_UPDATE_DELAY * 4);
+    
     subscribeToCoreSignals();
 }
 
@@ -68,6 +76,18 @@ int ClientModel::getNumConnections(unsigned int flags) const
     if(g_connman)
          return g_connman->GetNodeCount(connections);
     return 0;
+}
+
+QString ClientModel::getMasternodeCountString() const
+{
+    // return tr("Total: %1 (PS compatible: %2 / Enabled: %3) (IPv4: %4, IPv6: %5, TOR: %6)").arg(QString::number((int)mnodeman.size()))
+    return tr("Total: %1 (PS compatible: %2 / Enabled: %3)")
+            .arg(QString::number((int)mnodeman.size()))
+            //.arg(QString::number((int)mnodeman.CountEnabled(MIN_PRIVATESEND_PEER_PROTO_VERSION)))
+            .arg(QString::number((int)mnodeman.CountEnabled()));
+            // .arg(QString::number((int)mnodeman.CountByIP(NET_IPV4)))
+            // .arg(QString::number((int)mnodeman.CountByIP(NET_IPV6)))
+            // .arg(QString::number((int)mnodeman.CountByIP(NET_TOR)));
 }
 
 int ClientModel::getNumBlocks() const
@@ -153,6 +173,18 @@ void ClientModel::updateTimer()
     // the following calls will acquire the required lock
     Q_EMIT mempoolSizeChanged(getMempoolSize(), getMempoolDynamicUsage());
     Q_EMIT bytesChanged(getTotalBytesRecv(), getTotalBytesSent());
+}
+
+void ClientModel::updateMnTimer()
+{
+    QString newMasternodeCountString = getMasternodeCountString();
+
+    if (cachedMasternodeCountString != newMasternodeCountString)
+    {
+        cachedMasternodeCountString = newMasternodeCountString;
+
+        Q_EMIT strMasternodesChanged(cachedMasternodeCountString);
+    }
 }
 
 void ClientModel::updateNumConnections(int numConnections)

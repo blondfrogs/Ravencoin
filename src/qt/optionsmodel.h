@@ -47,6 +47,7 @@ public:
         ThreadsScriptVerif,     // int
         DatabaseCache,          // int
         SpendZeroConfChange,    // bool
+        ShowMasternodesTab,     // bool
         Listen,                 // bool
         CustomFeeFeatures,      // bool
         DarkModeEnabled,        // bool

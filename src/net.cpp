@@ -22,6 +22,7 @@
 #include "scheduler.h"
 #include "ui_interface.h"
 #include "utilstrencodings.h"
+#include "masternode-sync.h"
 
 #ifdef WIN32
 #include <string.h>
@@ -1129,6 +1130,13 @@ void CConnman::AcceptConnection(const ListenSocket& hListenSocket) {
             CloseSocket(hSocket);
             return;
         }
+    }
+
+    // don't accept incoming connections until fully synced
+    if(fMasternodeMode && !masternodeSync.IsSynced()) {
+        LogPrintf("AcceptConnection -- masternode is not synced yet, skipping inbound connection attempt\n");
+        CloseSocket(hSocket);
+        return;
     }
 
     NodeId id = GetNewNodeId();

@@ -59,6 +59,24 @@ std::string HelpRequiringPassphrase(CWallet * const pwallet)
         : "";
 }
 
+void EnsureWalletIsUnlocked()
+{
+    if (vpwallets[0]->IsLocked())
+        throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please enter the wallet passphrase with walletpassphrase first.");
+}
+
+bool EnsureWalletIsAvailable(bool avoidException)
+{
+    if (!vpwallets[0])
+    {
+        if (!avoidException)
+            throw JSONRPCError(RPC_METHOD_NOT_FOUND, "Method not found (disabled)");
+        else
+            return false;
+    }
+    return true;
+}
+
 bool EnsureWalletIsAvailable(CWallet * const pwallet, bool avoidException)
 {
     if (pwallet) return true;

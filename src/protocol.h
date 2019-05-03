@@ -453,6 +453,7 @@ class CInv
 public:
     CInv();
     CInv(int typeIn, const uint256& hashIn);
+    bool IsKnownType() const;
 
     ADD_SERIALIZE_METHODS;
 

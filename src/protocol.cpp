@@ -109,8 +109,62 @@ const static std::string allNetMessageTypes[] = {
     NetMsgType::BLOCKTXN,
     NetMsgType::GETASSETDATA,
     NetMsgType::ASSETDATA,
-    NetMsgType::ASSETNOTFOUND
+    NetMsgType::ASSETNOTFOUND,
+
+    // Syscoin message types
+    // NOTE: do NOT include non-implmented here, we want them to be "Unknown command" in ProcessMessage()
+    NetMsgType::TXLOCKREQUEST,
+    NetMsgType::TXLOCKVOTE,
+    NetMsgType::SPORK,
+    NetMsgType::GETSPORKS,
+    NetMsgType::MASTERNODEPAYMENTVOTE,
+    // NetMsgType::MASTERNODEPAYMENTBLOCK, // there is no message for this, only inventory
+    NetMsgType::MASTERNODEPAYMENTSYNC,
+    NetMsgType::MNANNOUNCE,
+    NetMsgType::MNPING,
+    NetMsgType::DSACCEPT,
+    NetMsgType::DSVIN,
+    NetMsgType::DSFINALTX,
+    NetMsgType::DSSIGNFINALTX,
+    NetMsgType::DSCOMPLETE,
+    NetMsgType::DSSTATUSUPDATE,
+    NetMsgType::DSTX,
+    NetMsgType::DSQUEUE,
+    NetMsgType::DSEG,
+    NetMsgType::SYNCSTATUSCOUNT,
+    NetMsgType::MNGOVERNANCESYNC,
+    NetMsgType::MNGOVERNANCEOBJECT,
+    NetMsgType::MNGOVERNANCEOBJECTVOTE,
+    NetMsgType::MNVERIFY,
 };
+
+static const char* ppszTypeName[] =
+{
+    "ERROR", // Should never occur
+    NetMsgType::TX,
+    NetMsgType::BLOCK,
+    "filtered block", // Should never occur
+    // Syscoin message types
+    // NOTE: include non-implmented here, we must keep this list in sync with enum in protocol.h
+    NetMsgType::TXLOCKREQUEST,
+    NetMsgType::TXLOCKVOTE,
+    NetMsgType::SPORK,
+    NetMsgType::MASTERNODEPAYMENTVOTE,
+    NetMsgType::MASTERNODEPAYMENTBLOCK, // reusing, was MNSCANERROR previousely, was NOT used in 12.0, we need this for inv
+    NetMsgType::MNBUDGETVOTE, // deprecated since 12.1
+    NetMsgType::MNBUDGETPROPOSAL, // deprecated since 12.1
+    NetMsgType::MNBUDGETFINAL, // deprecated since 12.1
+    NetMsgType::MNBUDGETFINALVOTE, // deprecated since 12.1
+    NetMsgType::MNQUORUM, // not implemented
+    NetMsgType::MNANNOUNCE,
+    NetMsgType::MNPING,
+    NetMsgType::DSTX,
+    NetMsgType::MNGOVERNANCEOBJECT,
+    NetMsgType::MNGOVERNANCEOBJECTVOTE,
+    NetMsgType::MNVERIFY,
+    "compact block", // Should never occur
+};
+
 const static std::vector<std::string> allNetMessageTypesVec(allNetMessageTypes, allNetMessageTypes+ARRAYLEN(allNetMessageTypes));
 
 CMessageHeader::CMessageHeader(const MessageStartChars& pchMessageStartIn)
@@ -195,6 +249,11 @@ CInv::CInv(int typeIn, const uint256& hashIn) : type(typeIn), hash(hashIn) {}
 bool operator<(const CInv& a, const CInv& b)
 {
     return (a.type < b.type || (a.type == b.type && a.hash < b.hash));
+}
+
+bool CInv::IsKnownType() const
+{
+    return (type >= 1 && type < (int)ARRAYLEN(ppszTypeName));
 }
 
 std::string CInv::GetCommand() const
