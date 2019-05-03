@@ -34,7 +34,7 @@ extern CCriticalSection cs_mapMasternodePayeeVotes;
 extern CMasternodePayments mnpayments;
 
 /// TODO: all 4 functions do not belong here really, they should be refactored/moved somewhere (main.cpp ?)
-bool IsBlockValueValid(const CBlock& block, int nBlockHeight,  const CAmount &blockReward, const CAmount &nFee, std::string& strErrorRet);
+bool IsBlockValueValid(const CBlock& block, int nBlockHeight, const CAmount &blockReward, const CAmount &nFee, std::string& strErrorRet);
 bool IsBlockPayeeValid(const CTransaction& txNew, int nBlockHeight, const CAmount &blockReward, const CAmount& fees, CAmount& nTotalRewardWithMasternodes);
 std::string GetRequiredPaymentsString(int nBlockHeight);
 
@@ -219,7 +219,7 @@ public:
     int GetMinMasternodePaymentsProto() const;
     void ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman& connman);
     std::string GetRequiredPaymentsString(int nBlockHeight) const;
-    bool CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockHeight, CAmount fees, BlockSubsidies& subsidies, CTxOut& masternodeTxOut);
+    bool FillBlockPayee(CMutableTransaction& txNew, int nBlockHeight, CAmount fees, BlockSubsidies& subsidies, CTxOut& masternodeTxOut) const;
     std::string ToString() const;
 
     int GetBlockCount() const { return mapMasternodeBlocks.size(); }

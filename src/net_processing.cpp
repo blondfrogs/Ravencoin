@@ -33,7 +33,6 @@
 #include "validationinterface.h"
 #include "auxpow/serialize.h"
 #include "spork.h"
-#include "governance.h"
 #include "masternode-payments.h"
 #include "masternode-sync.h"
 #include "masternodeman.h"

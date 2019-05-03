@@ -118,13 +118,6 @@ BITCOIN_CORE_H = \
   core_memusage.h \
   cuckoocache.h \
   flat-database.h \
-  governance.h \
-  governance-classes.h \
-  governance-exceptions.h \
-  governance-object.h \
-  governance-validators.h \
-  governance-vote.h \
-  governance-votedb.h \
   fs.h \
   httprpc.h \
   httpserver.h \
@@ -235,12 +228,6 @@ libbitcoin_server_a_SOURCES = \
   httpserver.cpp \
   init.cpp \
   dbwrapper.cpp \
-  governance.cpp \
-  governance-classes.cpp \
-  governance-object.cpp \
-  governance-validators.cpp \
-  governance-vote.cpp \
-  governance-votedb.cpp \
   masternode.cpp \
   masternode-payments.cpp \
   masternode-sync.cpp \

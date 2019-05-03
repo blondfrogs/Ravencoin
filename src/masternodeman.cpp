@@ -8,7 +8,6 @@
 #include "alert.h"
 #include "clientversion.h"
 #include "init.h"
-#include "governance.h"
 #include "masternode-payments.h"
 #include "masternode-sync.h"
 #include "masternodeman.h"

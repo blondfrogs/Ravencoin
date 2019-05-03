@@ -2598,11 +2598,10 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     int64_t nTime3 = GetTimeMicros(); nTimeConnect += nTime3 - nTime2;
     LogPrint(BCLog::BENCH, "      - Connect %u transactions: %.2fms (%.3fms/tx, %.3fms/txin) [%.2fs (%.2fms/blk)]\n", (unsigned)block.vtx.size(), MILLI * (nTime3 - nTime2), MILLI * (nTime3 - nTime2) / block.vtx.size(), nInputs <= 1 ? 0 : MILLI * (nTime3 - nTime2) / (nInputs-1), nTimeConnect * MICRO, nTimeConnect * MILLI / nBlocksTotal);
 
-    const BlockSubsidies& subsidies = GetBlockSubsidies(pindex->nHeight, chainparams.GetConsensus());
-    CAmount blockReward = nFees + subsidies.getTotal();
+    const auto& subsidies = GetBlockSubsidies(pindex->nHeight, chainparams.GetConsensus());
+    CAmount totalSubsidy = subsidies.getTotal();
 
-    // TODO (Mohak): check the use of the following function
-    if (!IsBlockPayeeValid(*block.vtx[0], pindex->nHeight, blockReward, nFees, subsidies.masternode)) {
+    if (!IsBlockPayeeValid(*block.vtx[0], pindex->nHeight, nFees, totalSubsidy)) {
 		{
 			LOCK(cs_main);
 			mapRejectedBlocks.insert(std::make_pair(block.GetHash(), GetTime()));
@@ -2612,8 +2611,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
 	}
 
     std::string strError = "";
-    // TODO (Mohak): check the use of the following function
-    if (!IsBlockValueValid(block, pindex->nHeight, subsidies.masternode, nFees, strError)) {
+    if (!IsBlockValueValid(block, pindex->nHeight, totalSubsidy, nFees, strError)) {
         return state.DoS(0, error("ConnectBlock(SYS): %s", strError), REJECT_INVALID, "bad-cb-amount");
     }
 
