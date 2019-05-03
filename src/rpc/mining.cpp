@@ -28,6 +28,8 @@
 #include "validationinterface.h"
 #include "warnings.h"
 #include "spork.h"
+#include "masternode-payments.h"
+#include "masternode-sync.h"
 
 #include <memory>
 #include <stdint.h>
@@ -455,6 +457,13 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
 
     if (IsInitialBlockDownload())
         throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "BLAST is downloading blocks...");
+
+    // when enforcement is on we need information about a masternode payee or otherwise our block is going to be orphaned by the network
+    CScript payee;
+    if (sporkManager.IsSporkActive(SPORK_8_MASTERNODE_PAYMENT_ENFORCEMENT)
+        && !masternodeSync.IsWinnersListSynced()
+        && !mnpayments.GetBlockPayee(chainActive.Height() + 1, payee))
+            throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "BLAST Core is downloading masternode winners...");
 
     static unsigned int nTransactionsUpdatedLast;
 

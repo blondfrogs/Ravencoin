@@ -562,6 +562,11 @@ void ArgsManager::ForceSetArg(const std::string &strArg, const std::string &strV
     mapMultiArgs[strArg] = {strValue};
 }
 
+void ArgsManager::ForceSetMultiArgs(const std::string& strArg, const std::vector<std::string>& values)
+{
+    LOCK(cs_args);
+    mapMultiArgs[strArg] = values;
+}
 
 static const int screenWidth = 79;
 static const int optIndent = 2;
