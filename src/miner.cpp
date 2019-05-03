@@ -185,11 +185,9 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     coinbaseTx.vin[0].prevout.SetNull();
     coinbaseTx.vout.resize(1);
     coinbaseTx.vout[0].scriptPubKey = scriptPubKeyIn;
-    
-    CAmount nTotalRewardWithMasternodes;
-	CAmount blockReward = GetBlockSubsidy(nHeight, Params().GetConsensus(), nTotalRewardWithMasternodes);
 
-    coinbaseTx.vout[0].nValue = nFees + blockReward;
+    // We'll add the miner reward after the call to FillBlockPayee
+    coinbaseTx.vout[0].nValue = nFees / 2;
     coinbaseTx.vin[0].scriptSig = CScript() << nHeight << OP_0;
     if (!chainparams.MineBlocksOnDemand() && nHeight > 1 && !IsInitialBlockDownload() && !fUnitTest) {
 		if (masternodeSync.IsFailed()) {
@@ -201,7 +199,18 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
 	}
     // Update coinbase transaction with additional info about masternode and governance payments,
     // get some info back to pass to getblocktemplate
-    FillBlockPayments(coinbaseTx, nHeight, blockReward, nFees, pblocktemplate->txoutMasternode, pblocktemplate->voutSuperblock);
+	BlockSubsidies subsidies;
+    if (FillBlockPayee(coinbaseTx, nHeight, subsidies, nFees, pblocktemplate->txoutMasternode)) {
+        // found a masternode!
+        coinbaseTx.vout[0].nValue += subsidies.miner;
+
+    } else {
+        // suitable masternode not found. give masternode's reward to the miner
+        coinbaseTx.vout[0].nValue += subsidies.miner + subsidies.masternode;
+    }
+
+    // TODO (Mohak): add a vout for dev
+
     // LogPrintf("CreateNewBlock -- nBlockHeight %d blockReward %lld txoutMasternode %s coinbaseTx %s",
     //             nHeight, blockReward, pblocktemplate->txoutMasternode.ToString(), coinbaseTx.ToString());
 

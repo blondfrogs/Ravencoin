@@ -1209,57 +1209,61 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus
     return true;
 }
 
-CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams, CAmount &nTotalRewardWithMasternodes, bool fSuperblockPartOnly, bool fMasternodePartOnly, unsigned int nStartHeight)
-{
-	if (nHeight == 0)
-		return 8.88*COIN;
-	if (nHeight == 1)
-	{
-		std::string chain = ChainNameFromCommandLine();
-		// SYSCOIN 3 snapshot
-		nTotalRewardWithMasternodes = 533000000 * COIN;
-		return nTotalRewardWithMasternodes;
-	}
-	CAmount nSubsidy = 38.5 * COIN;
-	int reductions = nHeight / consensusParams.nSubsidyHalvingInterval;
-	if (reductions >= 50) {
-		nTotalRewardWithMasternodes = 0;
-		return nTotalRewardWithMasternodes;
-	}
-	// Subsidy is cut in half every 525600 blocks which will occur approximately every year.
-	// yearly decline of production by 5% per year, projected ~888M coins max by year 2067+.
-	for (int i = 0; i < reductions; i++) {
-		nSubsidy -= nSubsidy / 20;
-	}
-	// Reduce the block reward of miners (allowing budget/superblocks)
-	const CAmount &nSuperblockPart = (nSubsidy*0.1);
+BlockSubsidies GetBlockSubsidies(int nHeight, const Consensus::Params& consensusParams, unsigned int nStartHeight) {
+    BlockSubsidy blockSubsidy;
+    CAmount totalSubsidy = GetTotalReward(nHeight, consensusParams);
+    if (totalSubsidy == 0) {
+        // return 0 initialized values
+        return blockSubsidy;
+    }
 
-	if (fSuperblockPartOnly)
-		return nSuperblockPart;
-	nSubsidy -= nSuperblockPart;
-	nTotalRewardWithMasternodes = nSubsidy;
-	if (fMasternodePartOnly) {
-		nSubsidy *= 0.75;
-		if (nHeight > 0 && nStartHeight > 0) {
-			unsigned int nDifferenceInBlocks = 0;
-			if (nHeight > (int)nStartHeight)
-				nDifferenceInBlocks = (nHeight - (int)nStartHeight);
-			// the first three intervals should discount rewards to incentivize bonding over longer terms (we add 3% premium every interval)
-			double fSubsidyAdjustmentPercentage = 0;
-			for (int i = 1; i <= consensusParams.nTotalSeniorityIntervals; i++) {
-				const unsigned int &nTotalSeniorityBlocks = i*consensusParams.nSeniorityInterval;
-				if (nDifferenceInBlocks <= nTotalSeniorityBlocks)
-					break;
-				fSubsidyAdjustmentPercentage += 0.03;
-			}
-			const CAmount &nChange = nSubsidy*fSubsidyAdjustmentPercentage;
-			nSubsidy += nChange;
-			nTotalRewardWithMasternodes += nChange;
-		}
+    blockSubsidy.miner = totalSubsidy * consensusParams.nMinerRewardPercent / 100;
+    blockSubsidy.dev = totalSubsidy * consensusParams.nDevRewardPercent / 100;
+    blockSubsidy.masternode = totalSubsidy * consensusParams.nMasternodeRewardPercent / 100;
+
+    // add masternode's seniority bonus
+    if (nHeight > 0 && nStartHeight > 0) {
+        unsigned int nDifferenceInBlocks = 0;
+        if (nHeight > (int)nStartHeight)
+            nDifferenceInBlocks = (nHeight - (int)nStartHeight);
+        // the first three intervals should discount rewards to incentivize bonding over longer terms (we add 3% premium every interval)
+        double fSubsidyAdjustmentPercentage = 0;
+        for (int i = 1; i <= consensusParams.nTotalSeniorityIntervals; i++) {
+            const unsigned int &nTotalSeniorityBlocks = i * consensusParams.nSeniorityInterval;
+            if (nDifferenceInBlocks <= nTotalSeniorityBlocks)
+                break;
+            fSubsidyAdjustmentPercentage += 0.03;
+        }
+        const CAmount &seniorityBonus = blockSubsidy.masternode * fSubsidyAdjustmentPercentage;
+        blockSubsidy.masternode += seniorityBonus;
+    }
+
+	return blockSubsidy;
+}
+
+CAmount GetTotalReward(int nHeight, const Consensus::Params& consensusParams) {
+    // 1       - 64        Reward = Block Height
+    // 65      - 640000    50
+    // 640001  - 1280000   25
+    // 1280001 - 1920000   12.5
+    // 1920001 - 2560000   6.25
+    // 2560001 - ..        Halving every 640000 blocks (~237 days)
+
+    if (nHeight == 0      ) { return    1 * COIN; }
+    if (nHeight <= 64     ) { return nHeight * COIN; }
+
+    CAmount totalSubsidy = 50 * COIN;
+	int halvings = nHeight / consensusParams.nSubsidyHalvingInterval;
+    // Force block reward to zero when right shift is undefined.
+	if (halvings >= 64) {
+        // Subsidy will be 0
+		return 0;
 	}
 
-	return nSubsidy;
+    // Subsidy is cut in half every 640000 blocks which will occur approximately every 237 days.
+    totalSubsidy >>= halvings;
 
+    return totalSubsidy;
 }
 
 bool IsInitialBlockDownload()
@@ -2594,9 +2598,11 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     int64_t nTime3 = GetTimeMicros(); nTimeConnect += nTime3 - nTime2;
     LogPrint(BCLog::BENCH, "      - Connect %u transactions: %.2fms (%.3fms/tx, %.3fms/txin) [%.2fs (%.2fms/blk)]\n", (unsigned)block.vtx.size(), MILLI * (nTime3 - nTime2), MILLI * (nTime3 - nTime2) / block.vtx.size(), nInputs <= 1 ? 0 : MILLI * (nTime3 - nTime2) / (nInputs-1), nTimeConnect * MICRO, nTimeConnect * MILLI / nBlocksTotal);
 
-    CAmount nTotalRewardWithMasternodes;
-    CAmount blockReward = nFees + GetBlockSubsidy(pindex->nHeight, chainparams.GetConsensus(), nTotalRewardWithMasternodes);
-    if (!IsBlockPayeeValid(*block.vtx[0], pindex->nHeight, blockReward, nFees, nTotalRewardWithMasternodes)) {
+    const BlockSubsidies& subsidies = GetBlockSubsidies(pindex->nHeight, chainparams.GetConsensus());
+    CAmount blockReward = nFees + subsidies.getTotal();
+
+    // TODO (Mohak): check the use of the following function
+    if (!IsBlockPayeeValid(*block.vtx[0], pindex->nHeight, blockReward, nFees, subsidies.masternode)) {
 		{
 			LOCK(cs_main);
 			mapRejectedBlocks.insert(std::make_pair(block.GetHash(), GetTime()));
@@ -2606,7 +2612,8 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
 	}
 
     std::string strError = "";
-    if (!IsBlockValueValid(block, pindex->nHeight, nTotalRewardWithMasternodes, nFees, strError)) {
+    // TODO (Mohak): check the use of the following function
+    if (!IsBlockValueValid(block, pindex->nHeight, subsidies.masternode, nFees, strError)) {
         return state.DoS(0, error("ConnectBlock(SYS): %s", strError), REJECT_INVALID, "bad-cb-amount");
     }
 

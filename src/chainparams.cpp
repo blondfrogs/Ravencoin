@@ -135,6 +135,11 @@ public:
         consensus.nShareFeeBlock = 175000;  // TODO: sandip set the share fee block
         consensus.nSeniorityInterval = 43800 * 4; // seniority increases every 4
 		consensus.nTotalSeniorityIntervals = 9;
+
+        consensus.nMinerRewardPercent = 80;
+        consensus.nMasternodeRewardPercent = 15;
+        consensus.nDevRewardPercent = 5;
+
         consensus.BIP34Height = 0;
         consensus.BIP34Hash = uint256S("0x000000001d03315ec89ac7895ad122e3ae9c3c92a2ec5f63000794cdd6c18095"); // Genesis hash (height 0)
 
@@ -294,6 +299,11 @@ public:
         consensus.nGovernanceFilterElements = 500;
         consensus.nShareFeeBlock = 1000;
         consensus.nSeniorityInterval = 60; // seniority increases every hour
+
+        consensus.nMinerRewardPercent = 80;
+        consensus.nMasternodeRewardPercent = 15;
+        consensus.nDevRewardPercent = 5;
+
 		consensus.nTotalSeniorityIntervals = 9;
         consensus.BIP34Height = 0;
         consensus.BIP34Hash = uint256S("0x0000000077062645faa71f32cd3fe871f4ca4f145d16781ff3ccaedf3ad2f1cd"); // Genesis hash (height 0)
@@ -508,6 +518,11 @@ public:
         consensus.nGovernanceFilterElements = 100;
         consensus.nShareFeeBlock = 1;
         consensus.nSeniorityInterval = 60; // seniority increases every hour
+
+        consensus.nMinerRewardPercent = 80;
+        consensus.nMasternodeRewardPercent = 15;
+        consensus.nDevRewardPercent = 5;
+
 		consensus.nTotalSeniorityIntervals = 9;
         consensus.BIP34Height = -1; // BIP34 has not necessarily activated on regtest
         consensus.BIP34Hash = uint256();

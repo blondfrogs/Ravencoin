@@ -63,6 +63,10 @@ struct Params {
    	int nSeniorityInterval;
 	int nTotalSeniorityIntervals;
 
+    int nMinerRewardPercent;
+    int nMasternodeRewardPercent;
+    int nDevRewardPercent;
+
     /** Block height and hash at which BIP34 becomes active */
     int BIP34Height;
     uint256 BIP34Hash;
