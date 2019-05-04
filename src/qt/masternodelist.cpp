@@ -122,7 +122,6 @@ void MasternodeList::StartAlias(std::string strAlias)
 
             if(fSuccess) {
                 strStatusHtml += "<br>Successfully started masternode.";
-                mnodeman.NotifyMasternodeUpdates(*g_connman);
             } else {
                 strStatusHtml += "<br>Failed to start masternode.<br>Error: " + strError;
             }
@@ -167,7 +166,6 @@ void MasternodeList::StartAll(std::string strCommand)
 
         if(fSuccess) {
             nCountSuccessful++;
-            mnodeman.NotifyMasternodeUpdates(*g_connman);
         } else {
             nCountFailed++;
             strFailedHtml += "\nFailed to start " + mne.getAlias() + ". Error: " + strError;

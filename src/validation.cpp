@@ -1210,16 +1210,16 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus
 }
 
 BlockSubsidies GetBlockSubsidies(int nHeight, const Consensus::Params& consensusParams, unsigned int nStartHeight) {
-    BlockSubsidy blockSubsidy;
+    BlockSubsidies subsidies;
     CAmount totalSubsidy = GetTotalReward(nHeight, consensusParams);
     if (totalSubsidy == 0) {
         // return 0 initialized values
-        return blockSubsidy;
+        return subsidies;
     }
 
-    blockSubsidy.miner = totalSubsidy * consensusParams.nMinerRewardPercent / 100;
-    blockSubsidy.dev = totalSubsidy * consensusParams.nDevRewardPercent / 100;
-    blockSubsidy.masternode = totalSubsidy * consensusParams.nMasternodeRewardPercent / 100;
+    subsidies.miner = totalSubsidy * consensusParams.nMinerRewardPercent / 100;
+    subsidies.dev = totalSubsidy * consensusParams.nDevRewardPercent / 100;
+    subsidies.masternode = totalSubsidy * consensusParams.nMasternodeRewardPercent / 100;
 
     // add masternode's seniority bonus
     if (nHeight > 0 && nStartHeight > 0) {
@@ -1234,11 +1234,11 @@ BlockSubsidies GetBlockSubsidies(int nHeight, const Consensus::Params& consensus
                 break;
             fSubsidyAdjustmentPercentage += 0.03;
         }
-        const CAmount &seniorityBonus = blockSubsidy.masternode * fSubsidyAdjustmentPercentage;
-        blockSubsidy.masternode += seniorityBonus;
+        const CAmount &seniorityBonus = subsidies.masternode * fSubsidyAdjustmentPercentage;
+        subsidies.masternode += seniorityBonus;
     }
 
-	return blockSubsidy;
+	return subsidies;
 }
 
 CAmount GetTotalReward(int nHeight, const Consensus::Params& consensusParams) {

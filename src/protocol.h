@@ -439,8 +439,8 @@ enum GetDataMsg
     MSG_MASTERNODE_ANNOUNCE = 14,
     MSG_MASTERNODE_PING = 15,
     MSG_DSTX = 16,
-    MSG_GOVERNANCE_OBJECT = 17,
-    MSG_GOVERNANCE_OBJECT_VOTE = 18,
+    // MSG_GOVERNANCE_OBJECT = 17,
+    // MSG_GOVERNANCE_OBJECT_VOTE = 18,
     MSG_MASTERNODE_VERIFY = 19,
     // Nodes may always request a MSG_CMPCT_BLOCK in a getdata, however,
     // MSG_CMPCT_BLOCK should not appear in any invs except as a part of getdata.

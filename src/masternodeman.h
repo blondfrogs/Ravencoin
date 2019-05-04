@@ -67,12 +67,6 @@ private:
     std::map<CService, std::pair<int64_t, CMasternodeVerification> > mapPendingMNV;
     CCriticalSection cs_mapPendingMNV;
 
-    /// Set when masternodes are added, cleared when CGovernanceManager is notified
-    bool fMasternodesAdded;
-
-    /// Set when masternodes are removed, cleared when CGovernanceManager is notified
-    bool fMasternodesRemoved;
-
     std::vector<uint256> vecDirtyGovernanceObjectHashes;
 
     int64_t nLastSentinelPingTime;
@@ -240,11 +234,6 @@ public:
 
     void WarnMasternodeDaemonUpdates();
 
-    /**
-     * Called to notify CGovernanceManager that the masternode index has been updated.
-     * Must be called while not holding the CMasternodeMan::cs mutex
-     */
-    void NotifyMasternodeUpdates(CConnman& connman);
 	unsigned int GetStartHeight(const masternode_info_t& mnInfo);
 
     void DoMaintenance(CConnman &connman);

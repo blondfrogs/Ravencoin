@@ -66,8 +66,6 @@ CMasternodeMan::CMasternodeMan():
     mMnbRecoveryRequests(),
     mMnbRecoveryGoodReplies(),
     listScheduledMnbRequestConnections(),
-    fMasternodesAdded(false),
-    fMasternodesRemoved(false),
     vecDirtyGovernanceObjectHashes(),
     nLastSentinelPingTime(0),
     mapSeenMasternodeBroadcast(),
@@ -83,7 +81,6 @@ bool CMasternodeMan::Add(CMasternode &mn)
 
     LogPrint("masternode", "CMasternodeMan::Add -- Adding new Masternode: addr=%s, %i now\n", mn.addr.ToString(), size() + 1);
     mapMasternodes[mn.outpoint] = mn;
-    fMasternodesAdded = true;
     return true;
 }
 
@@ -200,7 +197,6 @@ void CMasternodeMan::CheckAndRemove(CConnman& connman)
                 // and finally remove it from the list
                 it->second.FlagGovernanceItemsAsDirty();
                 mapMasternodes.erase(it++);
-                fMasternodesRemoved = true;
             } else {
                 bool fAsk = (nAskForMnbRecovery > 0) &&
                             masternodeSync.IsSynced() &&
@@ -345,10 +341,6 @@ void CMasternodeMan::CheckAndRemove(CConnman& connman)
         }
 
         LogPrintf("CMasternodeMan::CheckAndRemove -- %s\n", ToString());
-    }
-
-    if(fMasternodesRemoved) {
-        NotifyMasternodeUpdates(connman);
     }
 }
 
@@ -812,10 +804,6 @@ void CMasternodeMan::ProcessMessage(CNode* pfrom, const std::string& strCommand,
             connman.AddNewAddress(CAddress(mnb.addr, NODE_NETWORK), pfrom->addr, 2*60*60);
         } else if(nDos > 0) {
             Misbehaving(pfrom->GetId(), nDos);
-        }
-
-        if(fMasternodesAdded) {
-            NotifyMasternodeUpdates(connman);
         }
     } else if (strCommand == NetMsgType::MNPING) { //Masternode Ping
 
@@ -1675,29 +1663,6 @@ void CMasternodeMan::WarnMasternodeDaemonUpdates()
     fWarned = true;
 }
 
-void CMasternodeMan::NotifyMasternodeUpdates(CConnman& connman)
-{
-    // Avoid double locking
-    bool fMasternodesAddedLocal = false;
-    bool fMasternodesRemovedLocal = false;
-    {
-        LOCK(cs);
-        fMasternodesAddedLocal = fMasternodesAdded;
-        fMasternodesRemovedLocal = fMasternodesRemoved;
-    }
-
-    if(fMasternodesAddedLocal) {
-        governance.CheckMasternodeOrphanObjects(connman);
-        governance.CheckMasternodeOrphanVotes(connman);
-    }
-    if(fMasternodesRemovedLocal) {
-        governance.UpdateCachesAndClean();
-    }
-
-    LOCK(cs);
-    fMasternodesAdded = false;
-    fMasternodesRemoved = false;
-}
 unsigned int CMasternodeMan::GetStartHeight(const masternode_info_t& mnInfo) {
 	int nHeight = GetUTXOHeight(mnInfo.outpoint);
 	if (nHeight > 0)

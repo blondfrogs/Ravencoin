@@ -33,9 +33,9 @@ extern CCriticalSection cs_mapMasternodePayeeVotes;
 
 extern CMasternodePayments mnpayments;
 
-/// TODO: all 4 functions do not belong here really, they should be refactored/moved somewhere (main.cpp ?)
+/// TODO: all 3 functions do not belong here really, they should be refactored/moved somewhere (main.cpp ?)
 bool IsBlockValueValid(const CBlock& block, int nBlockHeight, const CAmount &blockReward, const CAmount &nFee, std::string& strErrorRet);
-bool IsBlockPayeeValid(const CTransaction& txNew, int nBlockHeight, const CAmount &blockReward, const CAmount& fees, CAmount& nTotalRewardWithMasternodes);
+bool IsBlockPayeeValid(const CTransaction& txNew, int nBlockHeight, const CAmount &fee, CAmount& nTotalRewardWithMasternodes);
 std::string GetRequiredPaymentsString(int nBlockHeight);
 
 class CMasternodePayee

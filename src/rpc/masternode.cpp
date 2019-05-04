@@ -256,7 +256,6 @@ UniValue masternode(const JSONRPCRequest& request)
                 if(!fResult) {
                     statusObj.push_back(Pair("errorMessage", strError));
                 }
-                mnodeman.NotifyMasternodeUpdates(*g_connman);
                 break;
             }
         }
@@ -321,7 +320,6 @@ UniValue masternode(const JSONRPCRequest& request)
 
             resultsObj.push_back(Pair("status", statusObj));
         }
-        mnodeman.NotifyMasternodeUpdates(*g_connman);
 
         UniValue returnObj(UniValue::VOBJ);
         returnObj.push_back(Pair("overall", strprintf("Successfully started %d masternodes, failed to start %d, total %d", nSuccessful, nFailed, nSuccessful + nFailed)));
@@ -845,7 +843,6 @@ UniValue masternodebroadcast(const JSONRPCRequest& request)
             bool fResult;
             if (mnb.CheckSignature(nDos)) {
                 fResult = mnodeman.CheckMnbAndUpdateMasternodeList(NULL, mnb, nDos, *g_connman);
-                mnodeman.NotifyMasternodeUpdates(*g_connman);
             } else fResult = false;
 
             if(fResult) {
