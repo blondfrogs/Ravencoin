@@ -136,9 +136,10 @@ public:
         consensus.nSeniorityInterval = 43800 * 4; // seniority increases every 4
 		consensus.nTotalSeniorityIntervals = 9;
 
-        consensus.nMinerRewardPercent = 80;
-        consensus.nMasternodeRewardPercent = 15;
-        consensus.nDevRewardPercent = 5;
+        consensus.minerRewardPercent = 80;
+        consensus.masternodeRewardPercent = 15;
+        consensus.devRewardPercent = 5;
+        consensus.devWalletAddress = "8QD1FZNN41npesU92uRAs4ZBCZ2ccviFP7";
 
         consensus.BIP34Height = 0;
         consensus.BIP34Hash = uint256S("0x000000001d03315ec89ac7895ad122e3ae9c3c92a2ec5f63000794cdd6c18095"); // Genesis hash (height 0)
@@ -300,9 +301,10 @@ public:
         consensus.nShareFeeBlock = 1000;
         consensus.nSeniorityInterval = 60; // seniority increases every hour
 
-        consensus.nMinerRewardPercent = 80;
-        consensus.nMasternodeRewardPercent = 15;
-        consensus.nDevRewardPercent = 5;
+        consensus.minerRewardPercent = 80;
+        consensus.masternodeRewardPercent = 15;
+        consensus.devRewardPercent = 5;
+        consensus.devWalletAddress = "8QD1FZNN41npesU92uRAs4ZBCZ2ccviFP7";
 
 		consensus.nTotalSeniorityIntervals = 9;
         consensus.BIP34Height = 0;
@@ -519,9 +521,10 @@ public:
         consensus.nShareFeeBlock = 1;
         consensus.nSeniorityInterval = 60; // seniority increases every hour
 
-        consensus.nMinerRewardPercent = 80;
-        consensus.nMasternodeRewardPercent = 15;
-        consensus.nDevRewardPercent = 5;
+        consensus.minerRewardPercent = 80;
+        consensus.masternodeRewardPercent = 15;
+        consensus.devRewardPercent = 5;
+        consensus.devWalletAddress = "8QD1FZNN41npesU92uRAs4ZBCZ2ccviFP7";
 
 		consensus.nTotalSeniorityIntervals = 9;
         consensus.BIP34Height = -1; // BIP34 has not necessarily activated on regtest
@@ -635,8 +638,8 @@ public:
         genesis = CreateGenesisBlock(1487000020, 0, 0x207fffff, 1, 1 * COIN);
         consensus.hashGenesisBlock = genesis.GetHash();
 
-        assert(consensus.hashGenesisBlock == uint256S("0x7d861dfe1447cb5ef5d2621a755a517d42a74980744c9996f805b4a4a3d71e91"));
-        assert(genesis.hashMerkleRoot == uint256S("0x037dae4600eea8850fba5fb5146897f57c6f7e0d512cc3875ca8d8f1104b46ad"));
+        assert(consensus.hashGenesisBlock == uint256S("0x487b10aae0cf4ce77082d200cb0dc0c7d90969b72af11a4bd0458d232b566c98"));
+        assert(genesis.hashMerkleRoot == uint256S("0xccc9ed60efe7224e7ea404369d246390d1b8f09f33268dcb6d66f3c5707232ae"));
 
         vFixedSeeds.clear(); //!< Regtest mode doesn't have any fixed seeds.
         vSeeds.clear();      //!< Regtest mode doesn't have any DNS seeds.

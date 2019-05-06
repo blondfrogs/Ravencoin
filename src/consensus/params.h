@@ -63,9 +63,10 @@ struct Params {
    	int nSeniorityInterval;
 	int nTotalSeniorityIntervals;
 
-    int nMinerRewardPercent;
-    int nMasternodeRewardPercent;
-    int nDevRewardPercent;
+    int minerRewardPercent;
+    int masternodeRewardPercent;
+    int devRewardPercent;
+    std::string devWalletAddress;
 
     /** Block height and hash at which BIP34 becomes active */
     int BIP34Height;

@@ -1217,9 +1217,9 @@ BlockSubsidies GetBlockSubsidies(int nHeight, const Consensus::Params& consensus
         return subsidies;
     }
 
-    subsidies.miner = totalSubsidy * consensusParams.nMinerRewardPercent / 100;
-    subsidies.dev = totalSubsidy * consensusParams.nDevRewardPercent / 100;
-    subsidies.masternode = totalSubsidy * consensusParams.nMasternodeRewardPercent / 100;
+    subsidies.miner = totalSubsidy * consensusParams.minerRewardPercent / 100;
+    subsidies.dev = totalSubsidy * consensusParams.devRewardPercent / 100;
+    subsidies.masternode = totalSubsidy * consensusParams.masternodeRewardPercent / 100;
 
     // add masternode's seniority bonus
     if (nHeight > 0 && nStartHeight > 0) {

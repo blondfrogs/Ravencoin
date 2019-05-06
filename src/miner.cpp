@@ -30,6 +30,7 @@
 #include "masternode-sync.h"
 #include "masternode-payments.h"
 #include "spork.h"
+#include "base58.h"
 
 #include "wallet/wallet.h"
 //#include "wallet/rpcwallet.h"
@@ -208,10 +209,13 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
         coinbaseTx.vout[0].nValue = subsidies.miner + subsidies.masternode + nFees;
     }
 
-    // TODO (Mohak): add a vout for dev
+    // add dev reward
+    CScript devScript = GetScriptForDestination(CBitcoinAddress(chainparams.GetConsensus().devWalletAddress).Get());
+    CTxOut devOut(subsidies.dev, devScript);
+    coinbaseTx.vout.push_back(devOut);
 
-    // LogPrintf("CreateNewBlock -- nBlockHeight %d blockReward %lld txoutMasternode %s coinbaseTx %s",
-    //             nHeight, blockReward, pblocktemplate->txoutMasternode.ToString(), coinbaseTx.ToString());
+    LogPrintf("CreateNewBlock -- nBlockHeight %d blockReward %lld txoutMasternode %s coinbaseTx %s",
+                nHeight, subsidies.getTotal(), pblocktemplate->txoutMasternode.ToString(), coinbaseTx.ToString());
 
     pblock->vtx[0] = MakeTransactionRef(std::move(coinbaseTx));
     pblocktemplate->vchCoinbaseCommitment = GenerateCoinbaseCommitment(*pblock, pindexPrev, chainparams.GetConsensus());
