@@ -505,6 +505,14 @@ std::string HelpMessage(HelpMessageMode mode)
 
     AppendParamsHelpMessages(strUsage, showDebug);
 
+    strUsage += HelpMessageOpt("-litemode=<n>", strprintf(_("Disable all Masernode specific functionality (0-1, default: %u)"), 0));
+
+    strUsage += HelpMessageGroup(_("Masternode options:"));
+    strUsage += HelpMessageOpt("-masternode=<n>", strprintf(_("Enable the client to act as a masternode (0-1, default: %u)"), 0));
+    strUsage += HelpMessageOpt("-mnconf=<file>", strprintf(_("Specify masternode configuration file (default: %s)"), "masternode.conf"));
+    strUsage += HelpMessageOpt("-mnconflock=<n>", strprintf(_("Lock masternodes from masternode configuration file (default: %u)"), 1));
+    strUsage += HelpMessageOpt("-masternodeprivkey=<n>", _("Set the masternode private key"));
+
     strUsage += HelpMessageGroup(_("Node relay options:"));
     if (showDebug) {
         strUsage += HelpMessageOpt("-acceptnonstdtxn", strprintf("Relay and mine \"non-standard\" transactions (%sdefault: %u)", "testnet/regtest only; ", !testnetChainParams->RequireStandard()));
@@ -1829,12 +1837,12 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     // ********************************************************* Step 11d: schedule Syscoin-specific tasks
 
     if (!fLiteMode) {
-        scheduler.scheduleEvery(boost::bind(&CNetFulfilledRequestManager::DoMaintenance, boost::ref(netfulfilledman)), 60);
-        scheduler.scheduleEvery(boost::bind(&CMasternodeSync::DoMaintenance, boost::ref(masternodeSync), boost::ref(*g_connman)), MASTERNODE_SYNC_TICK_SECONDS);
-        scheduler.scheduleEvery(boost::bind(&CMasternodeMan::DoMaintenance, boost::ref(mnodeman), boost::ref(*g_connman)), MASTERNODE_SYNC_TICK_SECONDS);
-        scheduler.scheduleEvery(boost::bind(&CActiveMasternode::DoMaintenance, boost::ref(activeMasternode), boost::ref(*g_connman)), MASTERNODE_MIN_MNP_SECONDS);
+        scheduler.scheduleEvery(boost::bind(&CNetFulfilledRequestManager::DoMaintenance, boost::ref(netfulfilledman)), 60 * 1000);
+        scheduler.scheduleEvery(boost::bind(&CMasternodeSync::DoMaintenance, boost::ref(masternodeSync), boost::ref(*g_connman)), MASTERNODE_SYNC_TICK_SECONDS * 1000);
+        scheduler.scheduleEvery(boost::bind(&CMasternodeMan::DoMaintenance, boost::ref(mnodeman), boost::ref(*g_connman)), MASTERNODE_SYNC_TICK_SECONDS * 1000);
+        scheduler.scheduleEvery(boost::bind(&CActiveMasternode::DoMaintenance, boost::ref(activeMasternode), boost::ref(*g_connman)), MASTERNODE_MIN_MNP_SECONDS * 1000);
 
-        scheduler.scheduleEvery(boost::bind(&CMasternodePayments::DoMaintenance, boost::ref(mnpayments)), 60);
+        scheduler.scheduleEvery(boost::bind(&CMasternodePayments::DoMaintenance, boost::ref(mnpayments)), 60 * 1000);
     }
 
     // ********************************************************* Step 12: start node
