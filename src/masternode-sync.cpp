@@ -79,8 +79,7 @@ void CMasternodeSync::SwitchToNextAsset(CConnman& connman)
         case(MASTERNODE_SYNC_MNW):
             LogPrintf("CMasternodeSync::SwitchToNextAsset -- Completed %s in %llds\n", GetAssetName(), GetTime() - nTimeAssetSyncStarted);
             nRequestedMasternodeAssets = MASTERNODE_SYNC_FINISHED;
-            // TODO: sandip uncomment below line
-            //uiInterface.NotifyAdditionalDataSyncProgressChanged(1);
+            uiInterface.NotifyAdditionalDataSyncProgressChanged(1);
             //try to activate our masternode if possible
             activeMasternode.ManageState(connman);
 
@@ -158,8 +157,7 @@ void CMasternodeSync::ProcessTick(CConnman& connman)
     // Calculate "progress" for LOG reporting / GUI notification
     double nSyncProgress = double(nRequestedMasternodeAttempt + (nRequestedMasternodeAssets - 1) * 8) / (8*4);
     LogPrintf("CMasternodeSync::ProcessTick -- nTick %d nRequestedMasternodeAssets %d nRequestedMasternodeAttempt %d nSyncProgress %f\n", nTick, nRequestedMasternodeAssets, nRequestedMasternodeAttempt, nSyncProgress);
-    // TODO: sandip uncomment below line
-    //uiInterface.NotifyAdditionalDataSyncProgressChanged(nSyncProgress);
+    uiInterface.NotifyAdditionalDataSyncProgressChanged(nSyncProgress);
 
     std::vector<CNode*> vNodesCopy = connman.CopyNodeVector(CConnman::FullyConnectedOnly);
 
