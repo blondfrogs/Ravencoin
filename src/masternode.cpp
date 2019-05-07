@@ -117,7 +117,7 @@ CMasternode::CollateralStatus CMasternode::CheckCollateral(const COutPoint& outp
         return COLLATERAL_UTXO_NOT_FOUND;
     }
 
-    if(coin.out.nValue != 100000 * COIN) {
+    if(coin.out.nValue != Params().MNCollateralAmount() * COIN) {
         return COLLATERAL_INVALID_AMOUNT;
     }
 
@@ -555,7 +555,7 @@ bool CMasternodeBroadcast::CheckOutpoint(int& nDos)
     }
 
     if (err == COLLATERAL_INVALID_AMOUNT) {
-        LogPrint("masternode", "CMasternodeBroadcast::CheckOutpoint -- Masternode UTXO should have 100000 SYS, masternode=%s\n", outpoint.ToStringShort());
+        LogPrint("masternode", "CMasternodeBroadcast::CheckOutpoint -- Masternode UTXO should have %ld BLAST, masternode=%s\n", Params().MNCollateralAmount(), outpoint.ToStringShort());
         nDos = 33;
         return false;
     }

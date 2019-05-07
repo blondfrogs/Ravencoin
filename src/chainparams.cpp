@@ -273,6 +273,7 @@ public:
         nMaxReorganizationDepth = 60; // 60 at 32 second block timespan is +/- 32 minutes.
         nMinReorganizationPeers = 4;
         nMinReorganizationAge = 60 * 60 * 12; // 12 hours
+        mnCollateralAmount = 25000;
         /** BLAST End **/
     }
 };
@@ -491,6 +492,7 @@ public:
 
         nMaxReorganizationDepth = 60; // 60 at 32 second block timespan is +/- 32 minutes.
         nMinReorganizationPeers = 4;
+        mnCollateralAmount = 10;
         nMinReorganizationAge = 60 * 60 * 12; // 12 hours
         /** BLAST End **/
 
@@ -689,6 +691,7 @@ public:
 
         nMaxReorganizationDepth = 60; // 60 at 32 second block timespan is +/- 32 minutes.
         nMinReorganizationPeers = 4;
+        mnCollateralAmount = 10;
         nMinReorganizationAge = 60 * 60 * 12; // 12 hours
         /** BLAST End **/
     }
