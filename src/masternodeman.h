@@ -67,8 +67,6 @@ private:
     std::map<CService, std::pair<int64_t, CMasternodeVerification> > mapPendingMNV;
     CCriticalSection cs_mapPendingMNV;
 
-    std::vector<uint256> vecDirtyGovernanceObjectHashes;
-
     int64_t nLastSentinelPingTime;
 
     friend class CMasternodeSync;
@@ -206,24 +204,8 @@ public:
 
     void UpdateLastPaid(const CBlockIndex* pindex);
 
-    void AddDirtyGovernanceObjectHash(const uint256& nHash)
-    {
-        LOCK(cs);
-        vecDirtyGovernanceObjectHashes.push_back(nHash);
-    }
-
-    std::vector<uint256> GetAndClearDirtyGovernanceObjectHashes()
-    {
-        LOCK(cs);
-        std::vector<uint256> vecTmp = vecDirtyGovernanceObjectHashes;
-        vecDirtyGovernanceObjectHashes.clear();
-        return vecTmp;;
-    }
-
     bool IsSentinelPingActive();
     void UpdateLastSentinelPingTime();
-    bool AddGovernanceVote(const COutPoint& outpoint, uint256 nGovernanceObjectHash);
-    void RemoveGovernanceObject(uint256 nGovernanceObjectHash);
 
     void CheckMasternode(const CPubKey& pubKeyMasternode, bool fForce);
 

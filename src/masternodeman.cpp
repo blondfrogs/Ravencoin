@@ -66,7 +66,6 @@ CMasternodeMan::CMasternodeMan():
     mMnbRecoveryRequests(),
     mMnbRecoveryGoodReplies(),
     listScheduledMnbRequestConnections(),
-    vecDirtyGovernanceObjectHashes(),
     nLastSentinelPingTime(0),
     mapSeenMasternodeBroadcast(),
     mapSeenMasternodePing(),
@@ -195,7 +194,6 @@ void CMasternodeMan::CheckAndRemove(CConnman& connman)
                 mWeAskedForMasternodeListEntry.erase(it->first);
 
                 // and finally remove it from the list
-                it->second.FlagGovernanceItemsAsDirty();
                 mapMasternodes.erase(it++);
             } else {
                 bool fAsk = (nAskForMnbRecovery > 0) &&
@@ -1550,25 +1548,6 @@ bool CMasternodeMan::IsSentinelPingActive()
     LOCK(cs);
     // Check if any masternodes have voted recently, otherwise return false
     return (GetTime() - nLastSentinelPingTime) <= MASTERNODE_SENTINEL_PING_MAX_SECONDS;
-}
-
-bool CMasternodeMan::AddGovernanceVote(const COutPoint& outpoint, uint256 nGovernanceObjectHash)
-{
-    LOCK(cs);
-    CMasternode* pmn = Find(outpoint);
-    if(!pmn) {
-        return false;
-    }
-    pmn->AddGovernanceVote(nGovernanceObjectHash);
-    return true;
-}
-
-void CMasternodeMan::RemoveGovernanceObject(uint256 nGovernanceObjectHash)
-{
-    LOCK(cs);
-    for(auto& mnpair : mapMasternodes) {
-        mnpair.second.RemoveGovernanceObject(nGovernanceObjectHash);
-    }
 }
 
 void CMasternodeMan::CheckMasternode(const CPubKey& pubKeyMasternode, bool fForce)
