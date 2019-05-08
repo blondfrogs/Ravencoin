@@ -22,8 +22,8 @@ static const int MASTERNODE_SYNC_MNW             = 3;
 // static const int MASTERNODE_SYNC_GOVOBJ_VOTE     = 11;
 static const int MASTERNODE_SYNC_FINISHED        = 999;
 
-static const int MASTERNODE_SYNC_TICK_SECONDS    = 6;
-static const int MASTERNODE_SYNC_TIMEOUT_SECONDS = 30; // our blocks are 1 minute so 30 seconds should be fine
+static const int MASTERNODE_SYNC_TICK_SECONDS    = 3;
+static const int MASTERNODE_SYNC_TIMEOUT_SECONDS = 16; // our blocks are 32 seconds so 16 seconds should be fine
 
 static const int MASTERNODE_SYNC_ENOUGH_PEERS    = 6;
 

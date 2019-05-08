@@ -199,7 +199,7 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
 	}
     // Update coinbase transaction with additional info about masternode and governance payments,
     // get some info back to pass to getblocktemplate
-	BlockSubsidies subsidies;
+	BlockSubsidies subsidies = GetBlockSubsidies(nHeight, chainparams.GetConsensus());
     if (mnpayments.FillBlockPayee(coinbaseTx, nHeight, nFees, subsidies, pblocktemplate->txoutMasternode)) {
         // found a masternode!
         coinbaseTx.vout[0].nValue = subsidies.miner + nFees / 2;

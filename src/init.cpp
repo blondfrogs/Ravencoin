@@ -55,6 +55,7 @@
 #include "masternode-sync.h"
 #include "masternodeconfig.h"
 #include "activemasternode.h"
+#include "dsnotificationinterface.h"
 #include "base58.h"
 
 #ifdef ENABLE_WALLET
@@ -93,6 +94,8 @@ std::unique_ptr<PeerLogicValidation> peerLogic;
 #if ENABLE_ZMQ
 static CZMQNotificationInterface* pzmqNotificationInterface = nullptr;
 #endif
+
+static CDSNotificationInterface* pdsNotificationInterface = nullptr;
 
 #ifdef WIN32
 // Win32 LevelDB doesn't use filedescriptors, and the ones used for
@@ -286,6 +289,12 @@ void Shutdown()
         pzmqNotificationInterface = nullptr;
     }
 #endif
+
+    if (pdsNotificationInterface) {
+        UnregisterValidationInterface(pdsNotificationInterface);
+        delete pdsNotificationInterface;
+        pdsNotificationInterface = NULL;
+    }
 
 #ifndef WIN32
     try {
@@ -1417,6 +1426,10 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
         RegisterValidationInterface(pzmqNotificationInterface);
     }
 #endif
+
+    pdsNotificationInterface = new CDSNotificationInterface(connman);
+    RegisterValidationInterface(pdsNotificationInterface);
+
     uint64_t nMaxOutboundLimit = 0; //unlimited unless -maxuploadtarget is set
     uint64_t nMaxOutboundTimeframe = MAX_UPLOAD_TIMEFRAME;
 
@@ -1832,7 +1845,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
     // force UpdatedBlockTip to initialize nCachedBlockHeight for DS, MN payments and budgets
     // but don't call it directly to prevent triggering of other listeners like zmq etc.
     // GetMainSignals().UpdatedBlockTip(chainActive.Tip());
-    // pdsNotificationInterface->InitializeCurrentBlockTip();
+    pdsNotificationInterface->InitializeCurrentBlockTip();
 
     // ********************************************************* Step 11d: schedule Syscoin-specific tasks
 
