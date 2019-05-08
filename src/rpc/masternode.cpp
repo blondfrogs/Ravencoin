@@ -369,7 +369,7 @@ UniValue masternode(const JSONRPCRequest& request)
         // Find possible candidates
         std::vector<COutput> vPossibleCoins;
 		// SYSCOIN include sys alias balances
-        vpwallets[0]->AvailableCoins(vPossibleCoins, true, NULL, false, ONLY_1000, false, true);
+        vpwallets[0]->AvailableCoins(vPossibleCoins, true, NULL, ONLY_1000);
 
         UniValue obj(UniValue::VOBJ);
         for (const auto& out : vPossibleCoins) {
