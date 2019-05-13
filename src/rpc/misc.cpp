@@ -173,31 +173,6 @@ public:
 };
 #endif
 
-UniValue debug(const JSONRPCRequest& request)
-{
-    if (request.fHelp || request.params.size() != 1)
-        throw std::runtime_error(
-            "debug ( 0|1|addrman|alert|bench|coindb|db|lock|rand|rpc|selectcoins|mempool"
-            "|mempoolrej|net|proxy|prune|http|libevent|tor|zmq|"
-            "syscoin|privatesend|instantsend|masternode|spork|keepass|mnpayments|gobject )\n"
-            "Change debug category on the fly. Specify single category or use '+' to specify many.\n"
-            "\nExamples:\n"
-            + HelpExampleCli("debug", "syscoin")
-            + HelpExampleRpc("debug", "syscoin+net")
-        );
-
-    std::string strMode = request.params[0].get_str();
-
-    std::vector<std::string> newMultiArgs;
-    boost::split(newMultiArgs, strMode, boost::is_any_of("+"));
-    gArgs.ForceSetMultiArgs("-debug", newMultiArgs);
-    gArgs.ForceSetArg("-debug", newMultiArgs[newMultiArgs.size() - 1]);
-
-    fDebug = gArgs.GetArg("-debug", "") != "0";
-
-    return "Debug mode: " + (fDebug ? strMode : "off");
-}
-
 UniValue validateaddress(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 1)
@@ -1474,7 +1449,6 @@ static const CRPCCommand commands[] =
 { //  category              name                      actor (function)         argNames
   //  --------------------- ------------------------  -----------------------  ----------
     { "control",            "getinfo",                &getinfo,                {} }, /* uses wallet if enabled */
-    { "control",            "debug",                  &debug,                  {} },
     { "control",            "getmemoryinfo",          &getmemoryinfo,          {"mode"} },
     { "util",               "validateaddress",        &validateaddress,        {"address"} }, /* uses wallet if enabled */
     { "util",               "createmultisig",         &createmultisig,         {"nrequired","keys"} },
