@@ -29,58 +29,6 @@ CCriticalSection cs_vecPayees;
 CCriticalSection cs_mapMasternodeBlocks;
 CCriticalSection cs_mapMasternodePaymentVotes;
 
-/**
-* IsBlockValueValid
-*
-*   Determine if coinbase outgoing created money is the correct value
-*
-*/
-
-bool IsBlockValueValid(const CBlock& block, int nBlockHeight, const CAmount &blockReward, const CAmount &nFee, std::string& strErrorRet)
-{
-    strErrorRet = "";
-    const CAmount vOutTotal = block.vtx[0]->GetValueOut();
-
-    // get subsidy for the block height with the max possible seniority bonus
-    const auto& subsidies = GetBlockSubsidies(nBlockHeight, Params().GetConsensus(), 1);
-    if (vOutTotal > (subsidies.getTotal() + nFee)) {
-        strErrorRet = strprintf("IsBlockValueValid: coinbase amount exceeds block subsidy schedule");
-        return false;
-    }
-
-    // ensure that the block's actual output value is not more than the expected block reward
-    const CAmount& blockRewardWithFee = blockReward + nFee;
-    if (vOutTotal > blockRewardWithFee) {
-        return false;
-    }
-
-	if (fDebug) LogPrintf("block.vtx[0].GetValueOut() %lld <= blockReward %lld\n", vOutTotal, blockRewardWithFee);
-    return true;
-}
-
-bool IsBlockPayeeValid(const CTransaction& txNew, int nBlockHeight, const CAmount &fee, CAmount& nTotalRewardWithMasternodes)
-{
-    if(!masternodeSync.IsSynced() || fLiteMode) {
-        //there is no budget data to use to check anything, let's just accept the longest chain
-		if (fDebug) LogPrintf("IsBlockPayeeValid -- WARNING: Not enough data, skipping block payee checks\n");
-		nTotalRewardWithMasternodes = txNew.GetValueOut();
-        return true;
-    }
-
-    // PAY A MASTERNODE DIRECTLY
-    if(mnpayments.IsTransactionValid(txNew, nBlockHeight, fee, nTotalRewardWithMasternodes)) {
-        LogPrint(BCLog::MNPAYMENT, "IsBlockPayeeValid -- Valid masternode payment at height %d: %s", nBlockHeight, txNew.ToString());
-        return true;
-    }
-
-    if(sporkManager.IsSporkActive(SPORK_8_MASTERNODE_PAYMENT_ENFORCEMENT)) {
-        LogPrintf("IsBlockPayeeValid -- ERROR: Invalid masternode payment detected at height %d: %s", nBlockHeight, txNew.ToString());
-        return false;
-    }
-
-    LogPrintf("IsBlockPayeeValid -- WARNING: Masternode payment enforcement is disabled, accepting any payee\n");
-    return true;
-}
 
 std::string GetRequiredPaymentsString(int nBlockHeight)
 {
