@@ -450,7 +450,7 @@ UniValue masternodelist(const JSONRPCRequest& request)
                 strMode != "activeseconds" && strMode != "addr" && strMode != "daemon" && strMode != "full" && strMode != "info" && strMode != "json" &&
                 strMode != "lastseen" && strMode != "lastpaidtime" && strMode != "lastpaidblock" &&
                 strMode != "protocol" && strMode != "payee" && strMode != "pubkey" &&
-                strMode != "rank" && strMode != "sentinel" && strMode != "status"))
+                strMode != "rank" && strMode != "status"))
     {
         throw std::runtime_error(
                 "masternodelist ( \"mode\" \"filter\" )\n"
@@ -466,7 +466,7 @@ UniValue masternodelist(const JSONRPCRequest& request)
                 "  daemon         - Print daemon version of a masternode (can be additionally filtered, exact match)\n"
                 "  full           - Print info in format 'status protocol payee lastseen activeseconds lastpaidtime lastpaidblock IP'\n"
                 "                   (can be additionally filtered, partial match)\n"
-                "  info           - Print info in format 'status protocol payee lastseen activeseconds sentinelversion sentinelstate IP'\n"
+                "  info           - Print info in format 'status protocol payee lastseen activeseconds IP'\n"
                 "                   (can be additionally filtered, partial match)\n"
                 "  json           - Print info in JSON format (can be additionally filtered, partial match)\n"
                 "  lastpaidblock  - Print the last block height a node was paid on the network\n"
@@ -477,8 +477,7 @@ UniValue masternodelist(const JSONRPCRequest& request)
                 "  protocol       - Print protocol of a masternode (can be additionally filtered, exact match)\n"
                 "  pubkey         - Print the masternode (not collateral) public key\n"
                 "  rank           - Print rank of a masternode based on current block\n"
-                "  sentinel       - Print sentinel version of a masternode (can be additionally filtered, exact match)\n"
-                "  status         - Print masternode status: PRE_ENABLED / ENABLED / EXPIRED / SENTINEL_PING_EXPIRED / NEW_START_REQUIRED /\n"
+                "  status         - Print masternode status: PRE_ENABLED / ENABLED / EXPIRED / NEW_START_REQUIRED /\n"
                 "                   UPDATE_REQUIRED / POSE_BAN / OUTPOINT_SPENT (can be additionally filtered, partial match)\n"
                 );
     }
@@ -519,11 +518,6 @@ UniValue masternodelist(const JSONRPCRequest& request)
                 if (strFilter !="" && strDaemon.find(strFilter) == std::string::npos &&
                     strOutpoint.find(strFilter) == std::string::npos) continue;
                 obj.push_back(Pair(strOutpoint, strDaemon));
-            } else if (strMode == "sentinel") {
-                std::string strSentinel = mn.lastPing.GetSentinelString();
-                if (strFilter !="" && strSentinel.find(strFilter) == std::string::npos &&
-                    strOutpoint.find(strFilter) == std::string::npos) continue;
-                obj.push_back(Pair(strOutpoint, strSentinel));
             } else if (strMode == "full") {
                 std::ostringstream streamFull;
                 streamFull << std::setw(18) <<
@@ -547,8 +541,6 @@ UniValue masternodelist(const JSONRPCRequest& request)
                                CBitcoinAddress(mn.pubKeyCollateralAddress.GetID()).ToString() << " " <<
                                (int64_t)mn.lastPing.sigTime << " " << std::setw(8) <<
                                (int64_t)(mn.lastPing.sigTime - mn.sigTime) << " " <<
-                               mn.lastPing.GetSentinelString() << " "  <<
-                               (mn.lastPing.fSentinelIsCurrent ? "current" : "expired") << " " <<
                                mn.addr.ToString();
                 std::string strInfo = streamInfo.str();
                 if (strFilter !="" && strInfo.find(strFilter) == std::string::npos &&
@@ -561,8 +553,6 @@ UniValue masternodelist(const JSONRPCRequest& request)
                                mn.GetStatus() << " " <<
                                mn.nProtocolVersion << " " <<
                                mn.lastPing.nDaemonVersion << " " <<
-                               mn.lastPing.GetSentinelString() << " " <<
-                               (mn.lastPing.fSentinelIsCurrent ? "current" : "expired") << " " <<
                                (int64_t)mn.lastPing.sigTime << " " <<
                                (int64_t)(mn.lastPing.sigTime - mn.sigTime) << " " <<
                                mn.GetLastPaidTime() << " " <<
@@ -576,8 +566,6 @@ UniValue masternodelist(const JSONRPCRequest& request)
                 objMN.push_back(Pair("status", mn.GetStatus()));
                 objMN.push_back(Pair("protocol", mn.nProtocolVersion));
                 objMN.push_back(Pair("daemonversion", mn.lastPing.GetDaemonString()));
-                objMN.push_back(Pair("sentinelversion", mn.lastPing.GetSentinelString()));
-                objMN.push_back(Pair("sentinelstate", (mn.lastPing.fSentinelIsCurrent ? "current" : "expired")));
                 objMN.push_back(Pair("lastseen", (int64_t)mn.lastPing.sigTime));
                 objMN.push_back(Pair("activeseconds", (int64_t)(mn.lastPing.sigTime - mn.sigTime)));
                 objMN.push_back(Pair("lastpaidtime", mn.GetLastPaidTime()));
@@ -864,26 +852,6 @@ UniValue masternodebroadcast(const JSONRPCRequest& request)
     return NullUniValue;
 }
 
-UniValue sentinelping(const JSONRPCRequest& request)
-{
-    if (request.fHelp || request.params.size() != 1) {
-        throw std::runtime_error(
-            "sentinelping version\n"
-            "\nSentinel ping.\n"
-            "\nArguments:\n"
-            "1. version           (string, required) Sentinel version in the form \"x.x.x\"\n"
-            "\nResult:\n"
-            "state                (boolean) Ping result\n"
-            "\nExamples:\n"
-            + HelpExampleCli("sentinelping", "1.0.2")
-            + HelpExampleRpc("sentinelping", "1.0.2")
-        );
-    }
-
-    activeMasternode.UpdateSentinelPing(StringVersionToInt(request.params[0].get_str()));
-    return true;
-}
-
 static const CRPCCommand commands[] =
 { //  category              name                      actor (function)         argNames
   //  --------------------- ------------------------  -----------------------  ----------
@@ -891,7 +859,7 @@ static const CRPCCommand commands[] =
     { "syscoin",               "masternodelist",         &masternodelist,         {} },
     { "syscoin",               "masternodebroadcast",    &masternodebroadcast,    {} },
     //{ "syscoin",               "getpoolinfo",            &getpoolinfo,          {} },
-    { "syscoin",               "sentinelping",           &sentinelping,           {} },
+    // { "syscoin",               "sentinelping",           &sentinelping,           {} },
 //#ifdef ENABLE_WALLET
 //    { "syscoin",               "privatesend",            &privatesend,          {} },
 //#endif // ENABLE_WALLET

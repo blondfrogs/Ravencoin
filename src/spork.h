@@ -26,10 +26,9 @@ static const int SPORK_8_MASTERNODE_PAYMENT_ENFORCEMENT                 = 10007;
 static const int SPORK_9_SUPERBLOCKS_ENABLED                            = 10008;
 static const int SPORK_10_MASTERNODE_PAY_UPDATED_NODES                  = 10009;
 static const int SPORK_12_RECONSIDER_BLOCKS                             = 10011;
-static const int SPORK_14_REQUIRE_SENTINEL_FLAG                         = 10013;
 
 static const int SPORK_START                                            = SPORK_2_INSTANTSEND_ENABLED;
-static const int SPORK_END                                              = SPORK_14_REQUIRE_SENTINEL_FLAG;
+static const int SPORK_END                                              = SPORK_12_RECONSIDER_BLOCKS;
 
 extern std::map<int, int64_t> mapSporkDefaults;
 extern std::map<uint256, CSporkMessage> mapSporks;

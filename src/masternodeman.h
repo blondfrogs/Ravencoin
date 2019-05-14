@@ -67,8 +67,6 @@ private:
     std::map<CService, std::pair<int64_t, CMasternodeVerification> > mapPendingMNV;
     CCriticalSection cs_mapPendingMNV;
 
-    int64_t nLastSentinelPingTime;
-
     friend class CMasternodeSync;
     /// Find an entry
     CMasternode* Find(const COutPoint& outpoint);
@@ -111,7 +109,6 @@ public:
         READWRITE(mWeAskedForMasternodeListEntry);
         READWRITE(mMnbRecoveryRequests);
         READWRITE(mMnbRecoveryGoodReplies);
-        READWRITE(nLastSentinelPingTime);
         READWRITE(nDsqCount);
 
         READWRITE(mapSeenMasternodeBroadcast);
@@ -203,9 +200,6 @@ public:
     bool IsMnbRecoveryRequested(const uint256& hash) { return mMnbRecoveryRequests.count(hash); }
 
     void UpdateLastPaid(const CBlockIndex* pindex);
-
-    bool IsSentinelPingActive();
-    void UpdateLastSentinelPingTime();
 
     void CheckMasternode(const CPubKey& pubKeyMasternode, bool fForce);
 

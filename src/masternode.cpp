@@ -193,7 +193,7 @@ void CMasternode::Check(bool fForce)
 
     if(fWaitForPing && !fOurMasternode) {
         // ...but if it was already expired before the initial check - return right away
-        if(IsExpired() || IsSentinelPingExpired() || IsNewStartRequired()) {
+        if(IsExpired() || IsNewStartRequired()) {
             LogPrint(BCLog::MASTERNODE, "CMasternode::Check -- Masternode %s is in %s state, waiting for ping\n", outpoint.ToStringShort(), GetStateString());
             return;
         }
@@ -217,20 +217,6 @@ void CMasternode::Check(bool fForce)
             }
             return;
         }
-
-        // part 1: expire based on syscoind ping
-        bool fSentinelPingActive = masternodeSync.IsSynced() && mnodeman.IsSentinelPingActive();
-        bool fSentinelPingExpired = fSentinelPingActive && !IsPingedWithin(MASTERNODE_SENTINEL_PING_MAX_SECONDS);
-        LogPrint(BCLog::MASTERNODE, "CMasternode::Check -- outpoint=%s, GetAdjustedTime()=%d, fSentinelPingExpired=%d\n",
-                outpoint.ToStringShort(), GetAdjustedTime(), fSentinelPingExpired);
-
-        if(fSentinelPingExpired) {
-            nActiveState = MASTERNODE_SENTINEL_PING_EXPIRED;
-            if(nActiveStatePrev != nActiveState) {
-                LogPrint(BCLog::MASTERNODE, "CMasternode::Check -- Masternode %s is in %s state now\n", outpoint.ToStringShort(), GetStateString());
-            }
-            return;
-        }
     }
 
     // We require MNs to be in PRE_ENABLED until they either start to expire or receive a ping and go into ENABLED state
@@ -239,23 +225,6 @@ void CMasternode::Check(bool fForce)
         if (lastPing.sigTime - sigTime < MASTERNODE_MIN_MNP_SECONDS) {
             nActiveState = MASTERNODE_PRE_ENABLED;
             if (nActiveStatePrev != nActiveState) {
-                LogPrint(BCLog::MASTERNODE, "CMasternode::Check -- Masternode %s is in %s state now\n", outpoint.ToStringShort(), GetStateString());
-            }
-            return;
-        }
-    }
-
-    if(!fWaitForPing || fOurMasternode) {
-        // part 2: expire based on sentinel info
-        bool fSentinelPingActive = masternodeSync.IsSynced() && mnodeman.IsSentinelPingActive();
-        bool fSentinelPingExpired = fSentinelPingActive && !lastPing.fSentinelIsCurrent;
-
-        LogPrint(BCLog::MASTERNODE, "CMasternode::Check -- outpoint=%s, GetAdjustedTime()=%d, fSentinelPingExpired=%d\n",
-                outpoint.ToStringShort(), GetAdjustedTime(), fSentinelPingExpired);
-
-        if(fSentinelPingExpired) {
-            nActiveState = MASTERNODE_SENTINEL_PING_EXPIRED;
-            if(nActiveStatePrev != nActiveState) {
                 LogPrint(BCLog::MASTERNODE, "CMasternode::Check -- Masternode %s is in %s state now\n", outpoint.ToStringShort(), GetStateString());
             }
             return;
@@ -297,7 +266,6 @@ std::string CMasternode::StateToString(int nStateIn)
         case MASTERNODE_EXPIRED:                return "EXPIRED";
         case MASTERNODE_OUTPOINT_SPENT:         return "OUTPOINT_SPENT";
         case MASTERNODE_UPDATE_REQUIRED:        return "UPDATE_REQUIRED";
-        case MASTERNODE_SENTINEL_PING_EXPIRED:  return "SENTINEL_PING_EXPIRED";
         case MASTERNODE_NEW_START_REQUIRED:     return "NEW_START_REQUIRED";
         case MASTERNODE_POSE_BAN:               return "POSE_BAN";
         default:                                return "UNKNOWN";
@@ -838,8 +806,8 @@ bool CMasternodePing::CheckAndUpdate(CMasternode* pmn, bool fFromNewBroadcast, i
 
     // force update, ignoring cache
     pmn->Check(true);
-    // relay ping for nodes in ENABLED/EXPIRED/SENTINEL_PING_EXPIRED state only, skip everyone else
-    if (!pmn->IsEnabled() && !pmn->IsExpired() && !pmn->IsSentinelPingExpired()) return false;
+    // relay ping for nodes in ENABLED/EXPIRED state only, skip everyone else
+    if (!pmn->IsEnabled() && !pmn->IsExpired()) return false;
 
     LogPrint(BCLog::MASTERNODE, "CMasternodePing::CheckAndUpdate -- Masternode ping accepted and relayed, masternode=%s\n", masternodeOutpoint.ToStringShort());
     Relay(connman);
@@ -857,11 +825,6 @@ void CMasternodePing::Relay(CConnman& connman)
 
     CInv inv(MSG_MASTERNODE_PING, GetHash());
     connman.RelayInv(inv);
-}
-
-std::string CMasternodePing::GetSentinelString() const
-{
-    return nSentinelVersion > DEFAULT_SENTINEL_VERSION ? SafeIntVersionToString(nSentinelVersion) : "Unknown";
 }
 
 std::string CMasternodePing::GetDaemonString() const

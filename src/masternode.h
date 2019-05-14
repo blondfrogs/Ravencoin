@@ -17,7 +17,6 @@ class CConnman;
 static const int MASTERNODE_CHECK_SECONDS               =   5;
 static const int MASTERNODE_MIN_MNB_SECONDS             =   5 * 60;
 static const int MASTERNODE_MIN_MNP_SECONDS             =   5 * 60;
-static const int MASTERNODE_SENTINEL_PING_MAX_SECONDS   =  60 * 60;
 static const int MASTERNODE_EXPIRATION_SECONDS          = 120 * 60;
 static const int MASTERNODE_NEW_START_REQUIRED_SECONDS  = 180 * 60;
 
@@ -27,8 +26,6 @@ static const int MASTERNODE_POSE_BAN_MAX_SCORE          = 5;
 // The Masternode Ping Class : Contains a different serialize method for sending pings from masternodes throughout the network
 //
 
-// sentinel version before implementation of nSentinelVersion in CMasternodePing
-#define DEFAULT_SENTINEL_VERSION 0x010001
 // daemon version before implementation of nDaemonVersion in CMasternodePing
 #define DEFAULT_DAEMON_VERSION CLIENT_MASTERNODE_VERSION
 
@@ -39,9 +36,6 @@ public:
     uint256 blockHash{};
     int64_t sigTime{}; //mnb message times
     std::vector<unsigned char> vchSig{};
-    bool fSentinelIsCurrent = false; // true if last sentinel ping was current
-    // MSB is always 0, other 3 bits corresponds to x.x.x version scheme
-    uint32_t nSentinelVersion{DEFAULT_SENTINEL_VERSION};
     uint32_t nDaemonVersion{DEFAULT_DAEMON_VERSION};
 
     CMasternodePing() = default;
@@ -61,8 +55,6 @@ public:
         if (!(s.GetType() & SER_GETHASH)) {
             READWRITE(vchSig);
         }
-        READWRITE(fSentinelIsCurrent);
-        READWRITE(nSentinelVersion);
         if (!(s.GetType() & SER_NETWORK)) {
             READWRITE(nDaemonVersion);
         }
@@ -79,7 +71,6 @@ public:
     bool CheckAndUpdate(CMasternode* pmn, bool fFromNewBroadcast, int& nDos, CConnman& connman);
     void Relay(CConnman& connman);
 
-    std::string GetSentinelString() const;
     std::string GetDaemonString() const;
 
     explicit operator bool() const;
@@ -148,7 +139,6 @@ public:
         MASTERNODE_EXPIRED,
         MASTERNODE_OUTPOINT_SPENT,
         MASTERNODE_UPDATE_REQUIRED,
-        MASTERNODE_SENTINEL_PING_EXPIRED,
         MASTERNODE_NEW_START_REQUIRED,
         MASTERNODE_POSE_BAN
     };
@@ -232,24 +222,18 @@ public:
     bool IsExpired() const { return nActiveState == MASTERNODE_EXPIRED; }
     bool IsOutpointSpent() const { return nActiveState == MASTERNODE_OUTPOINT_SPENT; }
     bool IsUpdateRequired() const { return nActiveState == MASTERNODE_UPDATE_REQUIRED; }
-    bool IsSentinelPingExpired() const { return nActiveState == MASTERNODE_SENTINEL_PING_EXPIRED; }
     bool IsNewStartRequired() const { return nActiveState == MASTERNODE_NEW_START_REQUIRED; }
 
     static bool IsValidStateForAutoStart(int nActiveStateIn)
     {
         return  nActiveStateIn == MASTERNODE_ENABLED ||
                 nActiveStateIn == MASTERNODE_PRE_ENABLED ||
-                nActiveStateIn == MASTERNODE_EXPIRED ||
-                nActiveStateIn == MASTERNODE_SENTINEL_PING_EXPIRED;
+                nActiveStateIn == MASTERNODE_EXPIRED;
     }
 
     bool IsValidForPayment() const
     {
         if(nActiveState == MASTERNODE_ENABLED) {
-            return true;
-        }
-        if(!sporkManager.IsSporkActive(SPORK_14_REQUIRE_SENTINEL_FLAG) &&
-           (nActiveState == MASTERNODE_SENTINEL_PING_EXPIRED)) {
             return true;
         }
 
