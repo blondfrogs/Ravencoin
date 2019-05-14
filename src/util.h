@@ -123,6 +123,8 @@ namespace BCLog
         LEVELDB = (1 << 20),
         MASTERNODE = (1 << 21),
         MNPAYMENT = (1 << 22),
+        SPORK = (1 << 23),
+        ALERT = (1 << 24),
         ALL = ~(uint32_t) 0,
     };
 }
