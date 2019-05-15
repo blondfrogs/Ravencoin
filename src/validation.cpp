@@ -46,6 +46,7 @@
 #include "masternode-payments.h"
 #include "masternode-sync.h"
 #include "alert.h"
+#include "base58.h"
 
 #include <atomic>
 #include <sstream>
@@ -2202,24 +2203,44 @@ bool IsBlockValueValid(const CBlock& block, int nBlockHeight, const CAmount &blo
     return true;
 }
 
+// checks whether txNew has a vout that pays appropriate subsidy to the dev address
+bool IsDevRewardValid(const CTransaction& txNew, int nBlockHeight) {
+    const auto& devSubsidy = GetBlockSubsidies(nBlockHeight, Params().GetConsensus()).dev;
+    CScript devScript = GetScriptForDestination(CBitcoinAddress(Params().GetConsensus().devWalletAddress).Get());
+
+    for(const CTxOut& txout: txNew.vout) {
+        if (txout.scriptPubKey == devScript && txout.nValue == devSubsidy) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool IsBlockPayeeValid(const CTransaction& txNew, int nBlockHeight, const CAmount &fee, CAmount& nTotalRewardWithMasternodes)
 {
-    if(!masternodeSync.IsSynced() || fLiteMode) {
-        //there is no budget data to use to check anything, let's just accept the longest chain
-		if (fDebug) LogPrintf("IsBlockPayeeValid -- WARNING: Not enough data, skipping block payee checks\n");
-		nTotalRewardWithMasternodes = txNew.GetValueOut();
-        return true;
-    }
+    if(sporkManager.IsSporkActive(SPORK_8_MASTERNODE_PAYMENT_ENFORCEMENT)) {
+        // check dev payments
+        if (!IsDevRewardValid(txNew, nBlockHeight)) {
+            LogPrintf("IsBlockPayeeValid -- ERROR: Invalid dev payment detected at height %d: %s", nBlockHeight, txNew.ToString());
+            return false;
+        }
+        // check masternode payment
+        if(!masternodeSync.IsSynced() || fLiteMode) {
+            //there is no budget data to use to check anything, let's just accept the longest chain
+            if (fDebug) LogPrintf("IsBlockPayeeValid -- WARNING: Not enough data, skipping block payee checks\n");
+            nTotalRewardWithMasternodes = txNew.GetValueOut();
+            return true;
+        }
 
-    // PAY A MASTERNODE DIRECTLY
-    if(mnpayments.IsTransactionValid(txNew, nBlockHeight, fee, nTotalRewardWithMasternodes)) {
+        if(!mnpayments.IsTransactionValid(txNew, nBlockHeight, fee, nTotalRewardWithMasternodes)) {
+            LogPrintf("IsBlockPayeeValid -- ERROR: Invalid masternode payment detected at height %d: %s", nBlockHeight, txNew.ToString());
+            return false;
+        }
+
+        // all good!
         LogPrint(BCLog::MNPAYMENT, "IsBlockPayeeValid -- Valid masternode payment at height %d: %s", nBlockHeight, txNew.ToString());
         return true;
-    }
-
-    if(sporkManager.IsSporkActive(SPORK_8_MASTERNODE_PAYMENT_ENFORCEMENT)) {
-        LogPrintf("IsBlockPayeeValid -- ERROR: Invalid masternode payment detected at height %d: %s", nBlockHeight, txNew.ToString());
-        return false;
     }
 
     LogPrintf("IsBlockPayeeValid -- WARNING: Masternode payment enforcement is disabled, accepting any payee\n");
@@ -2663,13 +2684,13 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
 			LOCK(cs_main);
 			mapRejectedBlocks.insert(std::make_pair(block.GetHash(), GetTime()));
 		}
-		return state.DoS(0, error("ConnectBlock(SYS): couldn't find masternode or superblock payments"),
+		return state.DoS(0, error("ConnectBlock: couldn't find masternode"),
 			REJECT_INVALID, "bad-cb-payee");
 	}
 
     std::string strError = "";
     if (!IsBlockValueValid(block, pindex->nHeight, totalSubsidy, nFees, strError)) {
-        return state.DoS(0, error("ConnectBlock(SYS): %s", strError), REJECT_INVALID, "bad-cb-amount");
+        return state.DoS(0, error("ConnectBlock: %s", strError), REJECT_INVALID, "bad-cb-amount");
     }
 
     if (!control.Wait())
