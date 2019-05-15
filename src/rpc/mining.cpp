@@ -460,7 +460,7 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
 
     // when enforcement is on we need information about a masternode payee or otherwise our block is going to be orphaned by the network
     CScript payee;
-    if (sporkManager.IsSporkActive(SPORK_8_MASTERNODE_PAYMENT_ENFORCEMENT)
+    if (sporkManager.IsSporkActive(SPORK_3_MASTERNODE_PAYMENT_ENFORCEMENT)
         && !masternodeSync.IsWinnersListSynced()
         && !mnpayments.GetBlockPayee(chainActive.Height() + 1, payee))
             throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "BLAST Core is downloading masternode winners...");
@@ -708,24 +708,7 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
 
     result.push_back(Pair("masternode", masternodeObj));
     result.push_back(Pair("masternode_payments_started", pindexPrev->nHeight + 1 > consensusParams.nMasternodePaymentsStartBlock));
-    result.push_back(Pair("masternode_payments_enforced", sporkManager.IsSporkActive(SPORK_8_MASTERNODE_PAYMENT_ENFORCEMENT)));
-
-    UniValue superblockObjArray(UniValue::VARR);
-    if(pblocktemplate->voutSuperblock.size()) {
-        for (const auto& txout : pblocktemplate->voutSuperblock) {
-            UniValue entry(UniValue::VOBJ);
-            CTxDestination address1;
-            ExtractDestination(txout.scriptPubKey, address1);
-            CBitcoinAddress address2(address1);
-            entry.push_back(Pair("payee", address2.ToString().c_str()));
-            entry.push_back(Pair("script", HexStr(txout.scriptPubKey)));
-            entry.push_back(Pair("amount", txout.nValue));
-            superblockObjArray.push_back(entry);
-        }
-    }
-    result.push_back(Pair("superblock", superblockObjArray));
-    result.push_back(Pair("superblocks_started", pindexPrev->nHeight + 1 > consensusParams.nSuperblockStartBlock));
-    result.push_back(Pair("superblocks_enabled", sporkManager.IsSporkActive(SPORK_9_SUPERBLOCKS_ENABLED)));
+    result.push_back(Pair("masternode_payments_enforced", sporkManager.IsSporkActive(SPORK_3_MASTERNODE_PAYMENT_ENFORCEMENT)));
 
     return result;
 }

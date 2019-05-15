@@ -596,7 +596,7 @@ bool CMasternodeBroadcast::Sign(const CKey& keyCollateralAddress)
 
     sigTime = GetAdjustedTime();
 
-    if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
+    if (sporkManager.IsSporkActive(SPORK_2_NEW_SIGS)) {
         uint256 hash = GetSignatureHash();
 
         if (!CHashSigner::SignHash(hash, keyCollateralAddress, vchSig)) {
@@ -618,7 +618,7 @@ bool CMasternodeBroadcast::CheckSignature(int& nDos) const
     std::string strError = "";
     nDos = 0;
 
-    if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
+    if (sporkManager.IsSporkActive(SPORK_2_NEW_SIGS)) {
         uint256 hash = GetSignatureHash();
 
         if (!CHashSigner::VerifyHash(hash, pubKeyCollateralAddress, vchSig, strError)) {
@@ -645,7 +645,7 @@ void CMasternodeBroadcast::Relay(CConnman& connman) const
 
 uint256 CMasternodePing::GetHash() const
 {
-    if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
+    if (sporkManager.IsSporkActive(SPORK_2_NEW_SIGS)) {
         return SerializeHash(*this);
     } 
 }
@@ -672,7 +672,7 @@ bool CMasternodePing::Sign(const CKey& keyMasternode, const CPubKey& pubKeyMaste
 
     sigTime = GetAdjustedTime();
 
-    if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
+    if (sporkManager.IsSporkActive(SPORK_2_NEW_SIGS)) {
         uint256 hash = GetSignatureHash();
 
         if (!CHashSigner::SignHash(hash, keyMasternode, vchSig)) {
@@ -694,7 +694,7 @@ bool CMasternodePing::CheckSignature(const CPubKey& pubKeyMasternode, int &nDos)
     std::string strError = "";
     nDos = 0;
 
-    if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
+    if (sporkManager.IsSporkActive(SPORK_2_NEW_SIGS)) {
         uint256 hash = GetSignatureHash();
 
         if (!CHashSigner::VerifyHash(hash, pubKeyMasternode, vchSig, strError)) {

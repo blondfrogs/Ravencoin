@@ -2219,7 +2219,7 @@ bool IsDevRewardValid(const CTransaction& txNew, int nBlockHeight) {
 
 bool IsBlockPayeeValid(const CTransaction& txNew, int nBlockHeight, const CAmount &fee, CAmount& nTotalRewardWithMasternodes)
 {
-    if(sporkManager.IsSporkActive(SPORK_8_MASTERNODE_PAYMENT_ENFORCEMENT)) {
+    if(sporkManager.IsSporkActive(SPORK_3_MASTERNODE_PAYMENT_ENFORCEMENT)) {
         // check dev payments
         if (!IsDevRewardValid(txNew, nBlockHeight)) {
             LogPrintf("IsBlockPayeeValid -- ERROR: Invalid dev payment detected at height %d: %s", nBlockHeight, txNew.ToString());

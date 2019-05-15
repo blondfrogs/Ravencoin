@@ -18,14 +18,9 @@ CSporkManager sporkManager;
 
 std::map<uint256, CSporkMessage> mapSporks;
 std::map<int, int64_t> mapSporkDefaults = {
-    {SPORK_2_INSTANTSEND_ENABLED,            0},             // ON
-    {SPORK_3_INSTANTSEND_BLOCK_FILTERING,    0},             // ON
-    {SPORK_5_INSTANTSEND_MAX_VALUE,          100000},          // 100000 Syscoin
-    {SPORK_6_NEW_SIGS,                       0}, // ON
-    {SPORK_8_MASTERNODE_PAYMENT_ENFORCEMENT, 0}, // ON
-    {SPORK_9_SUPERBLOCKS_ENABLED,            INT64_MAX}, // OFF FOREVER
-    {SPORK_10_MASTERNODE_PAY_UPDATED_NODES,  0}, // ON
-    {SPORK_12_RECONSIDER_BLOCKS,             0},             // 0 BLOCKS
+    {SPORK_2_NEW_SIGS,                       0}, // ON
+    {SPORK_3_MASTERNODE_PAYMENT_ENFORCEMENT, 0}, // ON
+    {SPORK_4_RECONSIDER_BLOCKS,             0},             // 0 BLOCKS
 };
 
 void CSporkManager::ProcessSpork(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman& connman)
@@ -83,9 +78,9 @@ void CSporkManager::ProcessSpork(CNode* pfrom, const std::string& strCommand, CD
 void CSporkManager::ExecuteSpork(int nSporkID, int nValue)
 {
     //correct fork via spork technology
-    if(nSporkID == SPORK_12_RECONSIDER_BLOCKS && nValue > 0) {
+    if(nSporkID == SPORK_4_RECONSIDER_BLOCKS && nValue > 0) {
         // allow to reprocess 24h of blocks max, which should be enough to resolve any issues
-        int64_t nMaxBlocks = 1440;
+        int64_t nMaxBlocks = 2700;
         // this potentially can be a heavy operation, so only allow this to be executed once per 10 minutes
         int64_t nTimeout = 10 * 60;
 
@@ -157,14 +152,9 @@ int64_t CSporkManager::GetSporkValue(int nSporkID)
 
 int CSporkManager::GetSporkIDByName(const std::string& strName)
 {
-    if (strName == "SPORK_2_INSTANTSEND_ENABLED")               return SPORK_2_INSTANTSEND_ENABLED;
-    if (strName == "SPORK_3_INSTANTSEND_BLOCK_FILTERING")       return SPORK_3_INSTANTSEND_BLOCK_FILTERING;
-    if (strName == "SPORK_5_INSTANTSEND_MAX_VALUE")             return SPORK_5_INSTANTSEND_MAX_VALUE;
-    if (strName == "SPORK_6_NEW_SIGS")                          return SPORK_6_NEW_SIGS;
-    if (strName == "SPORK_8_MASTERNODE_PAYMENT_ENFORCEMENT")    return SPORK_8_MASTERNODE_PAYMENT_ENFORCEMENT;
-    if (strName == "SPORK_9_SUPERBLOCKS_ENABLED")               return SPORK_9_SUPERBLOCKS_ENABLED;
-    if (strName == "SPORK_10_MASTERNODE_PAY_UPDATED_NODES")     return SPORK_10_MASTERNODE_PAY_UPDATED_NODES;
-    if (strName == "SPORK_12_RECONSIDER_BLOCKS")                return SPORK_12_RECONSIDER_BLOCKS;
+    if (strName == "SPORK_2_NEW_SIGS")                          return SPORK_2_NEW_SIGS;
+    if (strName == "SPORK_3_MASTERNODE_PAYMENT_ENFORCEMENT")    return SPORK_3_MASTERNODE_PAYMENT_ENFORCEMENT;
+    if (strName == "SPORK_4_RECONSIDER_BLOCKS")                return SPORK_4_RECONSIDER_BLOCKS;
 
     LogPrint(BCLog::SPORK, "CSporkManager::GetSporkIDByName -- Unknown Spork name '%s'\n", strName);
     return -1;
@@ -173,14 +163,9 @@ int CSporkManager::GetSporkIDByName(const std::string& strName)
 std::string CSporkManager::GetSporkNameByID(int nSporkID)
 {
     switch (nSporkID) {
-        case SPORK_2_INSTANTSEND_ENABLED:               return "SPORK_2_INSTANTSEND_ENABLED";
-        case SPORK_3_INSTANTSEND_BLOCK_FILTERING:       return "SPORK_3_INSTANTSEND_BLOCK_FILTERING";
-        case SPORK_5_INSTANTSEND_MAX_VALUE:             return "SPORK_5_INSTANTSEND_MAX_VALUE";
-        case SPORK_6_NEW_SIGS:                          return "SPORK_6_NEW_SIGS";
-        case SPORK_8_MASTERNODE_PAYMENT_ENFORCEMENT:    return "SPORK_8_MASTERNODE_PAYMENT_ENFORCEMENT";
-        case SPORK_9_SUPERBLOCKS_ENABLED:               return "SPORK_9_SUPERBLOCKS_ENABLED";
-        case SPORK_10_MASTERNODE_PAY_UPDATED_NODES:     return "SPORK_10_MASTERNODE_PAY_UPDATED_NODES";
-        case SPORK_12_RECONSIDER_BLOCKS:                return "SPORK_12_RECONSIDER_BLOCKS";
+        case SPORK_2_NEW_SIGS:                          return "SPORK_2_NEW_SIGS";
+        case SPORK_3_MASTERNODE_PAYMENT_ENFORCEMENT:    return "SPORK_3_MASTERNODE_PAYMENT_ENFORCEMENT";
+        case SPORK_4_RECONSIDER_BLOCKS:                return "SPORK_4_RECONSIDER_BLOCKS";
         default:
             LogPrint(BCLog::SPORK, "CSporkManager::GetSporkNameByID -- Unknown Spork ID %d\n", nSporkID);
             return "Unknown";
@@ -243,7 +228,7 @@ bool CSporkMessage::Sign(const CKey& key)
     CKeyID pubKeyId = key.GetPubKey().GetID();
     std::string strError = "";
 
-    if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
+    if (sporkManager.IsSporkActive(SPORK_2_NEW_SIGS)) {
         uint256 hash = GetSignatureHash();
 
         if(!CHashSigner::SignHash(hash, key, vchSig)) {
@@ -264,11 +249,11 @@ bool CSporkMessage::CheckSignature(const CKeyID& pubKeyId) const
 {
     std::string strError = "";
 
-	if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
+	if (sporkManager.IsSporkActive(SPORK_2_NEW_SIGS)) {
 		uint256 hash = GetSignatureHash();
 
 		if (!CHashSigner::VerifyHash(hash, pubKeyId, vchSig, strError)) {
-			// Note: unlike for many other messages when SPORK_6_NEW_SIGS is ON sporks with sigs in old format
+			// Note: unlike for many other messages when SPORK_2_NEW_SIGS is ON sporks with sigs in old format
 			// and newer timestamps should not be accepted, so if we failed here - that's it
 			LogPrintf("CSporkMessage::CheckSignature -- VerifyHash() failed, error: %s\n", strError);
 			return false;

@@ -244,7 +244,7 @@ bool CMasternodePaymentVote::Sign()
 {
     std::string strError;
 
-    if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
+    if (sporkManager.IsSporkActive(SPORK_2_NEW_SIGS)) {
         uint256 hash = GetSignatureHash();
 
         if(!CHashSigner::SignHash(hash, activeMasternode.keyMasternode, vchSig)) {
@@ -537,7 +537,6 @@ bool CMasternodePaymentVote::IsValid(CNode* pnode, int nValidationHeight, std::s
 
     int nMinRequiredProtocol;
     if(nBlockHeight >= nValidationHeight) {
-        // new votes must comply SPORK_10_MASTERNODE_PAY_UPDATED_NODES rules
         nMinRequiredProtocol = mnpayments.GetMinMasternodePaymentsProto();
     } else {
         // allow non-updated masternodes for old blocks
@@ -731,7 +730,7 @@ bool CMasternodePaymentVote::CheckSignature(const CPubKey& pubKeyMasternode, int
     nDos = 0;
     std::string strError = "";
 
-    if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
+    if (sporkManager.IsSporkActive(SPORK_2_NEW_SIGS)) {
         uint256 hash = GetSignatureHash();
 
         if (!CHashSigner::VerifyHash(hash, pubKeyMasternode, vchSig, strError)) {

@@ -1160,7 +1160,7 @@ void CMasternodeMan::SendVerifyReply(CNode* pnode, CMasternodeVerification& mnv,
 
     std::string strError;
 
-    if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
+    if (sporkManager.IsSporkActive(SPORK_2_NEW_SIGS)) {
         uint256 hash = mnv.GetSignatureHash1(blockHash);
 
         if(!CHashSigner::SignHash(hash, activeMasternode.keyMasternode, mnv.vchSig1)) {
@@ -1233,7 +1233,7 @@ void CMasternodeMan::ProcessVerifyReply(CNode* pnode, CMasternodeVerification& m
         for (auto& mnpair : mapMasternodes) {
             if(CAddress(mnpair.second.addr, NODE_NETWORK) == pnode->addr) {
                 bool fFound = false;
-                if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
+                if (sporkManager.IsSporkActive(SPORK_2_NEW_SIGS)) {
                     fFound = CHashSigner::VerifyHash(hash1, mnpair.second.pubKeyMasternode, mnv.vchSig1, strError);
                     // we don't care about mnv with signature in old format
                 } 
@@ -1254,7 +1254,7 @@ void CMasternodeMan::ProcessVerifyReply(CNode* pnode, CMasternodeVerification& m
                     // ... and sign it
                     std::string strError;
 
-                    if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
+                    if (sporkManager.IsSporkActive(SPORK_2_NEW_SIGS)) {
                         uint256 hash2 = mnv.GetSignatureHash2(blockHash);
 
                         if(!CHashSigner::SignHash(hash2, activeMasternode.keyMasternode, mnv.vchSig2)) {
@@ -1367,7 +1367,7 @@ void CMasternodeMan::ProcessVerifyBroadcast(CNode* pnode, const CMasternodeVerif
             return;
         }
 
-        if (sporkManager.IsSporkActive(SPORK_6_NEW_SIGS)) {
+        if (sporkManager.IsSporkActive(SPORK_2_NEW_SIGS)) {
             uint256 hash1 = mnv.GetSignatureHash1(blockHash);
             uint256 hash2 = mnv.GetSignatureHash2(blockHash);
 
