@@ -152,8 +152,8 @@ int64_t CSporkManager::GetSporkValue(int nSporkID)
 
 int CSporkManager::GetSporkIDByName(const std::string& strName)
 {
-    if (strName == "SPORK_2_NEW_SIGS")                          return SPORK_2_NEW_SIGS;
-    if (strName == "SPORK_3_MASTERNODE_PAYMENT_ENFORCEMENT")    return SPORK_3_MASTERNODE_PAYMENT_ENFORCEMENT;
+    if (strName == "SPORK_2_NEW_SIGS")                         return SPORK_2_NEW_SIGS;
+    if (strName == "SPORK_3_MASTERNODE_PAYMENT_ENFORCEMENT")   return SPORK_3_MASTERNODE_PAYMENT_ENFORCEMENT;
     if (strName == "SPORK_4_RECONSIDER_BLOCKS")                return SPORK_4_RECONSIDER_BLOCKS;
 
     LogPrint(BCLog::SPORK, "CSporkManager::GetSporkIDByName -- Unknown Spork name '%s'\n", strName);

@@ -227,6 +227,7 @@ public:
         fAllowMultiplePorts = false;
         nFulfilledRequestExpireTime = 60*60; // fulfilled requests expire in 1 hour
 
+        strSporkAddress = "bLa2RK9P7MqBLUGN4jcZXUM9nSgaVaYyxw";
         checkpointData = (CCheckpointData) {
             {
                 {      0, uint256S("0x00000000a6a47e28b4fea2ab47262d9a420bb1600dee375cad30fa54c9f6ec90")},
@@ -450,6 +451,7 @@ public:
         fAllowMultiplePorts = false;
         nFulfilledRequestExpireTime = 5*60; // fulfilled requests expire in 5 minutes
 
+        strSporkAddress = "bWYetMgxDgut45aaDNF7ySPJ66NTwjTDZc";
         checkpointData = (CCheckpointData) {
             {
                 {      0, uint256S("0x000000001d03315ec89ac7895ad122e3ae9c3c92a2ec5f63000794cdd6c18095")},
@@ -643,6 +645,7 @@ public:
         fAllowMultiplePorts = false;
         nFulfilledRequestExpireTime = 5*60; // fulfilled requests expire in 5 minutes
 
+        strSporkAddress = "bRLXw7eqUWMb9Uskk1pfvUozFgAkPZ2eMi";
         checkpointData = (CCheckpointData) {
             {
             }

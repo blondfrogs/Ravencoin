@@ -110,6 +110,7 @@ public:
     int MinReorganizationAge() const { return nMinReorganizationAge; }
     int FulfilledRequestExpireTime() const { return nFulfilledRequestExpireTime; }
     CAmount MNCollateralAmount() const { return mnCollateralAmount; }
+    const std::string& SporkAddress() const { return strSporkAddress; }
     /** BLAST End **/
 
 protected:
@@ -155,6 +156,7 @@ protected:
     CAmount mnCollateralAmount;
     bool fAllowMultiplePorts;
     int nFulfilledRequestExpireTime;
+    std::string strSporkAddress;
     /** BLAST End **/
 };
 
