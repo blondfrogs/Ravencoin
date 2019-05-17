@@ -103,7 +103,7 @@ bool CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockH
 }
 
 int CMasternodePayments::GetMinMasternodePaymentsProto() const {
-	return MIN_MASTERNODE_PAYMENT_PROTO_VERSION_2;
+	return MIN_MASTERNODE_PAYMENT_PROTO_VERSION;
 }
 
 void CMasternodePayments::ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman& connman)
@@ -535,13 +535,7 @@ bool CMasternodePaymentVote::IsValid(CNode* pnode, int nValidationHeight, std::s
         return false;
     }
 
-    int nMinRequiredProtocol;
-    if(nBlockHeight >= nValidationHeight) {
-        nMinRequiredProtocol = mnpayments.GetMinMasternodePaymentsProto();
-    } else {
-        // allow non-updated masternodes for old blocks
-        nMinRequiredProtocol = MIN_MASTERNODE_PAYMENT_PROTO_VERSION_1;
-    }
+    int nMinRequiredProtocol = mnpayments.GetMinMasternodePaymentsProto();
 
     if(mnInfo.nProtocolVersion < nMinRequiredProtocol) {
         strError = strprintf("Masternode protocol is too old: nProtocolVersion=%d, nMinRequiredProtocol=%d", mnInfo.nProtocolVersion, nMinRequiredProtocol);
