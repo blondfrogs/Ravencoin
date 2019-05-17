@@ -460,6 +460,7 @@ void BitcoinGUI::createActions()
         masternodeAction->setStatusTip(tr("Browse masternodes"));
         masternodeAction->setToolTip(masternodeAction->statusTip());
         masternodeAction->setCheckable(true);
+        masternodeAction->setFont(fontAlt);
 #ifdef Q_OS_MAC
         masternodeAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_5));
 #else
