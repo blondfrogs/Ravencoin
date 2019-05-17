@@ -56,8 +56,7 @@ struct Params {
     int nMasternodeMinimumConfirmations;
     int nGovernanceMinQuorum; // Min absolute vote count to trigger an action
     int nGovernanceFilterElements;
-    int nShareFeeBlock; // when to start enforcing 50/50 sharing of tx fees with masternodes
-   	int nSeniorityInterval;
+    int nSeniorityInterval;
 	int nTotalSeniorityIntervals;
 
     int minerRewardPercent;

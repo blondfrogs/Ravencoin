@@ -129,7 +129,6 @@ public:
         consensus.nMasternodeMinimumConfirmations = 15;
         consensus.nGovernanceMinQuorum = 10;
         consensus.nGovernanceFilterElements = 20000;
-        consensus.nShareFeeBlock = 175000;  // TODO: sandip set the share fee block
         consensus.nSeniorityInterval = 43800 * 4; // seniority increases every 4
 		consensus.nTotalSeniorityIntervals = 9;
 
@@ -294,7 +293,6 @@ public:
         consensus.nMasternodeMinimumConfirmations = 1;
         consensus.nGovernanceMinQuorum = 1;
         consensus.nGovernanceFilterElements = 500;
-        consensus.nShareFeeBlock = 1000;
         consensus.nSeniorityInterval = 60; // seniority increases every hour
 
         consensus.minerRewardPercent = 80;
@@ -513,7 +511,6 @@ public:
         consensus.nMasternodeMinimumConfirmations = 1;
         consensus.nGovernanceMinQuorum = 1;
         consensus.nGovernanceFilterElements = 100;
-        consensus.nShareFeeBlock = 1;
         consensus.nSeniorityInterval = 60; // seniority increases every hour
 
         consensus.minerRewardPercent = 80;
