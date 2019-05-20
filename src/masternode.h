@@ -370,7 +370,7 @@ public:
     {
         // Note: doesn't match serialization
 
-        CHashWriter ss(SER_GETHASH, MIN_PEER_PROTO_VERSION);
+        CHashWriter ss(SER_GETHASH, MASTERNODES_VERSION);
         // adding dummy values here to match old hashing format
         ss << masternodeOutpoint1;
         ss << masternodeOutpoint2;
@@ -384,7 +384,7 @@ public:
     {
         // Note: doesn't match serialization
 
-        CHashWriter ss(SER_GETHASH, MIN_PEER_PROTO_VERSION);
+        CHashWriter ss(SER_GETHASH, MASTERNODES_VERSION);
         ss << addr;
         ss << nonce;
         ss << blockHash;
@@ -395,7 +395,7 @@ public:
     {
         // Note: doesn't match serialization
 
-        CHashWriter ss(SER_GETHASH, MIN_PEER_PROTO_VERSION);
+        CHashWriter ss(SER_GETHASH, MASTERNODES_VERSION);
         ss << masternodeOutpoint1;
         ss << masternodeOutpoint2;
         ss << addr;

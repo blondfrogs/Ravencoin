@@ -227,7 +227,7 @@ uint256 CMasternodePaymentVote::GetHash() const
 {
     // Note: doesn't match serialization
 
-    CHashWriter ss(SER_GETHASH, MIN_PEER_PROTO_VERSION);
+    CHashWriter ss(SER_GETHASH, MASTERNODES_VERSION);
     ss << *(CScriptBase*)(&payee);
     ss << nBlockHeight;
 	ss << nStartHeight;
