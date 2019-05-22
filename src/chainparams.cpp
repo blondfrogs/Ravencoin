@@ -226,7 +226,7 @@ public:
         fAllowMultiplePorts = false;
         nFulfilledRequestExpireTime = 60*60; // fulfilled requests expire in 1 hour
 
-        strSporkAddress = "bLa2RK9P7MqBLUGN4jcZXUM9nSgaVaYyxw";
+        strSporkAddress = "BGqdCiPgBZTYdheLBVZhnY8aiN1Lp6M17T";
         checkpointData = (CCheckpointData) {
             {
                 {      0, uint256S("0x00000000a6a47e28b4fea2ab47262d9a420bb1600dee375cad30fa54c9f6ec90")},
