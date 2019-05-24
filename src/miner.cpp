@@ -187,7 +187,6 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     coinbaseTx.vout.resize(1);
     coinbaseTx.vout[0].scriptPubKey = scriptPubKeyIn;
 
-    // We'll add the miner reward after the call to FillBlockPayee
     coinbaseTx.vin[0].scriptSig = CScript() << nHeight << OP_0;
     if (!chainparams.MineBlocksOnDemand() && nHeight > 1 && !IsInitialBlockDownload() && !fUnitTest) {
 		if (masternodeSync.IsFailed()) {
@@ -197,25 +196,35 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
 			throw std::runtime_error("Masternode information has not synced, please wait until it finishes before mining!");
 		}
 	}
-    // Update coinbase transaction with additional info about masternode and governance payments,
-    // get some info back to pass to getblocktemplate
-	BlockSubsidies subsidies = GetBlockSubsidies(nHeight, chainparams.GetConsensus());
-    if (mnpayments.FillBlockPayee(coinbaseTx, nHeight, nFees, subsidies, pblocktemplate->txoutMasternode)) {
-        // found a masternode!
-        coinbaseTx.vout[0].nValue = subsidies.miner + nFees / 2;
 
+    // only pay masternodes and devs if the spork is active
+    if (nHeight >= chainparams.GetConsensus().nMasternodePaymentsStartBlock) {
+        // Update coinbase transaction with additional info about masternode and dev payments,
+        // get some info back to pass to getblocktemplate
+        const BlockSubsidies subsidies {GetTotalReward(nHeight, chainparams.GetConsensus())};
+        const auto& halfFees = nFees / 2;
+        if (mnpayments.FillBlockPayee(coinbaseTx, nHeight, subsidies.masternode + halfFees, pblocktemplate->txoutMasternode)) {
+            // found a masternode!
+            coinbaseTx.vout[0].nValue = subsidies.miner + halfFees;
+        } else {
+            // suitable masternode not found. give masternode's reward to the miner
+            coinbaseTx.vout[0].nValue = subsidies.miner + subsidies.masternode + nFees;
+        }
+
+        // add dev reward
+        CScript devScript = GetScriptForDestination(CBitcoinAddress(chainparams.GetConsensus().devWalletAddress).Get());
+        CTxOut devOut(subsidies.dev, devScript);
+        coinbaseTx.vout.push_back(devOut);
+
+        LogPrintf("CreateNewBlock -- nBlockHeight %d blockReward %lld txoutMasternode %s coinbaseTx %s",
+                         nHeight, subsidies.total, pblocktemplate->txoutMasternode.ToString(), coinbaseTx.ToString());
     } else {
-        // suitable masternode not found. give masternode's reward to the miner
-        coinbaseTx.vout[0].nValue = subsidies.miner + subsidies.masternode + nFees;
+        // give the miner the total reward
+        coinbaseTx.vout[0].nValue = GetTotalReward(nHeight, chainparams.GetConsensus());
+
+        LogPrintf("CreateNewBlock -- nBlockHeight %d blockReward %lld coinbaseTx %s",
+                        nHeight, coinbaseTx.vout[0].nValue, coinbaseTx.ToString());
     }
-
-    // add dev reward
-    CScript devScript = GetScriptForDestination(CBitcoinAddress(chainparams.GetConsensus().devWalletAddress).Get());
-    CTxOut devOut(subsidies.dev, devScript);
-    coinbaseTx.vout.push_back(devOut);
-
-    LogPrintf("CreateNewBlock -- nBlockHeight %d blockReward %lld txoutMasternode %s coinbaseTx %s",
-                nHeight, subsidies.getTotal(), pblocktemplate->txoutMasternode.ToString(), coinbaseTx.ToString());
 
     pblock->vtx[0] = MakeTransactionRef(std::move(coinbaseTx));
     pblocktemplate->vchCoinbaseCommitment = GenerateCoinbaseCommitment(*pblock, pindexPrev, chainparams.GetConsensus());

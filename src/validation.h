@@ -308,15 +308,11 @@ bool ActivateBestChain(CValidationState& state, const CChainParams& chainparams,
 double GuessVerificationProgress(const ChainTxData& data, CBlockIndex* pindex);
 
 struct BlockSubsidies {
-    CAmount masternode = 0, 
-            miner = 0,
-            dev = 0;
+    CAmount masternode, miner, dev, total;
 
-    inline CAmount getTotal() const { return masternode + miner + dev; }
+    BlockSubsidies(const CAmount& reward);
 };
 
-//Calculates the individual subsidies for the miner, the masternode and the devs based on the total reward
-BlockSubsidies GetBlockSubsidies(int nHeight, const Consensus::Params& consensusParams, unsigned int nStartHeight = 0);
 // Calculates the total reward for a block of given height
 CAmount GetTotalReward(int nHeight, const Consensus::Params& consensusParams);
 

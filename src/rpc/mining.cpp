@@ -458,9 +458,9 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
     if (IsInitialBlockDownload())
         throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "BLAST is downloading blocks...");
 
-    // when enforcement is on we need information about a masternode payee or otherwise our block is going to be orphaned by the network
+    // when masternode payment is on we need information about a masternode payee or otherwise our block is going to be orphaned by the network
     CScript payee;
-    if (sporkManager.IsSporkActive(SPORK_3_MASTERNODE_PAYMENT_ENFORCEMENT)
+    if (chainActive.Height() + 1 >= Params().GetConsensus().nMasternodePaymentsStartBlock
         && !masternodeSync.IsWinnersListSynced()
         && !mnpayments.GetBlockPayee(chainActive.Height() + 1, payee))
             throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "BLAST Core is downloading masternode winners...");
@@ -708,7 +708,6 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
 
     result.push_back(Pair("masternode", masternodeObj));
     result.push_back(Pair("masternode_payments_started", pindexPrev->nHeight + 1 > consensusParams.nMasternodePaymentsStartBlock));
-    result.push_back(Pair("masternode_payments_enforced", sporkManager.IsSporkActive(SPORK_3_MASTERNODE_PAYMENT_ENFORCEMENT)));
 
     return result;
 }

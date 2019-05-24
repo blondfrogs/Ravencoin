@@ -45,35 +45,14 @@ const char *GETASSETDATA="getassetdata";
 const char *ASSETDATA="assetdata";
 const char *ASSETNOTFOUND ="asstnotfound";
 
-// TODO: sandip remove unwanted
-const char *TXLOCKREQUEST="ix";
-const char *TXLOCKVOTE="txlvote";
 const char *SPORK="spork";
 const char *GETSPORKS="getsporks";
 const char *MASTERNODEPAYMENTVOTE="mnw";
-const char *MASTERNODEPAYMENTBLOCK="mnwb";
 const char *MASTERNODEPAYMENTSYNC="mnget";
-const char *MNBUDGETSYNC="mnvs"; // deprecated since 12.1
-const char *MNBUDGETVOTE="mvote"; // deprecated since 12.1
-const char *MNBUDGETPROPOSAL="mprop"; // deprecated since 12.1
-const char *MNBUDGETFINAL="fbs"; // deprecated since 12.1
-const char *MNBUDGETFINALVOTE="fbvote"; // deprecated since 12.1
-const char *MNQUORUM="mn quorum"; // not implemented
 const char *MNANNOUNCE="mnb";
 const char *MNPING="mnp";
-const char *DSACCEPT="dsa";
-const char *DSVIN="dsi";
-const char *DSFINALTX="dsf";
-const char *DSSIGNFINALTX="dss";
-const char *DSCOMPLETE="dsc";
-const char *DSSTATUSUPDATE="dssu";
-const char *DSTX="dstx";
-const char *DSQUEUE="dsq";
 const char *DSEG="dseg";
 const char *SYNCSTATUSCOUNT="ssc";
-const char *MNGOVERNANCESYNC="govsync";
-const char *MNGOVERNANCEOBJECT="govobj";
-const char *MNGOVERNANCEOBJECTVOTE="govobjvote";
 const char *MNVERIFY="mnv";
 } // namespace NetMsgType
 
@@ -113,28 +92,14 @@ const static std::string allNetMessageTypes[] = {
 
     // Syscoin message types
     // NOTE: do NOT include non-implmented here, we want them to be "Unknown command" in ProcessMessage()
-    NetMsgType::TXLOCKREQUEST,
-    NetMsgType::TXLOCKVOTE,
     NetMsgType::SPORK,
     NetMsgType::GETSPORKS,
     NetMsgType::MASTERNODEPAYMENTVOTE,
-    // NetMsgType::MASTERNODEPAYMENTBLOCK, // there is no message for this, only inventory
     NetMsgType::MASTERNODEPAYMENTSYNC,
     NetMsgType::MNANNOUNCE,
     NetMsgType::MNPING,
-    NetMsgType::DSACCEPT,
-    NetMsgType::DSVIN,
-    NetMsgType::DSFINALTX,
-    NetMsgType::DSSIGNFINALTX,
-    NetMsgType::DSCOMPLETE,
-    NetMsgType::DSSTATUSUPDATE,
-    NetMsgType::DSTX,
-    NetMsgType::DSQUEUE,
     NetMsgType::DSEG,
     NetMsgType::SYNCSTATUSCOUNT,
-    NetMsgType::MNGOVERNANCESYNC,
-    NetMsgType::MNGOVERNANCEOBJECT,
-    NetMsgType::MNGOVERNANCEOBJECTVOTE,
     NetMsgType::MNVERIFY,
 };
 
@@ -144,23 +109,17 @@ static const char* ppszTypeName[] =
     NetMsgType::TX,
     NetMsgType::BLOCK,
     "filtered block", // Should never occur
+
     // Syscoin message types
     // NOTE: include non-implmented here, we must keep this list in sync with enum in protocol.h
-    NetMsgType::TXLOCKREQUEST,
-    NetMsgType::TXLOCKVOTE,
     NetMsgType::SPORK,
+    NetMsgType::GETSPORKS,
     NetMsgType::MASTERNODEPAYMENTVOTE,
-    NetMsgType::MASTERNODEPAYMENTBLOCK, // reusing, was MNSCANERROR previousely, was NOT used in 12.0, we need this for inv
-    NetMsgType::MNBUDGETVOTE, // deprecated since 12.1
-    NetMsgType::MNBUDGETPROPOSAL, // deprecated since 12.1
-    NetMsgType::MNBUDGETFINAL, // deprecated since 12.1
-    NetMsgType::MNBUDGETFINALVOTE, // deprecated since 12.1
-    NetMsgType::MNQUORUM, // not implemented
+    NetMsgType::MASTERNODEPAYMENTSYNC,
     NetMsgType::MNANNOUNCE,
     NetMsgType::MNPING,
-    NetMsgType::DSTX,
-    NetMsgType::MNGOVERNANCEOBJECT,
-    NetMsgType::MNGOVERNANCEOBJECTVOTE,
+    NetMsgType::DSEG,
+    NetMsgType::SYNCSTATUSCOUNT,
     NetMsgType::MNVERIFY,
     "compact block", // Should never occur
 };

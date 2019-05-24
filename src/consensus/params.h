@@ -51,13 +51,7 @@ struct Params {
     int nMajorityRejectBlockOutdated;
     int nMajorityWindow;
     int nMasternodePaymentsStartBlock;
-    int nMasternodePaymentsIncreaseBlock;
-    int nMasternodePaymentsIncreasePeriod; // in blocks
     int nMasternodeMinimumConfirmations;
-    int nGovernanceMinQuorum; // Min absolute vote count to trigger an action
-    int nGovernanceFilterElements;
-    int nSeniorityInterval;
-	int nTotalSeniorityIntervals;
 
     int minerRewardPercent;
     int masternodeRewardPercent;

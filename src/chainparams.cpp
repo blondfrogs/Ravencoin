@@ -123,14 +123,8 @@ public:
         consensus.nMajorityEnforceBlockUpgrade = 750;
         consensus.nMajorityRejectBlockOutdated = 950;
         consensus.nMajorityWindow = 1000;
-        consensus.nMasternodePaymentsStartBlock = 2; // not true, but it's ok as long as it's less then nMasternodePaymentsIncreaseBlock
-        consensus.nMasternodePaymentsIncreaseBlock = 2; // actual historical value
-        consensus.nMasternodePaymentsIncreasePeriod = 576*30; // 17280 - actual historical value
+        consensus.nMasternodePaymentsStartBlock = 2;
         consensus.nMasternodeMinimumConfirmations = 15;
-        consensus.nGovernanceMinQuorum = 10;
-        consensus.nGovernanceFilterElements = 20000;
-        consensus.nSeniorityInterval = 43800 * 4; // seniority increases every 4
-		consensus.nTotalSeniorityIntervals = 9;
 
         consensus.minerRewardPercent = 80;
         consensus.masternodeRewardPercent = 15;
@@ -288,19 +282,13 @@ public:
         consensus.nMajorityRejectBlockOutdated = 950;
         consensus.nMajorityWindow = 1000;
         consensus.nMasternodePaymentsStartBlock = 2;
-        consensus.nMasternodePaymentsIncreaseBlock = 2; 
-        consensus.nMasternodePaymentsIncreasePeriod = 10;
         consensus.nMasternodeMinimumConfirmations = 1;
-        consensus.nGovernanceMinQuorum = 1;
-        consensus.nGovernanceFilterElements = 500;
-        consensus.nSeniorityInterval = 60; // seniority increases every hour
 
         consensus.minerRewardPercent = 80;
         consensus.masternodeRewardPercent = 15;
         consensus.devRewardPercent = 5;
         consensus.devWalletAddress = "8QD1FZNN41npesU92uRAs4ZBCZ2ccviFP7";
 
-		consensus.nTotalSeniorityIntervals = 9;
         consensus.BIP34Height = 0;
         consensus.BIP34Hash = uint256S("0x0000000077062645faa71f32cd3fe871f4ca4f145d16781ff3ccaedf3ad2f1cd"); // Genesis hash (height 0)
         
@@ -505,20 +493,14 @@ public:
         consensus.nMajorityEnforceBlockUpgrade = 750;
         consensus.nMajorityRejectBlockOutdated = 950;
         consensus.nMajorityWindow = 1000;
-        consensus.nMasternodePaymentsStartBlock = 4010; // not true, but it's ok as long as it's less then nMasternodePaymentsIncreaseBlock
-        consensus.nMasternodePaymentsIncreaseBlock = 4030;
-        consensus.nMasternodePaymentsIncreasePeriod = 10;
+        consensus.nMasternodePaymentsStartBlock = 4010;
         consensus.nMasternodeMinimumConfirmations = 1;
-        consensus.nGovernanceMinQuorum = 1;
-        consensus.nGovernanceFilterElements = 100;
-        consensus.nSeniorityInterval = 60; // seniority increases every hour
 
         consensus.minerRewardPercent = 80;
         consensus.masternodeRewardPercent = 15;
         consensus.devRewardPercent = 5;
         consensus.devWalletAddress = "8QD1FZNN41npesU92uRAs4ZBCZ2ccviFP7";
 
-		consensus.nTotalSeniorityIntervals = 9;
         consensus.BIP34Height = -1; // BIP34 has not necessarily activated on regtest
         consensus.BIP34Hash = uint256();
         

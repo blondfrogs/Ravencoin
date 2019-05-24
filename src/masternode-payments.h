@@ -95,10 +95,9 @@ public:
 
     void AddPayee(const CMasternodePaymentVote& vote);
     bool GetBestPayee(CScript& payeeRet) const;
-	bool GetBestPayee(CScript& payeeRet, int &nStartHeightBlock) const;
     bool HasPayeeWithVotes(const CScript& payeeIn, int nVotesReq, CMasternodePayee& payee) const;
 
-    bool IsTransactionValid(const CTransaction& txNew, const int64_t &nHeight, const CAmount& fee, CAmount& nTotalRewardWithMasternodes) const;
+    bool IsTransactionValid(const CTransaction& txNew, const int64_t &nHeight, const CAmount& fee) const;
 
     std::string GetRequiredPaymentsString() const;
 };
@@ -204,8 +203,7 @@ public:
     void CheckAndRemove();
 
     bool GetBlockPayee(int nBlockHeight, CScript& payeeRet) const;
-	bool GetBlockPayee(int nBlockHeight, CScript& payee, int &nStartHeightBlock) const;
-    bool IsTransactionValid(const CTransaction& txNew, int nBlockHeight, const CAmount& fee, CAmount& nTotalRewardWithMasternodes) const;
+    bool IsTransactionValid(const CTransaction& txNew, int nBlockHeight, const CAmount& fee) const;
     bool IsScheduled(const masternode_info_t& mnInfo, int nNotBlockHeight) const;
 
     bool UpdateLastVote(const CMasternodePaymentVote& vote);
@@ -213,7 +211,7 @@ public:
     int GetMinMasternodePaymentsProto() const;
     void ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman& connman);
     std::string GetRequiredPaymentsString(int nBlockHeight) const;
-    bool FillBlockPayee(CMutableTransaction& txNew, int nBlockHeight, CAmount fees, BlockSubsidies& subsidies, CTxOut& masternodeTxOut) const;
+    bool FillBlockPayee(CMutableTransaction& txNew, int nBlockHeight, CAmount payment, CTxOut& masternodeTxOut) const;
     std::string ToString() const;
 
     int GetBlockCount() const { return mapMasternodeBlocks.size(); }

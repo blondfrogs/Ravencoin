@@ -65,16 +65,14 @@ bool CMasternodePayments::UpdateLastVote(const CMasternodePaymentVote& vote)
 *   Fill Masternode ONLY payment block
 */
 
-bool CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockHeight, CAmount fees, BlockSubsidies& subsidies, CTxOut& masternodeTxOut) const
+bool CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockHeight, CAmount payment, CTxOut& masternodeTxOut) const
 {
-    const CAmount halfFees = fees / 2;
     // make sure it's not filled yet
     masternodeTxOut = CTxOut();
     CScript payee;
-	int nStartHeightBlock = 0;
 
     // find a masternode
-    if(!GetBlockPayee(nBlockHeight, payee, nStartHeightBlock)) {
+    if(!GetBlockPayee(nBlockHeight, payee)) {
         // no masternode detected...
         int nCount = 0;
         masternode_info_t mnInfo;
@@ -85,11 +83,9 @@ bool CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockH
         }
         // fill payee with locally calculated winner and hope for the best
         payee = GetScriptForDestination(mnInfo.pubKeyCollateralAddress.GetID());
-		nStartHeightBlock = 0;
     }
 
-    subsidies = GetBlockSubsidies(nBlockHeight, Params().GetConsensus(), nStartHeightBlock);
-    masternodeTxOut = CTxOut(subsidies.masternode + halfFees, payee);
+    masternodeTxOut = CTxOut(payment, payee);
 
     txNew.vout.push_back(masternodeTxOut);
 
@@ -98,7 +94,7 @@ bool CMasternodePayments::FillBlockPayee(CMutableTransaction& txNew, int nBlockH
     ExtractDestination(payee, address1);
     CBitcoinAddress address2(address1);
 
-    LogPrintf("CMasternodePayments::FillBlockPayee -- Masternode payment %lld + %lld to %s\n", subsidies.masternode, halfFees, address2.ToString());
+    LogPrintf("CMasternodePayments::FillBlockPayee -- Masternode payment %lld to %s\n", payment, address2.ToString());
     return true;
 }
 
@@ -268,11 +264,7 @@ bool CMasternodePayments::GetBlockPayee(int nBlockHeight, CScript& payeeRet) con
     auto it = mapMasternodeBlocks.find(nBlockHeight);
     return it != mapMasternodeBlocks.end() && it->second.GetBestPayee(payeeRet);
 }
-bool CMasternodePayments::GetBlockPayee(int nBlockHeight, CScript& payeeRet, int &nStartHeightBlock) const
-{
-	auto it = mapMasternodeBlocks.find(nBlockHeight);
-	return it != mapMasternodeBlocks.end() && it->second.GetBestPayee(payeeRet, nStartHeightBlock);
-}
+
 // Is this masternode scheduled to get paid soon?
 // -- Only look ahead up to 8 blocks to allow for propagation of the latest 2 blocks of votes
 bool CMasternodePayments::IsScheduled(const masternode_info_t& mnInfo, int nNotBlockHeight) const
@@ -358,26 +350,7 @@ bool CMasternodeBlockPayees::GetBestPayee(CScript& payeeRet) const
 
     return (nVotes > -1);
 }
-bool CMasternodeBlockPayees::GetBestPayee(CScript& payeeRet, int& nStartHeightBlock) const
-{
-	LOCK(cs_vecPayees);
 
-	if (vecPayees.empty()) {
-		LogPrint(BCLog::MNPAYMENT, "CMasternodeBlockPayees::GetBestPayee -- ERROR: couldn't find any payee\n");
-		return false;
-	}
-
-	int nVotes = -1;
-	for (const auto& payee : vecPayees) {
-		if (payee.GetVoteCount() > nVotes) {
-			payeeRet = payee.GetPayee();
-			nVotes = payee.GetVoteCount();
-			nStartHeightBlock = payee.nStartHeight;
-		}
-	}
-
-	return (nVotes > -1);
-}
 bool CMasternodeBlockPayees::HasPayeeWithVotes(const CScript& payeeIn, int nVotesReq, CMasternodePayee& payeeOut) const
 {
     LOCK(cs_vecPayees);
@@ -393,7 +366,7 @@ bool CMasternodeBlockPayees::HasPayeeWithVotes(const CScript& payeeIn, int nVote
     return false;
 }
 
-bool CMasternodeBlockPayees::IsTransactionValid(const CTransaction& txNew, const int64_t &nHeight, const CAmount& fee, CAmount& nTotalRewardWithMasternodes) const
+bool CMasternodeBlockPayees::IsTransactionValid(const CTransaction& txNew, const int64_t &nHeight, const CAmount& fee) const
 {
     LOCK(cs_vecPayees);
     int nMaxSignatures = 0;
@@ -410,12 +383,11 @@ bool CMasternodeBlockPayees::IsTransactionValid(const CTransaction& txNew, const
         }
     }
 
-	CAmount masternodePayment = 0;
+    const CAmount masternodePayment = BlockSubsidies(GetTotalReward(nHeight, chainparams.GetConsensus())).masternode 
+                                      + (fee / 2);
+
 	for (const auto& payee : vecPayees) {
 		const CScript& payeeScript = payee.GetPayee();
-        const auto& subsidies = GetBlockSubsidies(nHeight, chainparams.GetConsensus(), payee.nStartHeight);
-        masternodePayment = subsidies.masternode + (fee / 2);
-        nTotalRewardWithMasternodes = subsidies.getTotal();
 
 		bool bFoundPayment = false;
 		for(const CTxOut& txout: txNew.vout) {
@@ -444,8 +416,6 @@ bool CMasternodeBlockPayees::IsTransactionValid(const CTransaction& txNew, const
 
 	// if not enough sigs approve longest chain
 	if (nMaxSignatures < MNPAYMENTS_SIGNATURES_REQUIRED) {
-		nTotalRewardWithMasternodes = txNew.GetValueOut();
-        nTotalRewardWithMasternodes  -= fee;
 		return true;
 	}
     LogPrintf("CMasternodeBlockPayees::IsTransactionValid -- ERROR: Missing required payment, possible payees: '%s', amount: %f SYS\n", strPayeesPossible, (float)masternodePayment / COIN);
@@ -484,17 +454,16 @@ std::string CMasternodePayments::GetRequiredPaymentsString(int nBlockHeight) con
     return it == mapMasternodeBlocks.end() ? "Unknown" : it->second.GetRequiredPaymentsString();
 }
 
-bool CMasternodePayments::IsTransactionValid(const CTransaction& txNew, int nBlockHeight, const CAmount& fee, CAmount& nTotalRewardWithMasternodes) const
+bool CMasternodePayments::IsTransactionValid(const CTransaction& txNew, int nBlockHeight, const CAmount& fee) const
 {
     LOCK(cs_mapMasternodeBlocks);
 
     const auto it = mapMasternodeBlocks.find(nBlockHeight);
 	if (it == mapMasternodeBlocks.end()) {
-		nTotalRewardWithMasternodes = txNew.GetValueOut();
 		return true;
 	}
 	else {
-		return it->second.IsTransactionValid(txNew, nBlockHeight, fee, nTotalRewardWithMasternodes);
+		return it->second.IsTransactionValid(txNew, nBlockHeight, fee);
 	}
 }
 

@@ -291,7 +291,9 @@ void CMasternode::UpdateLastPaid(const CBlockIndex *pindex, int nMaxBlocksToScan
 	
 	const CChainParams& chainparams = Params();
     CScript mnpayee = GetScriptForDestination(pubKeyCollateralAddress.GetID());
-    // LogPrint(BCLog::MNPAYMENT, "CMasternode::UpdateLastPaidBlock -- searching for block with payment to %s\n", outpoint.ToStringShort());
+    const CAmount masternodeSubsidy = BlockSubsidies(GetTotalReward(BlockReading->nHeight, 
+                                                                    chainparams.GetConsensus())).masternode;
+    LogPrint(BCLog::MNPAYMENT, "CMasternode::UpdateLastPaidBlock -- searching for block with payment to %s\n", outpoint.ToStringShort());
 
     LOCK(cs_mapMasternodeBlocks);
 	CMasternodePayee payee;
@@ -306,10 +308,9 @@ void CMasternode::UpdateLastPaid(const CBlockIndex *pindex, int nMaxBlocksToScan
 				LogPrint(BCLog::MNPAYMENT, "CMasternode::UpdateLastPaidBlock -- Could not read block from disk\n");
 				continue; // shouldn't really happen
 			}
-            const BlockSubsidies& subsidies = GetBlockSubsidies(BlockReading->nHeight, chainparams.GetConsensus(), payee.nStartHeight);
 
             for (const auto& txout : block.vtx[0]->vout)
-                if(mnpayee == txout.scriptPubKey && subsidies.masternode <= txout.nValue) {
+                if(mnpayee == txout.scriptPubKey && masternodeSubsidy <= txout.nValue) {
                     nBlockLastPaid = BlockReading->nHeight;
                     nTimeLastPaid = BlockReading->nTime;
                     LogPrint(BCLog::MNPAYMENT, "CMasternode::UpdateLastPaidBlock -- searching for block with payment to %s -- found new %d\n", outpoint.ToStringShort(), nBlockLastPaid);
@@ -323,7 +324,7 @@ void CMasternode::UpdateLastPaid(const CBlockIndex *pindex, int nMaxBlocksToScan
 
     // Last payment for this masternode wasn't found in latest mnpayments blocks
     // or it was found in mnpayments blocks but wasn't found in the blockchain.
-    // LogPrint(BCLog::MNPAYMENT, "CMasternode::UpdateLastPaidBlock -- searching for block with payment to %s -- keeping old %d\n", outpoint.ToStringShort(), nBlockLastPaid);
+    LogPrint(BCLog::MNPAYMENT, "CMasternode::UpdateLastPaidBlock -- searching for block with payment to %s -- keeping old %d\n", outpoint.ToStringShort(), nBlockLastPaid);
 }
 
 #ifdef ENABLE_WALLET

@@ -19,11 +19,10 @@ class CSporkManager;
     - This would result in old clients getting confused about which spork is for what
 */
 static const int SPORK_2_NEW_SIGS                                       = 10001;
-static const int SPORK_3_MASTERNODE_PAYMENT_ENFORCEMENT                 = 10002;
-static const int SPORK_4_RECONSIDER_BLOCKS                              = 10003;
+static const int SPORK_3_RECONSIDER_BLOCKS                              = 10002;
 
 static const int SPORK_START                                            = SPORK_2_NEW_SIGS;
-static const int SPORK_END                                              = SPORK_4_RECONSIDER_BLOCKS;
+static const int SPORK_END                                              = SPORK_3_RECONSIDER_BLOCKS;
 
 extern std::map<int, int64_t> mapSporkDefaults;
 extern std::map<uint256, CSporkMessage> mapSporks;

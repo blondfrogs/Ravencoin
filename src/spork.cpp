@@ -19,8 +19,7 @@ CSporkManager sporkManager;
 std::map<uint256, CSporkMessage> mapSporks;
 std::map<int, int64_t> mapSporkDefaults = {
     {SPORK_2_NEW_SIGS,                       0}, // ON
-    {SPORK_3_MASTERNODE_PAYMENT_ENFORCEMENT, 0}, // ON
-    {SPORK_4_RECONSIDER_BLOCKS,             0},             // 0 BLOCKS
+    {SPORK_3_RECONSIDER_BLOCKS,             0},             // 0 BLOCKS
 };
 
 void CSporkManager::ProcessSpork(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman& connman)
@@ -78,7 +77,7 @@ void CSporkManager::ProcessSpork(CNode* pfrom, const std::string& strCommand, CD
 void CSporkManager::ExecuteSpork(int nSporkID, int nValue)
 {
     //correct fork via spork technology
-    if(nSporkID == SPORK_4_RECONSIDER_BLOCKS && nValue > 0) {
+    if(nSporkID == SPORK_3_RECONSIDER_BLOCKS && nValue > 0) {
         // allow to reprocess 24h of blocks max, which should be enough to resolve any issues
         int64_t nMaxBlocks = 2700;
         // this potentially can be a heavy operation, so only allow this to be executed once per 10 minutes
@@ -153,8 +152,7 @@ int64_t CSporkManager::GetSporkValue(int nSporkID)
 int CSporkManager::GetSporkIDByName(const std::string& strName)
 {
     if (strName == "SPORK_2_NEW_SIGS")                         return SPORK_2_NEW_SIGS;
-    if (strName == "SPORK_3_MASTERNODE_PAYMENT_ENFORCEMENT")   return SPORK_3_MASTERNODE_PAYMENT_ENFORCEMENT;
-    if (strName == "SPORK_4_RECONSIDER_BLOCKS")                return SPORK_4_RECONSIDER_BLOCKS;
+    if (strName == "SPORK_3_RECONSIDER_BLOCKS")                return SPORK_3_RECONSIDER_BLOCKS;
 
     LogPrint(BCLog::SPORK, "CSporkManager::GetSporkIDByName -- Unknown Spork name '%s'\n", strName);
     return -1;
@@ -164,8 +162,7 @@ std::string CSporkManager::GetSporkNameByID(int nSporkID)
 {
     switch (nSporkID) {
         case SPORK_2_NEW_SIGS:                          return "SPORK_2_NEW_SIGS";
-        case SPORK_3_MASTERNODE_PAYMENT_ENFORCEMENT:    return "SPORK_3_MASTERNODE_PAYMENT_ENFORCEMENT";
-        case SPORK_4_RECONSIDER_BLOCKS:                return "SPORK_4_RECONSIDER_BLOCKS";
+        case SPORK_3_RECONSIDER_BLOCKS:                 return "SPORK_3_RECONSIDER_BLOCKS";
         default:
             LogPrint(BCLog::SPORK, "CSporkManager::GetSporkNameByID -- Unknown Spork ID %d\n", nSporkID);
             return "Unknown";

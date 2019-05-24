@@ -985,10 +985,6 @@ bool static AlreadyHave(const CInv& inv) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
     case MSG_MASTERNODE_PING:
         return mnodeman.mapSeenMasternodePing.count(inv.hash);
 
-    // case MSG_DSTX: {
-    //     return static_cast<bool>(CPrivateSend::GetDSTX(inv.hash));
-    // }
-
     case MSG_MASTERNODE_VERIFY:
         return mnodeman.mapSeenMasternodeVerification.count(inv.hash);
     }
@@ -1247,14 +1243,6 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                         push = true;
                     }
                 }
-
-                // if (!push && inv.type == MSG_DSTX) {
-                //     CDarksendBroadcastTx dstx = CPrivateSend::GetDSTX(inv.hash);
-                //     if(dstx) {
-                //         connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::DSTX, dstx));
-                //         push = true;
-                //     }
-                // }
 
                 if (!push && inv.type == MSG_MASTERNODE_VERIFY) {
                     if(mnodeman.mapSeenMasternodeVerification.count(inv.hash)) {

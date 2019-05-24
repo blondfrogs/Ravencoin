@@ -1211,36 +1211,12 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus
     return true;
 }
 
-BlockSubsidies GetBlockSubsidies(int nHeight, const Consensus::Params& consensusParams, unsigned int nStartHeight) {
-    BlockSubsidies subsidies;
-    CAmount totalSubsidy = GetTotalReward(nHeight, consensusParams);
-    if (totalSubsidy == 0) {
-        // return 0 initialized values
-        return subsidies;
-    }
-
-    subsidies.miner = totalSubsidy * consensusParams.minerRewardPercent / 100;
-    subsidies.dev = totalSubsidy * consensusParams.devRewardPercent / 100;
-    subsidies.masternode = totalSubsidy * consensusParams.masternodeRewardPercent / 100;
-
-    // add masternode's seniority bonus
-    if (nHeight > 0 && nStartHeight > 0) {
-        unsigned int nDifferenceInBlocks = 0;
-        if (nHeight > (int)nStartHeight)
-            nDifferenceInBlocks = (nHeight - (int)nStartHeight);
-        // the first three intervals should discount rewards to incentivize bonding over longer terms (we add 3% premium every interval)
-        double fSubsidyAdjustmentPercentage = 0;
-        for (int i = 1; i <= consensusParams.nTotalSeniorityIntervals; i++) {
-            const unsigned int &nTotalSeniorityBlocks = i * consensusParams.nSeniorityInterval;
-            if (nDifferenceInBlocks <= nTotalSeniorityBlocks)
-                break;
-            fSubsidyAdjustmentPercentage += 0.03;
-        }
-        const CAmount &seniorityBonus = subsidies.masternode * fSubsidyAdjustmentPercentage;
-        subsidies.masternode += seniorityBonus;
-    }
-
-	return subsidies;
+BlockSubsidies::BlockSubsidies(const CAmount& reward): total(reward) {
+    // Calculate the individual subsidies for the miner, the masternode and the devs based on the total reward
+    const auto& params = Params().GetConsensus();
+    miner = total * params.minerRewardPercent / 100;
+    dev = total * params.devRewardPercent / 100;
+    masternode = total * params.masternodeRewardPercent / 100;
 }
 
 CAmount GetTotalReward(int nHeight, const Consensus::Params& consensusParams) {
@@ -2181,31 +2157,25 @@ static unsigned int GetBlockScriptFlags(const CBlockIndex* pindex, const Consens
 *
 */
 
-bool IsBlockValueValid(const CBlock& block, int nBlockHeight, const CAmount &blockReward, const CAmount &nFee, std::string& strErrorRet)
+bool IsBlockValueValid(const CBlock& block, int nBlockHeight, const CAmount &nFee, std::string& strErrorRet)
 {
     strErrorRet = "";
     const CAmount vOutTotal = block.vtx[0]->GetValueOut();
 
-    // get subsidy for the block height with the max possible seniority bonus
-    const auto& subsidies = GetBlockSubsidies(nBlockHeight, Params().GetConsensus(), 1);
-    if (vOutTotal > (subsidies.getTotal() + nFee)) {
-        strErrorRet = strprintf("IsBlockValueValid: coinbase amount exceeds block subsidy schedule");
+    const auto& expectedReward = GetTotalReward(nBlockHeight, Params().GetConsensus()) + nFee;
+
+    if (vOutTotal > expectedReward) {
+        strErrorRet = strprintf("IsBlockValueValid: coinbase amount exceeds expected value.");
         return false;
     }
 
-    // ensure that the block's actual output value is not more than the expected block reward
-    const CAmount& blockRewardWithFee = blockReward + nFee;
-    if (vOutTotal > blockRewardWithFee) {
-        return false;
-    }
-
-	if (fDebug) LogPrintf("block.vtx[0].GetValueOut() %lld <= blockReward %lld\n", vOutTotal, blockRewardWithFee);
+	if (fDebug) LogPrintf("block.vtx[0].GetValueOut() %lld <= blockReward %lld\n", vOutTotal, expectedReward);
     return true;
 }
 
 // checks whether txNew has a vout that pays appropriate subsidy to the dev address
 bool IsDevRewardValid(const CTransaction& txNew, int nBlockHeight) {
-    const auto& devSubsidy = GetBlockSubsidies(nBlockHeight, Params().GetConsensus()).dev;
+    const CAmount devSubsidy = BlockSubsidies(GetTotalReward(nBlockHeight, Params().GetConsensus())).dev;
     CScript devScript = GetScriptForDestination(CBitcoinAddress(Params().GetConsensus().devWalletAddress).Get());
 
     for(const CTxOut& txout: txNew.vout) {
@@ -2217,9 +2187,9 @@ bool IsDevRewardValid(const CTransaction& txNew, int nBlockHeight) {
     return false;
 }
 
-bool IsBlockPayeeValid(const CTransaction& txNew, int nBlockHeight, const CAmount &fee, CAmount& nTotalRewardWithMasternodes)
+bool IsBlockPayeeValid(const CTransaction& txNew, int nBlockHeight, const CAmount &fee)
 {
-    if(sporkManager.IsSporkActive(SPORK_3_MASTERNODE_PAYMENT_ENFORCEMENT)) {
+    if(nBlockHeight >= Params().GetConsensus().nMasternodePaymentsStartBlock) {
         // check dev payments
         if (!IsDevRewardValid(txNew, nBlockHeight)) {
             LogPrintf("IsBlockPayeeValid -- ERROR: Invalid dev payment detected at height %d: %s", nBlockHeight, txNew.ToString());
@@ -2229,11 +2199,10 @@ bool IsBlockPayeeValid(const CTransaction& txNew, int nBlockHeight, const CAmoun
         if(!masternodeSync.IsSynced() || fLiteMode) {
             //there is no budget data to use to check anything, let's just accept the longest chain
             if (fDebug) LogPrintf("IsBlockPayeeValid -- WARNING: Not enough data, skipping block payee checks\n");
-            nTotalRewardWithMasternodes = txNew.GetValueOut();
             return true;
         }
 
-        if(!mnpayments.IsTransactionValid(txNew, nBlockHeight, fee, nTotalRewardWithMasternodes)) {
+        if(!mnpayments.IsTransactionValid(txNew, nBlockHeight, fee)) {
             LogPrintf("IsBlockPayeeValid -- ERROR: Invalid masternode payment detected at height %d: %s", nBlockHeight, txNew.ToString());
             return false;
         }
@@ -2676,10 +2645,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     int64_t nTime3 = GetTimeMicros(); nTimeConnect += nTime3 - nTime2;
     LogPrint(BCLog::BENCH, "      - Connect %u transactions: %.2fms (%.3fms/tx, %.3fms/txin) [%.2fs (%.2fms/blk)]\n", (unsigned)block.vtx.size(), MILLI * (nTime3 - nTime2), MILLI * (nTime3 - nTime2) / block.vtx.size(), nInputs <= 1 ? 0 : MILLI * (nTime3 - nTime2) / (nInputs-1), nTimeConnect * MICRO, nTimeConnect * MILLI / nBlocksTotal);
 
-    const auto& subsidies = GetBlockSubsidies(pindex->nHeight, chainparams.GetConsensus());
-    CAmount totalSubsidy = subsidies.getTotal();
-
-    if (!IsBlockPayeeValid(*block.vtx[0], pindex->nHeight, nFees, totalSubsidy)) {
+    if (!IsBlockPayeeValid(*block.vtx[0], pindex->nHeight, nFees)) {
 		{
 			LOCK(cs_main);
 			mapRejectedBlocks.insert(std::make_pair(block.GetHash(), GetTime()));
@@ -2689,7 +2655,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
 	}
 
     std::string strError = "";
-    if (!IsBlockValueValid(block, pindex->nHeight, totalSubsidy, nFees, strError)) {
+    if (!IsBlockValueValid(block, pindex->nHeight, nFees, strError)) {
         return state.DoS(0, error("ConnectBlock: %s", strError), REJECT_INVALID, "bad-cb-amount");
     }
 
