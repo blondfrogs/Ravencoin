@@ -23,14 +23,17 @@ public:
         std::string privKey;
         std::string txHash;
         std::string outputIndex;
+        std::string identifier;
+
     public:
 
-        CMasternodeEntry(const std::string& alias, const std::string& ip, const std::string& privKey, const std::string& txHash, const std::string& outputIndex) {
+        CMasternodeEntry(const std::string& alias, const std::string& ip, const std::string& privKey, const std::string& txHash, const std::string& outputIndex, const std::string& identifier) {
             this->alias = alias;
             this->ip = ip;
             this->privKey = privKey;
             this->txHash = txHash;
             this->outputIndex = outputIndex;
+            this->identifier = identifier;
         }
 
         const std::string& getAlias() const {
@@ -65,6 +68,14 @@ public:
             this->txHash = txHash;
         }
 
+        const std::string& getIdentifier() const {
+            return identifier;
+        }
+
+        void setIdentifier(const std::string& identifier) {
+            this->identifier = identifier;
+        }
+
         const std::string& getIp() const {
             return ip;
         }
@@ -80,7 +91,7 @@ public:
 
     void clear();
     bool read(std::string& strErrRet);
-    void add(const std::string& alias, const std::string& ip, const std::string& privKey, const std::string& txHash, const std::string& outputIndex);
+    void add(const std::string& alias, const std::string& ip, const std::string& privKey, const std::string& txHash, const std::string& outputIndex, const std::string& identifier);
 
     std::vector<CMasternodeEntry>& getEntries() {
         return entries;
