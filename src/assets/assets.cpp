@@ -4284,12 +4284,15 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
                 std::string change_address = EncodeDestination(coinControl.destChange);
                 // If this is a transfer of a restricted asset, check the destination address against the verifier string
                 CNullAssetTxVerifierString verifier;
-                if (!passets->GetAssetVerifierStringIfExists(asset_name, verifier))
-                    throw JSONRPCError(RPC_DATABASE_ERROR, _("Unable to get restricted assets verifier string. Database out of sync. Reindex required"));
+                if (!passets->GetAssetVerifierStringIfExists(asset_name, verifier)) {
+                    error = std::make_pair(RPC_DATABASE_ERROR, _("Unable to get restricted assets verifier string. Database out of sync. Reindex required"));
+                    return false;
+                }
 
-                if (!CheckVerifierString(*passets, verifier.verifier_string, change_address, strError))
-                    throw JSONRPCError(RPC_DATABASE_ERROR,
-                                       std::string(_("Change address can not be sent to because it doesn't have the correct qualifier tags") + strError));
+                if (!CheckVerifierString(*passets, verifier.verifier_string, change_address, strError)) {
+                    error = std::make_pair(RPC_DATABASE_ERROR, std::string(_("Change address can not be sent to because it doesn't have the correct qualifier tags") + strError));
+                    return false;
+                }
             }
         }
 
@@ -4310,11 +4313,15 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
         for (auto pair : *nullAssetTxData) {
 
             if (IsAssetNameAQualifier(pair.first.asset_name)) {
-                if (!VerifyQualifierChange(*passets, pair.first, pair.second, strError))
-                    throw JSONRPCError(RPC_INVALID_REQUEST, strError);
+                if (!VerifyQualifierChange(*passets, pair.first, pair.second, strError)) {
+                    error = std::make_pair(RPC_INVALID_REQUEST, strError);
+                    return false;
+                }
             } else if (IsAssetNameAnRestricted(pair.first.asset_name)) {
-                if (!VerifyRestrictedAddressChange(*passets, pair.first, pair.second, strError))
-                    throw JSONRPCError(RPC_INVALID_REQUEST, strError);
+                if (!VerifyRestrictedAddressChange(*passets, pair.first, pair.second, strError)) {
+                    error = std::make_pair(RPC_INVALID_REQUEST, strError);
+                    return false;
+                }
             }
 
             CScript dataScript = GetScriptForNullAssetDataDestination(DecodeDestination(pair.second));
@@ -4330,8 +4337,10 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
         std::string strError = "";
         for (auto dataObject : *nullGlobalRestrictionData) {
 
-            if (!VerifyGlobalRestrictedChange(*passets, dataObject, strError))
-                throw JSONRPCError(RPC_INVALID_REQUEST, strError);
+            if (!VerifyGlobalRestrictedChange(*passets, dataObject, strError)) {
+                error = std::make_pair(RPC_INVALID_REQUEST, strError);
+                return false;
+            }
 
             CScript dataScript;
             dataObject.ConstructGlobalRestrictionTransaction(dataScript);
