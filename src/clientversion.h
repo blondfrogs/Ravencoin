@@ -42,7 +42,7 @@ static const int CLIENT_VERSION =
                          +     100 * CLIENT_VERSION_REVISION
                          +       1 * CLIENT_VERSION_BUILD;
 
-static const int CLIENT_MASTERNODE_VERSION = 3000000;
+static const int CLIENT_MASTERNODE_VERSION = 2000000;
 
 extern const std::string CLIENT_NAME;
 extern const std::string CLIENT_BUILD;

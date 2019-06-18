@@ -123,7 +123,7 @@ public:
         consensus.nMajorityEnforceBlockUpgrade = 750;
         consensus.nMajorityRejectBlockOutdated = 950;
         consensus.nMajorityWindow = 1000;
-        consensus.nMasternodePaymentsStartBlock = 2;
+        consensus.nMasternodePaymentsStartBlock = 1480000;
         consensus.nMasternodeMinimumConfirmations = 15;
 
         consensus.minerRewardPercent = 80;

@@ -857,13 +857,13 @@ UniValue masternodebroadcast(const JSONRPCRequest& request)
 static const CRPCCommand commands[] =
 { //  category              name                      actor (function)         argNames
   //  --------------------- ------------------------  -----------------------  ----------
-    { "syscoin",               "masternode",             &masternode,             {} },
-    { "syscoin",               "masternodelist",         &masternodelist,         {} },
-    { "syscoin",               "masternodebroadcast",    &masternodebroadcast,    {} },
-    //{ "syscoin",               "getpoolinfo",            &getpoolinfo,          {} },
-    // { "syscoin",               "sentinelping",           &sentinelping,           {} },
+    { "blast",               "masternode",             &masternode,             {} },
+    { "blast",               "masternodelist",         &masternodelist,         {} },
+    { "blast",               "masternodebroadcast",    &masternodebroadcast,    {} },
+//  { "blast",               "getpoolinfo",            &getpoolinfo,            {} },
+//  { "blast",               "sentinelping",           &sentinelping,           {} },
 //#ifdef ENABLE_WALLET
-//    { "syscoin",               "privatesend",            &privatesend,          {} },
+//  { "blast",               "privatesend",            &privatesend,            {} },
 //#endif // ENABLE_WALLET
 };
 

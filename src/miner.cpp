@@ -188,7 +188,7 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     coinbaseTx.vout[0].scriptPubKey = scriptPubKeyIn;
 
     coinbaseTx.vin[0].scriptSig = CScript() << nHeight << OP_0;
-    if (!chainparams.MineBlocksOnDemand() && nHeight > 1 && !IsInitialBlockDownload() && !fUnitTest) {
+    if (!chainparams.MineBlocksOnDemand() && nHeight >= chainparams.GetConsensus().nMasternodePaymentsStartBlock && !IsInitialBlockDownload() && !fUnitTest) {
 		if (masternodeSync.IsFailed()) {
 			throw std::runtime_error("Masternode information has failed to sync, please restart your node!");
 		}
