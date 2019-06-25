@@ -217,7 +217,8 @@ BitcoinGUI::BitcoinGUI(const PlatformStyle *_platformStyle, const NetworkStyle *
     loadFonts();
 
 #if !defined(Q_OS_MAC)
-    this->setFont(QFont("Open Sans")); // this->setFont(QFont("Exo2"));
+    this->setFont(QFont("Open Sans"));
+//  this->setFont(QFont("Exo2"));
 #endif
 
     // Create actions for the toolbar, menu bar and tray/dock icon
@@ -418,7 +419,7 @@ void BitcoinGUI::createActions()
     transferAssetAction->setFont(fontAlt);
     tabGroup->addAction(transferAssetAction);
 
-    createAssetAction = new QAction(platformStyle->SingleColorIconOnOff(":/icons/asset_create_selected", ":/icons/asset_create"), tr("&Create CryptoMech"), this);
+    createAssetAction = new QAction(platformStyle->SingleColorIconOnOff(":/icons/asset_create_selected", ":/icons/asset_create"), tr("&Create Assets"), this);
     createAssetAction->setStatusTip(tr("Create new main/sub/unique assets"));
     createAssetAction->setToolTip(createAssetAction->statusTip());
     createAssetAction->setCheckable(true);
@@ -455,8 +456,7 @@ void BitcoinGUI::createActions()
 #ifdef ENABLE_WALLET
     QSettings settings;
     if (!fLiteMode && settings.value("fShowMasternodesTab").toBool()) {
-        // TODO: sandip update masternode icon
-        masternodeAction = new QAction(platformStyle->SingleColorIconOnOff(":/icons/receiving_addresses_selected", ":/icons/receiving_addresses"), tr("&Masternodes"), this);  
+        masternodeAction = new QAction(platformStyle->SingleColorIconOnOff(":/icons/masternode_selected", ":/icons/masternode"), tr("&Masternodes"), this);  
         masternodeAction->setStatusTip(tr("Browse masternodes"));
         masternodeAction->setToolTip(masternodeAction->statusTip());
         masternodeAction->setCheckable(true);
@@ -679,14 +679,26 @@ void BitcoinGUI::createToolBars()
         // Create the orange background and the vertical tool bar
         QWidget* toolbarWidget = new QWidget();
 
-        QString widgetStyleSheet = ".QWidget {background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 %1, stop: 1 %2);}";
+        QString widgetStyleSheet = ".QWidget {background-image: url(:/graphics/toolbar-bg); background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #14151a, stop: 0.33 #272a30, stop: 1 #0e1113);}";
 
-        toolbarWidget->setStyleSheet(widgetStyleSheet.arg(platformStyle->LightGreyColor().name(), platformStyle->DarkGreyColor().name()));
+        toolbarWidget->setStyleSheet(widgetStyleSheet);
+        // toolbarWidget->setStyleSheet(widgetStyleSheet.arg(platformStyle->LightGreyColor().name(), platformStyle->DarkGreyColor().name()));
 
         QLabel* label = new QLabel();
         label->setPixmap(QPixmap::fromImage(QImage(":/icons/blasttext")));
         label->setContentsMargins(0,0,0,50);
         label->setStyleSheet(".QLabel{background-color: transparent;}");
+
+        QFrame* toolbarDivider = new QFrame();
+        //toolbarDivider->setFixedHeight(1);
+        //toolbarDivider->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+        toolbarDivider->setStyleSheet(QString("background-color: rgb(255, 190, 72);"));
+
+        //QLabel* toolbarDivider = new QLabel();
+        //toolbarDivider->setFixedHeight(1);
+        //toolbarDivider->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+        //toolbarDivider->setFrameStyle(QFrame::StyledPanel);
+        //toolbarDivider->setPixmap(QPixmap(":/graphics/divider"));
         /** BLAST END */
 
         QToolBar *toolbar = new QToolBar();
@@ -701,7 +713,9 @@ void BitcoinGUI::createToolBars()
         toolbar->addAction(historyAction);
         toolbar->addAction(createAssetAction);
         toolbar->addAction(transferAssetAction);
+        toolbar->addWidget(toolbarDivider);
         toolbar->addAction(manageAssetAction);
+//        toolbar->addWidget(toolbarDivider);
 //        toolbar->addAction(messagingAction);
 //        toolbar->addAction(votingAction);
         QString exo2FontString = "font: normal 22pt \"Exo2\";";
@@ -717,9 +731,9 @@ void BitcoinGUI::createToolBars()
 
         /** BLAST START */
         QString tbStyleSheet = ".QToolBar {background-color : transparent; border-color: transparent; }  "
-                               ".QToolButton {background-color: transparent; border-color: transparent; width: 249px; color: %1; border: none;} "
-                               ".QToolButton:checked {background: none; background-color: none; selection-background-color: none; color: %2; border: none; font: %4} "
-                               ".QToolButton:hover {background: none; background-color: none; border: none; color: %3;} "
+                               ".QToolButton {background-color: transparent; border-color: transparent; width: 249px; color: %1; border-right: none; border-left: none; border-top: none; border-bottom: 1px solid; border-image: url(:/graphics/divider-selected); } "
+                               ".QToolButton:checked {background: none; background-color: none; selection-background-color: none; color: #ffbe48; border-right: none; border-left: none; border-top: none; border-bottom: 1px solid; border-image: url(:/graphics/divider-selected); } "
+                               ".QToolButton:hover {background: none; background-color: none; selection-background-color: none; border-right: none; border-left: none; border-top: none; border-bottom: 1px solid; border-image: url(:/graphics/divider-selected); } "
                                ".QToolButton:disabled {color: gray;}";
 
         toolbar->setStyleSheet(tbStyleSheet.arg(platformStyle->ToolBarNotSelectedTextColor().name(),
@@ -735,6 +749,7 @@ void BitcoinGUI::createToolBars()
 		QSettings settings;
         if (!fLiteMode && settings.value("fShowMasternodesTab").toBool() && masternodeAction)
         {
+            toolbar->addWidget(toolbarDivider);
             toolbar->addAction(masternodeAction);
         }
         toolbar->setMovable(false); // remove unused icon in upper left corner
@@ -760,11 +775,11 @@ void BitcoinGUI::createToolBars()
         walletFrameShadow->setYOffset(0);
         mainWalletWidget->setGraphicsEffect(walletFrameShadow);
 
-        QString widgetBackgroundSytleSheet = QString(".QWidget{background-color: %1}").arg(platformStyle->TopWidgetBackGroundColor().name());
+        QString widgetBackgroundStyleSheet = QString(".QWidget{background-color: %1}").arg(platformStyle->TopWidgetBackGroundColor().name());
 
         // Set the headers widget options
         headerWidget->setContentsMargins(0,0,0,50);
-        headerWidget->setStyleSheet(widgetBackgroundSytleSheet);
+        headerWidget->setStyleSheet(widgetBackgroundStyleSheet);
         headerWidget->setGraphicsEffect(GUIUtil::getShadowEffect());
         headerWidget->setFixedHeight(75);
 

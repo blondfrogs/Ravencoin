@@ -68,6 +68,8 @@
         <file alias="asset_manage_selected">res/icons/asset_manage_selected.png</file>
         <file alias="asset_transfer">res/icons/asset_transfer.png</file>
         <file alias="asset_transfer_selected">res/icons/asset_transfer_selected.png</file>
+        <file alias="masternode">res/icons/masternode.png</file>
+        <file alias="masternode_selected">res/icons/masternode_selected.png</file>
         <file alias="blasttext">res/icons/blasttext.png</file>
     </qresource>
     <qresource prefix="/movies">
@@ -156,5 +158,10 @@
         <file alias="opensans-regular">res/fonts/OpenSans-Regular.ttf</file>
         <file alias="opensans-semibold">res/fonts/OpenSans-SemiBold.ttf</file>
         <file alias="opensans-semibolditalic">res/fonts/OpenSans-SemiBoldItalic.ttf</file>
+    </qresource>
+    <qresource prefix="/graphics">
+        <file alias="toolbar-bg">res/src/background.png</file>
+        <file alias="divider-selected">res/src/divider-gold.png</file>
+        <file alias="divider-unselected">res/src/divider-silver.png</file>
     </qresource>
 </RCC>

@@ -42,16 +42,16 @@ static const bool DEFAULT_SPLASHSCREEN = true;
 #define COLOR_WALLETFRAME_SHADOW QColor(0,0,0,71)
 
 /* Color of labels */
-//#define COLOR_LABELS QColor("#c8c8c8")
-#define COLOR_LABELS QColor("#4960ad")
+#define COLOR_LABELS QColor("#464b4f")
+// #define COLOR_LABELS QColor("#4960ad")
 
 /** LIGHT MODE */
 /* Background color, very light gray */
 #define COLOR_BACKGROUND_LIGHT QColor("#fbfbfe")
 /* BLAST dark orange */
-#define COLOR_DARK_ORANGE QColor("#f05339")
+#define COLOR_DARK_ORANGE QColor("#b60000") // QColor("#f05339")
 /* BLAST light orange */
-#define COLOR_LIGHT_ORANGE QColor("#f79433")
+#define COLOR_LIGHT_ORANGE QColor("#f79433") // QColor("#ed9f0f) // QColor("#ed9f0f")
 /* BLAST dark blue */
 #define COLOR_DARK_BLUE QColor("#475eaa")
 /* BLAST light blue */
@@ -61,10 +61,11 @@ static const bool DEFAULT_SPLASHSCREEN = true;
 /* BLAST shadow color - light mode */
 #define COLOR_SHADOW_LIGHT QColor("#e1e6f3")
 /* Toolbar not selected text color */
-#define COLOR_TOOLBAR_NOT_SELECTED_TEXT QColor("#a5b7f3")
+#define COLOR_TOOLBAR_NOT_SELECTED_TEXT COLOR_WHITE
+// #define COLOR_TOOLBAR_NOT_SELECTED_TEXT QColor("#a5b7f3")
 // #define COLOR_TOOLBAR_NOT_SELECTED_TEXT QColor("#c8c8c8")
 /* Toolbar selected text color */
-#define COLOR_TOOLBAR_SELECTED_TEXT COLOR_WHITE
+#define COLOR_TOOLBAR_SELECTED_TEXT QColor(255, 190, 72)
 /* BLAST light grey */
 #define COLOR_LIGHT_GREY QColor("#2b3e50")
 /* BLAST dark grey */
@@ -94,8 +95,8 @@ static const bool DEFAULT_SPLASHSCREEN = true;
 
 
 /* BLAST label color as a string */
-#define STRING_LABEL_COLOR "color: #4960ad"
-// #define STRING_LABEL_COLOR "color: #c8c8c8"
+// #define STRING_LABEL_COLOR "color: #4960ad"
+#define STRING_LABEL_COLOR "color: #464b4f"
 
 
 

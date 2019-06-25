@@ -171,7 +171,7 @@ public:
         QRect gradientRect = mainRect;
         gradientRect.setTop(gradientRect.top() + 2);
         gradientRect.setBottom(gradientRect.bottom() - 2);
-        gradientRect.setRight(gradientRect.right() - 20);
+        gradientRect.setRight(gradientRect.right() - 0);
 
         int halfheight = (gradientRect.height() - 2*ypad)/2;
 
