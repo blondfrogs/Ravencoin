@@ -271,7 +271,7 @@ extern const char *ASSETDATA;
  */
     extern const char *ASSETNOTFOUND;
 
-// Syscoin message types
+// BLAST message types
 // NOTE: do NOT declare non-implmented here, we don't want them to be exposed to the outside
 // TODO: add description
 extern const char *SPORK;

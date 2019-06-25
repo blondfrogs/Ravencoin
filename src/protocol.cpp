@@ -90,7 +90,7 @@ const static std::string allNetMessageTypes[] = {
     NetMsgType::ASSETDATA,
     NetMsgType::ASSETNOTFOUND,
 
-    // Syscoin message types
+    // BLAST message types
     // NOTE: do NOT include non-implmented here, we want them to be "Unknown command" in ProcessMessage()
     NetMsgType::SPORK,
     NetMsgType::GETSPORKS,
@@ -110,7 +110,7 @@ static const char* ppszTypeName[] =
     NetMsgType::BLOCK,
     "filtered block", // Should never occur
 
-    // Syscoin message types
+    // BLAST message types
     // NOTE: include non-implmented here, we must keep this list in sync with enum in protocol.h
     NetMsgType::SPORK,
     NetMsgType::GETSPORKS,

@@ -4,8 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef SYSCOIN_ALERT_H
-#define SYSCOIN_ALERT_H
+#ifndef BLAST_ALERT_H
+#define BLAST_ALERT_H
 
 #include "serialize.h"
 #include "sync.h"
@@ -112,4 +112,4 @@ public:
     static CAlert getAlertByHash(const uint256 &hash);
 };
 
-#endif // SYSCOIN_ALERT_H
+#endif // BLAST_ALERT_H

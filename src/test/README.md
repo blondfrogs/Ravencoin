@@ -5,18 +5,18 @@ and tests weren't explicitly disabled.
 
 After configuring, they can be run with `make check`.
 
-To run the ravend tests manually, launch `src/test/test_blast`. To recompile
+To run the blastd tests manually, launch `src/test/test_blast`. To recompile
 after a test file was modified, run `make` and then run the test again. If you
 modify a non-test file, use `make -C src/test` to recompile only what's needed
-to run the ravend tests.
+to run the blastd tests.
 
-To add more ravend tests, add `BOOST_AUTO_TEST_CASE` functions to the existing
+To add more blastd tests, add `BOOST_AUTO_TEST_CASE` functions to the existing
 .cpp files in the `test/` directory or add new .cpp files that
 implement new BOOST_AUTO_TEST_SUITE sections.
 
-To run the raven-qt tests manually, launch `src/qt/test/test_blast-qt`
+To run the blast-qt tests manually, launch `src/qt/test/test_blast-qt`
 
-To add more raven-qt tests, add them to the `src/qt/test/` directory and
+To add more blast-qt tests, add them to the `src/qt/test/` directory and
 the `src/qt/test/test_main.cpp` file.
 
 To display progress information the unit tests should be run as follows:
@@ -32,7 +32,7 @@ Additional optional parameters are available. To display all optional parameters
 To display what individual tests are running (as they are running) use the
 `--log_level=message` parameter.  
 
-By default the log messages from the Raven Core application are not echoed 
+By default the log messages from the BLAST Core application are not echoed 
 when running the unit tests.  If it is desired to print this log data change 
 the following from 'false' to 'true' in the `test_bitcoin.cpp` file and uncomment
 three lines in the `script\interpreter.cpp\ VerifyScript` method and recompile:
@@ -64,7 +64,7 @@ To run just the 'getarg_tests' (verbosely):
 ### Note on adding test cases
 
 The sources in this directory are unit test cases.  Boost includes a
-unit testing framework, and since raven already uses boost, it makes
+unit testing framework, and since BLAST already uses boost, it makes
 sense to simply use this framework rather than require developers to
 configure some other framework (we want as few impediments to creating
 unit tests as possible).

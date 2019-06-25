@@ -3,8 +3,8 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 
-#ifndef RAVENCOIN_ASSET_PROTOCOL_H
-#define RAVENCOIN_ASSET_PROTOCOL_H
+#ifndef BLAST_ASSET_PROTOCOL_H
+#define BLAST_ASSET_PROTOCOL_H
 
 #include "amount.h"
 #include "tinyformat.h"
@@ -327,4 +327,4 @@ bool SendAssetTransaction(CWallet* pwallet, CWalletTx& transaction, CReserveKey&
 
 /** Helper method for extracting address bytes, asset name and amount from an asset script */
 bool ParseAssetScript(CScript scriptPubKey, uint160 &hashBytes, std::string &assetName, CAmount &assetAmount);
-#endif //RAVENCOIN_ASSET_PROTOCOL_H
+#endif //BLAST_ASSET_PROTOCOL_H

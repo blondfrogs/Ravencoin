@@ -234,7 +234,7 @@ public:
         };
 
         chainTxData = ChainTxData{
-            // Update as we know more about the contents of the Raven chain
+            // Update as we know more about the contents of the BLAST chain
             // Stats as of c0e8ef621936909064f627478d7031adda683bbcd7477cffd8eca571cf868c32
             1538172088, // * UNIX timestamp of last known number of transactions
             768047,     // * total number of transactions between genesis and that timestamp
@@ -445,7 +445,7 @@ public:
         };
 
         chainTxData = ChainTxData{
-            // Update as we know more about the contents of the Raven chain
+            // Update as we know more about the contents of the BLAST chain
             // Stats as of 000000001d03315ec89ac7895ad122e3ae9c3c92a2ec5f63000794cdd6c18095
             1536875774, // * UNIX timestamp of last known number of transactions
             0,          // * total number of transactions between genesis and that timestamp

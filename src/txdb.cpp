@@ -505,12 +505,12 @@ bool CBlockTreeDB::LoadBlockIndexGuts(const Consensus::Params& consensusParams, 
                 pcursor->GetKey(key);
 //                pcursor->GetValue(*pindexNew);
 
-                // Ravencoin: Disable PoW Sanity check while loading block index from disk.
+                // BLAST: Disable PoW Sanity check while loading block index from disk.
                 // We use the sha256 hash for the block index for performance reasons, which is recorded for later use.
 
                 // CheckProofOfWork() uses the PoW hash which is discarded after a block is accepted.
                 //While it is technically feasible to verify the PoW, doing so takes several minutes as it
-                // requires recomputing every PoW hash during every Ravencoin startup.
+                // requires recomputing every PoW hash during every BLAST startup.
                 // We opt instead to simply trust the data that is on your local disk.
                 //if (!CheckProofOfWork(pindexNew->GetBlockHash(), pindexNew->nBits, consensusParams))
                 //    return error("%s: CheckProofOfWork failed: %s", __func__, pindexNew->ToString());

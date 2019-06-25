@@ -24,13 +24,13 @@ BOOST_FIXTURE_TEST_SUITE(main_tests, TestingSetup)
         for (int nHalvings = 0; nHalvings < maxHalvings; nHalvings++)
         {
             int nHeight = nHalvings * consensusParams.nSubsidyHalvingInterval;
-            // TODO: sandip update GetBlockSubsidy call
+            // TODO: update GetBlockSubsidy call
             CAmount nSubsidy; // = GetBlockSubsidy(nHeight, consensusParams);
             BOOST_CHECK(nSubsidy <= nInitialSubsidy);
             BOOST_CHECK_EQUAL(nSubsidy, nPreviousSubsidy / 2);
             nPreviousSubsidy = nSubsidy;
         }
-        // TODO: sandip update GetBlockSubsidy call
+        // TODO: update GetBlockSubsidy call
         //BOOST_CHECK_EQUAL(GetBlockSubsidy(maxHalvings * consensusParams.nSubsidyHalvingInterval, consensusParams), 0);
     }
 
@@ -59,7 +59,7 @@ BOOST_FIXTURE_TEST_SUITE(main_tests, TestingSetup)
         CAmount nSum = 0;
         for (int nHeight = 0; nHeight < 14000000; nHeight += 1000)
         {
-            // TODO: sandip update GetBlockSubsidy call
+            // TODO: update GetBlockSubsidy call
             CAmount nSubsidy; // = GetBlockSubsidy(nHeight, chainParams->GetConsensus());
             BOOST_CHECK(nSubsidy <= 5000 * COIN);
             nSum += nSubsidy * 1000;

@@ -3,8 +3,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef SYSCOIN_QT_QRDIALOG_H
-#define SYSCOIN_QT_QRDIALOG_H
+#ifndef BLAST_QT_QRDIALOG_H
+#define BLAST_QT_QRDIALOG_H
 
 #include "walletmodel.h"
 
@@ -68,4 +68,4 @@ private:
     QString strQRCodeTitle;
 };
 
-#endif // SYSCOIN_QT_QRDIALOG_H
+#endif // BLAST_QT_QRDIALOG_H

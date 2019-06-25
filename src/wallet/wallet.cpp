@@ -2994,14 +2994,14 @@ bool CWallet::GetMasternodeOutpointAndKeys(COutPoint& outpointRet, CPubKey& pubK
 
     // Find possible candidates
     std::vector<COutput> vPossibleCoins;
-	// SYSCOIN include sys alias balances
+	// BLAST include BLAST alias balances
     AvailableCoins(vPossibleCoins, true, NULL, ONLY_1000);
     if(vPossibleCoins.empty()) {
         LogPrintf("CWallet::GetMasternodeOutpointAndKeys -- Could not locate any valid masternode vin\n");
         return false;
     }
 
-    // TODO: sandip ?
+    // TODO: ?
     if(strTxHash.empty()) // No output specified, select the first one
         return false;
         //return GetOutpointAndKeysFromOutput(vPossibleCoins[0], outpointRet, pubKeyRet, keyRet);
@@ -3317,7 +3317,7 @@ bool CWallet::CreateTransactionAll(const std::vector<CRecipient>& vecSend, CWall
             /** BLAST END */
             // Create change script that will be used if we need change
             // TODO: pass in scriptChange instead of reservekey so
-            // change transaction isn't always pay-to-raven-address
+            // change transaction isn't always pay-to-blast-address
             CScript scriptChange;
 
             // coin control: send change to custom address

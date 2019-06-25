@@ -264,8 +264,8 @@ bool LogAcceptCategory(const char* category)
                 const std::vector<std::string>& categories = gArgs.GetArgs("-debug");
                 ptrCategory.reset(new std::set<std::string>(categories.begin(), categories.end()));
                 // thread_specific_ptr automatically deletes the set when the thread ends.
-                // "syscoin" is a composite category enabling all Syscoin-related debug output
-                if(ptrCategory->count(std::string("syscoin"))) {
+                // "BLAST" is a composite category enabling all BLAST-related debug output
+                if(ptrCategory->count(std::string("blast"))) {
                     ptrCategory->insert(std::string("privatesend"));
                     ptrCategory->insert(std::string("instantsend"));
                     ptrCategory->insert(std::string("masternode"));

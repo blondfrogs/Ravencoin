@@ -153,7 +153,7 @@ bool CMasternodeMan::PoSeBan(const COutPoint &outpoint)
 
 void CMasternodeMan::Check()
 {
-	// SYSCOIN remove csmain lock
+	// BLAST remove csmain lock
     LOCK(cs);
 
     for (auto& mnpair : mapMasternodes) {
@@ -780,7 +780,7 @@ void CMasternodeMan::ProcessPendingMnbRequests(CConnman& connman)
 
 void CMasternodeMan::ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman& connman)
 {
-    if(fLiteMode) return; // disable all Syscoin specific functionality
+    if(fLiteMode) return; // disable all BLAST specific functionality
 
     if (strCommand == NetMsgType::MNANNOUNCE) { //Masternode Broadcast
 
@@ -1629,7 +1629,7 @@ unsigned int CMasternodeMan::GetStartHeight(const masternode_info_t& mnInfo) {
 }
 void CMasternodeMan::DoMaintenance(CConnman& connman)
 {
-    if(fLiteMode) return; // disable all Syscoin specific functionality
+    if(fLiteMode) return; // disable all BLAST specific functionality
 
     if(!masternodeSync.IsBlockchainSynced() || ShutdownRequested())
         return;

@@ -53,4 +53,4 @@ std::string FormatSubVersion(const std::string& name, int nClientVersion, const 
 
 #endif // WINDRES_PREPROC
 
-#endif // RAVEN_CLIENTVERSION_H
+#endif // BITCOIN_CLIENTVERSION_H

@@ -19,7 +19,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/foreach.hpp>
 
-// SYSCOIN
+// BLAST
 extern std::vector<unsigned char> vchFromString(const std::string &str);
 
 /** Object for who's going to get paid on which blocks */
@@ -104,7 +104,7 @@ int CMasternodePayments::GetMinMasternodePaymentsProto() const {
 
 void CMasternodePayments::ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStream& vRecv, CConnman& connman)
 {
-    if(fLiteMode) return; // disable all Syscoin specific functionality
+    if(fLiteMode) return; // disable all BLAST specific functionality
 
     if (strCommand == NetMsgType::MASTERNODEPAYMENTSYNC) { //Masternode Payments Request Sync
 
@@ -203,7 +203,7 @@ void CMasternodePayments::ProcessMessage(CNode* pfrom, const std::string& strCom
             // so just quit here.
             return;
         }
-		// SYSCOIN update last vote after sig check
+		// BLAST update last vote after sig check
 		if (!UpdateLastVote(vote)) {
 			LogPrintf("MASTERNODEPAYMENTVOTE -- masternode already voted, masternode=%s\n", vote.masternodeOutpoint.ToStringShort());
 			return;

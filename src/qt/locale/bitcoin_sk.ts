@@ -2801,7 +2801,7 @@
     </message>
     <message>
         <source>Copy raw transaction</source>
-        <translation>Skopírovať neupravenú transakciu</translation>
+        <translation>Skopírovať neupblastú transakciu</translation>
     </message>
     <message>
         <source>Copy full transaction details</source>
