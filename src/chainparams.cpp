@@ -123,7 +123,7 @@ public:
         consensus.nMajorityEnforceBlockUpgrade = 750;
         consensus.nMajorityRejectBlockOutdated = 950;
         consensus.nMajorityWindow = 1000;
-        consensus.nMasternodePaymentsStartBlock = 1480000;
+        consensus.nMasternodePaymentsStartBlock = 1500640;
         consensus.nMasternodeMinimumConfirmations = 15;
 
         consensus.minerRewardPercent = 80;
@@ -162,8 +162,8 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 1199145601; // January 1, 2008
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 1230767999; // December 31, 2008
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].bit = 6;  //Assets (RIP2)
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 9999999999; // Oct 31, 2018
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 9999999999; // Oct 31, 2019
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 1562095966; // July 24, 2019 4:25:30 AM
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 1595564730; // July 24, 2020 4:25:30 AM
 
         // Deployment of BIP68, BIP112, and BIP113.
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].bit = 0;
@@ -294,11 +294,11 @@ public:
         consensus.BIP34Hash = uint256S("0x0000000077062645faa71f32cd3fe871f4ca4f145d16781ff3ccaedf3ad2f1cd"); // Genesis hash (height 0)
         
         consensus.nBIP34Enabled = true; //  
-        consensus.nBIP65Enabled = false; // 000000000000000004c2b624ed5d7756c508d90fd0da2c7c679febfa6c4735f0
+        consensus.nBIP65Enabled = false; // 
         consensus.nBIP66Enabled = true;
         consensus.nSegwitEnabled = false;
         consensus.nCSVEnabled = true;
-        consensus.powLimit = uint256S("00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // ~uint256(0) >> 32;
+        consensus.powLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); // ~uint256(0) >> 32;
         consensus.nPowTargetTimespan = 32 * 60; // 32 min
         consensus.nPowTargetSpacing = 1 * 32;  // 32 sec
 
