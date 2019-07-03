@@ -36,7 +36,7 @@ sudo make install
 # Build BLAST
 ```
 cd ~/build/
-git clone https://github.com/cryptoBLAST/Blast-Core
+git clone https://github.com/blastdev/blast-core
 cd Blast-Core/
 ./autogen.sh
 ./configure --disable-tests --with-gui=no CPPFLAGS="-I/usr/local/BerkeleyDB.4.8/include -O2" LDFLAGS="-L/usr/local/BerkeleyDB.4.8/lib"

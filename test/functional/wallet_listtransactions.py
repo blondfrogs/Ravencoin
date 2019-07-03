@@ -6,7 +6,7 @@
 """Test the listtransactions API."""
 
 from decimal import Decimal
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import BlastTestFramework
 from test_framework.util import *
 from test_framework.mininode import CTransaction, COIN
 from io import BytesIO
@@ -20,7 +20,7 @@ def txFromHex(hexstring):
     return tx
 
 
-class ListTransactionsTest(RavenTestFramework):
+class ListTransactionsTest(BlastTestFramework):
     def set_test_params(self):
         self.num_nodes = 2
         self.enable_mocktime()

@@ -27,13 +27,13 @@ import signal  #Used for timeout
 JSON_ONLY_CHECK = False
 FILESIZE_THRESHOLD = 100000000
 
-#Set this to your raven-cli program
-cli = "raven-cli"
+#Set this to your blast-cli program
+cli = "blast-cli"
 
 #mode = "-testnet"
 mode = ""
 rpc_port = 64639
-#Set this information in your raven.conf file (in datadir, not testnet3)
+#Set this information in your blast.conf file (in datadir, not testnet3)
 rpc_user = 'rpcuser'
 rpc_pass = 'rpcpass555'
 
@@ -363,7 +363,7 @@ def monitor_zmq():
 	context = zmq.Context()
 	socket = context.socket(zmq.SUB)
 
-	print("Getting Ravencoin msgs")
+	print("Getting BLAST msgs")
 	socket.connect("tcp://localhost:26464")
 
 	#socket.setsockopt_string(zmq.SUBSCRIBE, u'hashtx')

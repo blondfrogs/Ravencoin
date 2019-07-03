@@ -1,14 +1,12 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: Raven
+Upstream-Name: BLAST
 Upstream-Contact: Satoshi Nakamoto <satoshin@gmx.com>
- irc://#raven@freenode.net
-Source: https://github.com/RavenProject/Ravencoin
+Source: https://github.com/blastdev/blast-core
 
 Files: *
-Copyright: 2009-2017, Raven Core Developers
+Copyright: 2017-2019, BLAST Core Developers
 License: Expat
-Comment: The Raven Core Developers encompasses the current developers listed on raven.org,
-         as well as the numerous contributors to the project.
+Comment: 
 
 Files: debian/*
 Copyright: 2010-2011, Jonas Smedegaard <dr@jones.dk>
@@ -78,12 +76,12 @@ License: Expat
 Comment: Modifications of Stephan Hutchings Typicons
 
 Files: src/qt/res/icons/about.png
-       src/qt/res/icons/raven.*
-       share/pixmaps/raven*
-       src/qt/res/src/raven.svg
+       src/qt/res/icons/bitcoin.*
+       share/pixmaps/blast*
+       src/qt/res/src/bitcoin.svg
 Copyright: Bitboy, Jonas Schnelli
 License: public-domain
-Comment: Site: https://raventalk.org/?topic=1756.0
+Comment: Site: https://bitcointalk.org/?topic=1756.0
 
 
 License: Expat

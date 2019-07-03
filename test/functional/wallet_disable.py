@@ -9,10 +9,10 @@
 - Test that it is not possible to mine to an invalid address.
 """
 
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import BlastTestFramework
 from test_framework.util import *
 
-class DisableWalletTest (RavenTestFramework):
+class DisableWalletTest (BlastTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
         self.num_nodes = 1

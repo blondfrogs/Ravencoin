@@ -567,10 +567,10 @@ std::string HelpMessage(HelpMessageMode mode)
 
 std::string LicenseInfo()
 {
-    const std::string URL_SOURCE_CODE = "<https://github.com/cryptoBLAST/Blast-Core>";
+    const std::string URL_SOURCE_CODE = "<https://github.com/blastdev/blast-core>";
     const std::string URL_WEBSITE = "<https://blastblastblast.com>";
 
-    return CopyrightHolders(strprintf(_("Copyright (C) %i-%i"), 2009, COPYRIGHT_YEAR) + " ") + "\n" +
+    return CopyrightHolders(strprintf(_("Copyright (C) %i-%i"), 2017, COPYRIGHT_YEAR) + " ") + "\n" +
            "\n" +
            strprintf(_("Please contribute if you find %s useful. "
                        "Visit %s for further information about the software."),
@@ -1765,7 +1765,7 @@ bool AppInitMain(boost::thread_group& threadGroup, CScheduler& scheduler)
 
     // TODO: masternode should have no wallet
 
-    //lite mode disables all Syscoin-specific functionality
+    //lite mode disables all BLAST-specific functionality
     fLiteMode = gArgs.GetBoolArg("-litemode", false);
 
     if(fLiteMode) {

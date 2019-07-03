@@ -10,11 +10,11 @@
 
 import time
 
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import BlastTestFramework
 from test_framework.util import *
 
 
-class TimestampIndexTest(RavenTestFramework):
+class TimestampIndexTest(BlastTestFramework):
 
     def set_test_params(self):
         self.setup_clean_chain = True

@@ -14,7 +14,7 @@
 %endif
 
 Name:		blast
-Version:	0.12.0
+Version:	2.0.0
 Release:	2%{?dist}
 Summary:	Peer to Peer Cryptographic Currency
 
@@ -24,20 +24,20 @@ URL:		https://blastblastblast.com/
 Source0:	https://blastblastblast.com/bin/blast-core-%{version}/blast-%{version}.tar.gz
 Source1:	http://download.oracle.com/berkeley-db/db-%{bdbv}.NC.tar.gz
 
-Source10:	https://raw.githubusercontent.com/cryptoBLAST/BLAST-Core/v%{version}/contrib/debian/examples/blast.conf
+Source10:	https://raw.githubusercontent.com/blastdev/blast-core/v%{version}/contrib/debian/examples/blast.conf
 
 #man pages
-Source20:	https://raw.githubusercontent.com/cryptoBLAST/Blast-Core/v%{version}/doc/man/blastd.1
-Source21:	https://raw.githubusercontent.com/cryptoBLAST/Blast-Core/v%{version}/doc/man/blast-cli.1
-Source22:	https://raw.githubusercontent.com/cryptoBLAST/Blast-Core/v%{version}/doc/man/blast-qt.1
+Source20:	https://raw.githubusercontent.com/blastdev/blast-core/v%{version}/doc/man/blastd.1
+Source21:	https://raw.githubusercontent.com/blastdev/blast-core/v%{version}/doc/man/blast-cli.1
+Source22:	https://raw.githubusercontent.com/blastdev/blast-core/v%{version}/doc/man/blast-qt.1
 
 #selinux
-Source30:	https://raw.githubusercontent.com/cryptoBLAST/Blast-Core/v%{version}/contrib/rpm/blast.te
+Source30:	https://raw.githubusercontent.com/blastdev/blast-core/v%{version}/contrib/rpm/blast.te
 # Source31 - what about blast-tx and bench_blast ???
-Source31:	https://raw.githubusercontent.com/cryptoBLAST/Blast-Core/v%{version}/contrib/rpm/blast.fc
-Source32:	https://raw.githubusercontent.com/cryptoBLAST/Blast-Core/v%{version}/contrib/rpm/blast.if
+Source31:	https://raw.githubusercontent.com/blastdev/blast-core/v%{version}/contrib/rpm/blast.fc
+Source32:	https://raw.githubusercontent.com/blastdev/blast-core/v%{version}/contrib/rpm/blast.if
 
-Source100:	https://upload.wikimedia.org/wikipedia/commons/4/46/BLAST.svg
+Source100:	https://upload.wikimedia.org/wikipedia/commons/4/46/blast.svg
 
 %if 0%{?_use_libressl:1}
 BuildRequires:	libressl-devel

@@ -8,15 +8,15 @@ import subprocess
 import json
 
 
-#Set this to your raven-cli program
-cli = "raven-cli"
+#Set this to your blast-cli program
+cli = "blast-cli"
 
 mode = "-testnet"
 rpc_port = 64319
 #mode =  "-regtest"
 #rpc_port = 32319
 
-#Set this information in your raven.conf file (in datadir, not testnet3)
+#Set this information in your blast.conf file (in datadir, not testnet3)
 rpc_user = 'rpcuser'
 rpc_pass = 'rpcpass555'
 

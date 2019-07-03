@@ -4,10 +4,10 @@
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test the importmulti RPC."""
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import BlastTestFramework
 from test_framework.util import *
 
-class ImportMultiTest (RavenTestFramework):
+class ImportMultiTest (BlastTestFramework):
     def set_test_params(self):
         self.num_nodes = 2
         self.setup_clean_chain = True
@@ -37,7 +37,7 @@ class ImportMultiTest (RavenTestFramework):
 
         # RPC importmulti -----------------------------------------------
 
-        # Raven Address
+        # BLAST Address
         self.log.info("Should import an address")
         address = self.nodes[0].validateaddress(self.nodes[0].getnewaddress())
         result = self.nodes[1].importmulti([{

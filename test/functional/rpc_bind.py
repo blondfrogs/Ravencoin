@@ -8,11 +8,11 @@
 import socket
 import sys
 
-from test_framework.test_framework import RavenTestFramework, SkipTest
+from test_framework.test_framework import BlastTestFramework, SkipTest
 from test_framework.util import *
 from test_framework.netutil import *
 
-class RPCBindTest(RavenTestFramework):
+class RPCBindTest(BlastTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
         self.num_nodes = 1

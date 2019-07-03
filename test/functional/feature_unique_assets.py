@@ -8,7 +8,7 @@
 """
 import random
 
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import BlastTestFramework
 from test_framework.util import (
     assert_contains,
     assert_does_not_contain_key,
@@ -34,7 +34,7 @@ def gen_unique_asset_name(root):
         name += tag_c
     return name
 
-class UniqueAssetTest(RavenTestFramework):
+class UniqueAssetTest(BlastTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
         self.num_nodes = 3

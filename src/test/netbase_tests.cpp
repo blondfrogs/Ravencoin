@@ -89,10 +89,10 @@ BOOST_FIXTURE_TEST_SUITE(netbase_tests, BasicTestingSetup)
     {
         BOOST_TEST_MESSAGE("Running NetBase SplitHost Test");
 
-        BOOST_CHECK(TestSplitHost("www.raven.org", "www.raven.org", -1));
-        BOOST_CHECK(TestSplitHost("[www.raven.org]", "www.raven.org", -1));
-        BOOST_CHECK(TestSplitHost("www.raven.org:80", "www.raven.org", 80));
-        BOOST_CHECK(TestSplitHost("[www.raven.org]:80", "www.raven.org", 80));
+        BOOST_CHECK(TestSplitHost("www.blastblastblast.com", "www.blastblastblast.com", -1));
+        BOOST_CHECK(TestSplitHost("[www.blastblastblast.com]", "www.blastblastblast.com", -1));
+        BOOST_CHECK(TestSplitHost("www.blastblastblast.com:80", "www.blastblastblast.com", 80));
+        BOOST_CHECK(TestSplitHost("[www.blastblastblast.com]:80", "www.blastblastblast.com", 80));
         BOOST_CHECK(TestSplitHost("127.0.0.1", "127.0.0.1", -1));
         BOOST_CHECK(TestSplitHost("127.0.0.1:64640", "127.0.0.1", 64640));
         BOOST_CHECK(TestSplitHost("[127.0.0.1]", "127.0.0.1", -1));

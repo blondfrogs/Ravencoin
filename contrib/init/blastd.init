@@ -1,0 +1,67 @@
+#!/bin/bash
+#
+#  blastd The blast core server.
+#
+#
+# chkconfig: 345 80 20
+# description: blastd
+# processname: blastd
+#
+
+# Source function library.
+. /etc/init.d/functions
+
+# you can override defaults in /etc/sysconfig/blastd, see below
+if [ -f /etc/sysconfig/blastd ]; then
+        . /etc/sysconfig/blastd
+fi
+
+RETVAL=0
+
+prog=blastd
+# you can override the lockfile via BLASTD_LOCKFILE in /etc/sysconfig/blastd
+lockfile=${BLASTD_LOCKFILE-/var/lock/subsys/blastd}
+
+# blastd defaults to /usr/bin/blastd, override with BLASTD_BIN
+blastd=${BLASTD_BIN-/usr/bin/blastd}
+
+# blastd opts default to -disablewallet, override with BLASTD_OPTS
+blastd_opts=${BLASTD_OPTS--disablewallet}
+
+start() {
+    echo -n $"Starting $prog: "
+    daemon $DAEMONOPTS $blastd $blastd_opts
+    RETVAL=$?
+    echo
+    [ $RETVAL -eq 0 ] && touch $lockfile
+    return $RETVAL
+}
+
+stop() {
+    echo -n $"Stopping $prog: "
+    killproc $prog
+    RETVAL=$?
+    echo
+    [ $RETVAL -eq 0 ] && rm -f $lockfile
+    return $RETVAL
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    status)
+        status $prog
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    *)
+        echo "Usage: service $prog {start|stop|status|restart}"
+        exit 1
+        ;;
+esac

@@ -129,7 +129,7 @@ public:
         consensus.minerRewardPercent = 80;
         consensus.masternodeRewardPercent = 15;
         consensus.devRewardPercent = 5;
-        consensus.devWalletAddress = "8QD1FZNN41npesU92uRAs4ZBCZ2ccviFP7";
+        consensus.devWalletAddress = "8XMNXVZvMTcxvp37wQFdjL2PhSPcCsC8kL";
 
         consensus.BIP34Height = 0;
         consensus.BIP34Hash = uint256S("0x000000001d03315ec89ac7895ad122e3ae9c3c92a2ec5f63000794cdd6c18095"); // Genesis hash (height 0)
@@ -176,7 +176,7 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout = 1519146928; // February 20th, 2018
 
         // The best chain should have at least this much work.
-        consensus.nMinimumChainWork = uint256S("0x0000000000000000000000000000000000000000000007bcf1a7820259035581");  // Height 741975
+        consensus.nMinimumChainWork = uint256S("0x000000000000000000000000000000000000000000008d50d55ed008a84c251c");  // Height 1442960
 
         //TODO - Set this to genesis block
         // By default assume that the signatures in ancestors of this block are valid.
@@ -220,43 +220,44 @@ public:
         fAllowMultiplePorts = false;
         nFulfilledRequestExpireTime = 60*60; // fulfilled requests expire in 1 hour
 
-        strSporkAddress = "BGqdCiPgBZTYdheLBVZhnY8aiN1Lp6M17T";
+        strSporkAddress = "BMF79MqWvhoFQev7KSRAYMpjPBtBg2AURJ";
         checkpointData = (CCheckpointData) {
             {
-                {      0, uint256S("0x00000000a6a47e28b4fea2ab47262d9a420bb1600dee375cad30fa54c9f6ec90")},
-                {  88238, uint256S("0x0000000000012ed053d9c1f2221803df06f57c982b264c9f6289cd5db88404d2")},
-                { 136700, uint256S("0x9f5833e664b0d283ef89ca8e6cf2a1ca0355199475da2f29679e11e07733ef19")},
-                { 289999, uint256S("0xcffbc77ecbf3c6b208405192d70acf600dff4adaaf985785d9a366b2595032d1")},
-                { 429998, uint256S("0x0000000000000211e981e385f0bb709b6793deed2dfd06ca2597f06f6020b90d")},
-                { 470001, uint256S("0x0000000000000091e9201aac0d7de4644d840f77343a383abcbfe4cdb143d00c")},
-                { 741975, uint256S("0xc0e8ef621936909064f627478d7031adda683bbcd7477cffd8eca571cf868c32")},
+                {       0, uint256S("0x00000000a6a47e28b4fea2ab47262d9a420bb1600dee375cad30fa54c9f6ec90")},
+                {   88238, uint256S("0x0000000000012ed053d9c1f2221803df06f57c982b264c9f6289cd5db88404d2")},
+                {  136700, uint256S("0x9f5833e664b0d283ef89ca8e6cf2a1ca0355199475da2f29679e11e07733ef19")},
+                {  289999, uint256S("0xcffbc77ecbf3c6b208405192d70acf600dff4adaaf985785d9a366b2595032d1")},
+                {  429998, uint256S("0x0000000000000211e981e385f0bb709b6793deed2dfd06ca2597f06f6020b90d")},
+                {  470001, uint256S("0x0000000000000091e9201aac0d7de4644d840f77343a383abcbfe4cdb143d00c")},
+                {  741975, uint256S("0xc0e8ef621936909064f627478d7031adda683bbcd7477cffd8eca571cf868c32")},
+                { 1442960, uint256S("0xf26d6870d649fbddc13f5fb1e575f9e52eb06b78c184615179a84b4632fd6218")},
             }
         };
 
         chainTxData = ChainTxData{
             // Update as we know more about the contents of the BLAST chain
-            // Stats as of c0e8ef621936909064f627478d7031adda683bbcd7477cffd8eca571cf868c32
-            1538172088, // * UNIX timestamp of last known number of transactions
-            768047,     // * total number of transactions between genesis and that timestamp
-                        //   (the tx=... number in the SetBestChain debug.log lines)
-            2700.0      // * estimated number of transactions per second after that timestamp
+            // Data from rpc: getchaintxstats 4096 f26d6870d649fbddc13f5fb1e575f9e52eb06b78c184615179a84b4632fd6218
+            1562094659,             // * UNIX timestamp of last known number of transactions
+            1481890,                // * total number of transactions between genesis and that timestamp
+                                    //   (the tx=... number in the SetBestChain debug.log lines)
+            0.03027175532572118     // * estimated number of transactions per second after that timestamp
         };
 
         /** BLAST Start **/
         // Burn Amounts
-        nIssueAssetBurnAmount = 500 * COIN;
-        nReissueAssetBurnAmount = 100 * COIN;
-        nIssueSubAssetBurnAmount = 100 * COIN;
-        nIssueUniqueAssetBurnAmount = 5 * COIN;
+        nIssueAssetBurnAmount = 2 * COIN;
+        nReissueAssetBurnAmount = 1 * COIN;
+        nIssueSubAssetBurnAmount = 1 * COIN;
+        nIssueUniqueAssetBurnAmount = 3 * COIN;
 
         // Burn Addresses
-        strIssueAssetBurnAddress = "RXissueAssetXXXXXXXXXXXXXXXXXhhZGt";
-        strReissueAssetBurnAddress = "RXReissueAssetXXXXXXXXXXXXXXVEFAWu";
-        strIssueSubAssetBurnAddress = "RXissueSubAssetXXXXXXXXXXXXXWcwhwL";
-        strIssueUniqueAssetBurnAddress = "RXissueUniqueAssetXXXXXXXXXXWEAe58";
+        strIssueAssetBurnAddress = "BLXissueAssetXXXXXXXXXXXXXXXVd4AWU";
+        strReissueAssetBurnAddress = "BLXReissueAssetXXXXXXXXXXXXXcsoxG6";
+        strIssueSubAssetBurnAddress = "BLXissueSubAssetXXXXXXXXXXXXVw8vuG";
+        strIssueUniqueAssetBurnAddress = "BLXissueUniqueAssetXXXXXXXXXUwDQ7Y";
 
         //Global Burn Address
-        strGlobalBurnAddress = "RXBurnXXXXXXXXXXXXXXXXXXXXXXWUo9FV";
+        strGlobalBurnAddress = "BLXBurnXXXXXXXXXXXXXXXXXXXXXW8Wo8q";
 
         // DGW Activation
         nDGWActivationBlock = 0;
@@ -264,7 +265,7 @@ public:
         nMaxReorganizationDepth = 60; // 60 at 32 second block timespan is +/- 32 minutes.
         nMinReorganizationPeers = 4;
         nMinReorganizationAge = 60 * 60 * 12; // 12 hours
-        mnCollateralAmount = 25000;
+        mnCollateralAmount = 6400;
         /** BLAST End **/
     }
 };
@@ -437,7 +438,7 @@ public:
         fAllowMultiplePorts = false;
         nFulfilledRequestExpireTime = 5*60; // fulfilled requests expire in 5 minutes
 
-        strSporkAddress = "bWYetMgxDgut45aaDNF7ySPJ66NTwjTDZc";
+        strSporkAddress = "bQZKqNsgY1EqozbxFgErAt98CWTxAUjeFg";
         checkpointData = (CCheckpointData) {
             {
                 {      0, uint256S("0x000000001d03315ec89ac7895ad122e3ae9c3c92a2ec5f63000794cdd6c18095")},
@@ -458,16 +459,16 @@ public:
         nIssueAssetBurnAmount = 2 * COIN;
         nReissueAssetBurnAmount = 1 * COIN;
         nIssueSubAssetBurnAmount = 1 * COIN;
-        nIssueUniqueAssetBurnAmount = 1 * COIN;
+        nIssueUniqueAssetBurnAmount = 3 * COIN;
 
         // Burn Addresses
-        strIssueAssetBurnAddress = "8R6xzzuVcDWM4KM1xC47AgvWF3nGSp5E4b"; // "n1issueAssetXXXXXXXXXXXXXXXXWdnemQ";
-        strReissueAssetBurnAddress = "8R6xzzuVcDWM4KM1xC47AgvWF3nGSp5E4b"; // "n1ReissueAssetXXXXXXXXXXXXXXWG9NLd";
-        strIssueSubAssetBurnAddress = "8R6xzzuVcDWM4KM1xC47AgvWF3nGSp5E4b"; // "n1issueSubAssetXXXXXXXXXXXXXbNiH6v";
-        strIssueUniqueAssetBurnAddress = "8R6xzzuVcDWM4KM1xC47AgvWF3nGSp5E4b"; // "n1issueUniqueAssetXXXXXXXXXXS4695i";
+        strIssueAssetBurnAddress = "bLXissueAssetXXXXXXXXXXXXXXXWDAJ5X"; // "n1issueAssetXXXXXXXXXXXXXXXXWdnemQ";
+        strReissueAssetBurnAddress = "bLXReissueAssetXXXXXXXXXXXXXZmwaH8"; // "n1ReissueAssetXXXXXXXXXXXXXXWG9NLd";
+        strIssueSubAssetBurnAddress = "bLXissueSubAssetXXXXXXXXXXXXawjcXz"; // "n1issueSubAssetXXXXXXXXXXXXXbNiH6v";
+        strIssueUniqueAssetBurnAddress = "bLXissueUniqueAssetXXXXXXXXXZQasDs"; // "n1issueUniqueAssetXXXXXXXXXXS4695i";
 
         // Global Burn Address
-        strGlobalBurnAddress = "8R6xzzuVcDWM4KM1xC47AgvWF3nGSp5E4b"; // "n1BurnXXXXXXXXXXXXXXXXXXXXXXU1qejP";
+        strGlobalBurnAddress = "bLXBurnXXXXXXXXXXXXXXXXXXXXXU1AqD5"; // "n1BurnXXXXXXXXXXXXXXXXXXXXXXU1qejP";
 
         // DGW Activation
         nDGWActivationBlock = 0;
@@ -499,7 +500,7 @@ public:
         consensus.minerRewardPercent = 80;
         consensus.masternodeRewardPercent = 15;
         consensus.devRewardPercent = 5;
-        consensus.devWalletAddress = "8QD1FZNN41npesU92uRAs4ZBCZ2ccviFP7";
+        consensus.devWalletAddress = "K7y8ijS81JEq4WJtAb1mhQGGiYpZ4vQL6m";
 
         consensus.BIP34Height = -1; // BIP34 has not necessarily activated on regtest
         consensus.BIP34Hash = uint256();
@@ -624,7 +625,7 @@ public:
         fAllowMultiplePorts = false;
         nFulfilledRequestExpireTime = 5*60; // fulfilled requests expire in 5 minutes
 
-        strSporkAddress = "bRLXw7eqUWMb9Uskk1pfvUozFgAkPZ2eMi";
+        strSporkAddress = "K7y8ijS81JEq4WJtAb1mhQGGiYpZ4vQL6m";
         checkpointData = (CCheckpointData) {
             {
             }
@@ -645,19 +646,19 @@ public:
 
         /** BLAST Start **/
         // Burn Amounts
-        nIssueAssetBurnAmount = 500 * COIN;
-        nReissueAssetBurnAmount = 100 * COIN;
-        nIssueSubAssetBurnAmount = 100 * COIN;
-        nIssueUniqueAssetBurnAmount = 5 * COIN;
+        nIssueAssetBurnAmount = 2 * COIN;
+        nReissueAssetBurnAmount = 1 * COIN;
+        nIssueSubAssetBurnAmount = 1 * COIN;
+        nIssueUniqueAssetBurnAmount = 3 * COIN;
 
         // Burn Addresses
-        strIssueAssetBurnAddress = "n1issueAssetXXXXXXXXXXXXXXXXWdnemQ";
-        strReissueAssetBurnAddress = "n1ReissueAssetXXXXXXXXXXXXXXWG9NLd";
-        strIssueSubAssetBurnAddress = "n1issueSubAssetXXXXXXXXXXXXXbNiH6v";
-        strIssueUniqueAssetBurnAddress = "n1issueUniqueAssetXXXXXXXXXXS4695i";
+        strIssueAssetBurnAddress = "KLXissueAssetXXXXXXXXXXXXXXXVegZ2i";
+        strReissueAssetBurnAddress = "KLXReissueAssetXXXXXXXXXXXXXbC7U4T";
+        strIssueSubAssetBurnAddress = "KLXissueSubAssetXXXXXXXXXXXXXzHTbt";
+        strIssueUniqueAssetBurnAddress = "KLXissueUniqueAssetXXXXXXXXXYrwJGp";
 
         // Global Burn Address
-        strGlobalBurnAddress = "n1BurnXXXXXXXXXXXXXXXXXXXXXXU1qejP";
+        strGlobalBurnAddress = "KLXBurnXXXXXXXXXXXXXXXXXXXXXUP2Myc";
 
         // DGW Activation
         nDGWActivationBlock = 0;

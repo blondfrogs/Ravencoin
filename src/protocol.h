@@ -166,7 +166,7 @@ extern const char *PONG;
  * The alert message warns nodes of problems that may affect them or the rest
  * of the network.
  * @since protocol version 311.
- * @see https://syscoin.org/en/developer-reference#alert
+ * @see https://bitcoin.org/en/developer-reference#alert
  */
 extern const char *ALERT;
 /**

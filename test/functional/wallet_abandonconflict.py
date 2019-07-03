@@ -11,10 +11,10 @@
  which are not included in a block and are not currently in the mempool. It has
  no effect on transactions which are already conflicted or abandoned.
 """
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import BlastTestFramework
 from test_framework.util import *
 
-class AbandonConflictTest(RavenTestFramework):
+class AbandonConflictTest(BlastTestFramework):
     def set_test_params(self):
         self.num_nodes = 2
         self.extra_args = [["-minrelaytxfee=0.00001"], []]

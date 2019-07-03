@@ -7,8 +7,8 @@
 """
     ZMQ example using python3's asyncio
 
-    Raven should be started with the command line arguments:
-        ravend -testnet -daemon \
+    BLAST should be started with the command line arguments:
+        blastd -testnet -daemon \
                 -zmqpubhashblock=tcp://127.0.0.1:26464 \
                 -zmqpubrawtx=tcp://127.0.0.1:26464 \
                 -zmqpubhashtx=tcp://127.0.0.1:26464 \
@@ -24,7 +24,7 @@
     and `await` keywords respectively.
 
     A blocking example using python 2.7 can be obtained from the git history:
-    https://github.com/RavenProject/Ravencoin/blob/37a7fe9e440b83e2364d5498931253937abe9294/contrib/zmq/zmq_sub.py
+    https://github.com/bitcoin/bitcoin/blob/37a7fe9e440b83e2364d5498931253937abe9294/contrib/zmq/zmq_sub.py
 """
 
 import binascii

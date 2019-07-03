@@ -23,13 +23,13 @@ from test_framework.mininode import (
     msg_getheaders,
     wait_until,
 )
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import BlastTestFramework
 from test_framework.util import (
     assert_equal,
     p2p_port,
 )
 
-class P2PFingerprintTest(RavenTestFramework):
+class P2PFingerprintTest(BlastTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
         self.num_nodes = 1

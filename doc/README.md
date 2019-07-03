@@ -1,15 +1,15 @@
-Ravencoin Core
+BLAST Core
 ==============
 
 Setup
 ---------------------
-Ravencoin Core is the original Ravencoin client and it builds the backbone of the network. It downloads and, by default, stores the entire history of Ravencoin transactions; depending on the speed of your computer and network connection, the synchronization process is typically complete in under an hour.
+BLAST Core is the original BLAST client and it builds the backbone of the network. It downloads and, by default, stores the entire history of BLAST transactions; depending on the speed of your computer and network connection, the synchronization process is typically complete in under an hour.
 
-To download compiled binaries of the Ravencoin Core and wallet, visit the [GitHub release page](https://github.com/RavenProject/Ravencoin/releases).
+To download compiled binaries of the BLAST Core and wallet, visit the [GitHub release page](https://github.com/blastdev/blast-core/releases).
 
 Running
 ---------------------
-The following are some helpful notes on how to run Ravencoin on your native platform.
+The following are some helpful notes on how to run BLAST on your native platform.
 
 ### Linux
 
@@ -17,15 +17,15 @@ The following are some helpful notes on how to run Ravencoin on your native plat
 
 2) Install distribution-specific dependencies listed below.
 
-3) Run the GUI wallet or only the Ravencoin core deamon
+3) Run the GUI wallet or only the BLAST core deamon
 
    a. GUI wallet:
    
-   `./raven-qt`
+   `./blast-qt`
 
    b. Core deamon:
    
-   `./ravend -deamon`
+   `./blastd -deamon`
 
 #### Ubuntu 16.04, 17.04/17.10 and 18.04
 
@@ -73,15 +73,15 @@ The GUI wallet requires the QR Code encoding library and Google's data interchan
 
 ### OS X
 
-1) Download Raven-Qt.dmg.
+1) Download Blast-Qt.dmg.
 
 2) Double click the DMG to mount it. 
 
-3) Drag Raven Core icon to the Applications Folder
+3) Drag Blast Core icon to the Applications Folder
 
 ![alt tag](https://i.imgur.com/GLhBFUV.png)
 
-4) Open the Applications folder and Launch Raven Core. The client will begin synchronizing with the network.
+4) Open the Applications folder and Launch Blast Core. The client will begin synchronizing with the network.
 
 ![alt tag](https://i.imgur.com/v3962qo.png)
 
@@ -89,69 +89,64 @@ Note: You may get the follow error on first launch:
 ```
 Dyld Error Message:
   Library not loaded: @loader_path/libboost_system-mt.dylib
-  Referenced from: /Applications/Raven-Qt.app/Contents/Frameworks/libboost_thread-mt.dylib
+  Referenced from: /Applications/Blast-Qt.app/Contents/Frameworks/libboost_thread-mt.dylib
   Reason: image not found
 ```
-To resolve, you will need to copy libboost_system.dylib to libboost_system-mt.dylib in the /Applications/Raven-Qt.app/Contents/Frameworks folder
+To resolve, you will need to copy libboost_system.dylib to libboost_system-mt.dylib in the /Applications/Blast-Qt.app/Contents/Frameworks folder
 
 ### Windows
 
 1) Download windows-x86_64.zip and unpack executables to desired folder.
 
-2) Double click the raven-qt.exe to launch it.
+2) Double click the blast-qt.exe to launch it.
 
 ### Need Help?
 
-- See the documentation at the [Ravencoin Wiki](https://raven.wiki/wiki/Ravencoin_Wiki)
-for help and more information.
-- Ask for help on [Discord](https://discord.gg/DUkcBst), [Telegram](https://t.me/RavencoinDev) or [Reddit](https://www.reddit.com/r/Ravencoin/).
-- Ask for help on the [RavencoinTalk](https://www.ravencointalk.org/) forums, in the [Development and Technical discussion board](https://www.ravencointalk.org/?forum=661517).
+- Ask for help on [Discord](https://discord.gg/qXkJ3VA) or [Telegram](https://t.me/BLASTcoin ).
 
 Building from source
 ---------------------
-The following are developer notes on how to build the Ravencoin core software on your native platform. They are not complete guides, but include notes on the necessary libraries, compile flags, etc.
+The following are developer notes on how to build the BLAST core software on your native platform. They are not complete guides, but include notes on the necessary libraries, compile flags, etc.
 
-- [Dependencies](https://github.com/RavenProject/Ravencoin/tree/master/doc/dependencies.md)
-- [OS X Build Notes](https://github.com/RavenProject/Ravencoin/tree/master/doc/build-osx.md)
-- [Unix Build Notes](https://github.com/RavenProject/Ravencoin/tree/master/doc/build-unix.md)
-- [Windows Build Notes](https://github.com/RavenProject/Ravencoin/tree/master/doc/build-windows.md)
-- [OpenBSD Build Notes](https://github.com/RavenProject/Ravencoin/tree/master/doc/build-openbsd.md)
-- [Gitian Building Guide](https://github.com/RavenProject/Ravencoin/tree/master/doc/gitian-building.md)
+- [Dependencies](https://github.com/blastdev/blast-core/tree/master/doc/dependencies.md)
+- [OS X Build Notes](https://github.com/blastdev/blast-core/tree/master/doc/build-osx.md)
+- [Unix Build Notes](https://github.com/blastdev/blast-core/tree/master/doc/build-unix.md)
+- [Windows Build Notes](https://github.com/blastdev/blast-core/tree/master/doc/build-windows.md)
+- [OpenBSD Build Notes](https://github.com/blastdev/blast-core/tree/master/doc/build-openbsd.md)
+- [Gitian Building Guide](https://github.com/blastdev/blast-core/tree/master/doc/gitian-building.md)
 
 Development
 ---------------------
-Ravencoin repo's [root README](https://github.com/RavenProject/Ravencoin/blob/master/README.md) contains relevant information on the development process and automated testing.
+BLAST repo [root README](https://github.com/blastdev/blast-core/blob/master/README.md) contains relevant information on the development process and automated testing.
 
-- [Developer Notes](https://github.com/RavenProject/Ravencoin/blob/master/doc/developer-notes.md)
-- [Release Notes](https://github.com/RavenProject/Ravencoin/blob/master/doc/release-notes.md)
-- [Release Process](https://github.com/RavenProject/Ravencoin/blob/master/doc/release-process.md)
-- [Source Code Documentation (External Link)](https://dev.visucore.com/raven/doxygen/) -- 2018-05-11 -- Broken link
-- [Translation Process](https://github.com/RavenProject/Ravencoin/blob/master/doc/translation_process.md)
-- [Translation Strings Policy](https://github.com/RavenProject/Ravencoin/blob/master/doc/translation_strings_policy.md)
-- [Travis CI](https://github.com/RavenProject/Ravencoin/blob/master/doc/travis-ci.md)
-- [Unauthenticated REST Interface](https://github.com/RavenProject/Ravencoin/blob/master/doc/REST-interface.md)
-- [Shared Libraries](https://github.com/RavenProject/Ravencoin/blob/master/doc/shared-libraries.md)
-- [BIPS](https://github.com/RavenProject/Ravencoin/blob/master/doc/bips.md)
-- [Dnsseed Policy](https://github.com/RavenProject/Ravencoin/blob/master/doc/dnsseed-policy.md)
-- [Benchmarking](https://github.com/RavenProject/Ravencoin/blob/master/doc/benchmarking.md)
+- [Developer Notes](https://github.com/blastdev/blast-core/blob/master/doc/developer-notes.md)
+- [Release Notes](https://github.com/blastdev/blast-core/blob/master/doc/release-notes.md)
+- [Release Process](https://github.com/blastdev/blast-core/blob/master/doc/release-process.md)
+- [Source Code Documentation (External Link)](https://dev.visucore.com/bitcoin/doxygen/) -- 2018-05-11 -- Broken link
+- [Translation Process](https://github.com/blastdev/blast-core/blob/master/doc/translation_process.md)
+- [Translation Strings Policy](https://github.com/blastdev/blast-core/blob/master/doc/translation_strings_policy.md)
+- [Travis CI](https://github.com/blastdev/blast-core/blob/master/doc/travis-ci.md)
+- [Unauthenticated REST Interface](https://github.com/blastdev/blast-core/blob/master/doc/REST-interface.md)
+- [Shared Libraries](https://github.com/blastdev/blast-core/blob/master/doc/shared-libraries.md)
+- [BIPS](https://github.com/blastdev/blast-core/blob/master/doc/bips.md)
+- [Dnsseed Policy](https://github.com/blastdev/blast-core/blob/master/doc/dnsseed-policy.md)
+- [Benchmarking](https://github.com/blastdev/blast-core/blob/master/doc/benchmarking.md)
 
 ### Resources
-- Discuss on the [RavencoinTalk](https://www.ravencointalk.org/) forums, in the [Development & Technical Discussion board](https://www.ravencointalk.org/?forum=661517).
-- Discuss on chat [Discord](https://discord.gg/DUkcBst), [Telegram](https://t.me/RavencoinDev) or [Reddit](https://www.reddit.com/r/Ravencoin/).
-- Find out more on the [Ravencoin Wiki](https://raven.wiki/wiki/Ravencoin_Wiki)
-- Visit the project home [Ravencoin.org](https://ravencoin.org)
+- Discuss on chat [Discord](https://discord.gg/qXkJ3VA) or [Telegram](https://t.me/BLASTcoin).
+- Visit the project home [blastblastblast.com](https://blastblastblast.com)
 
 ### Miscellaneous
-- [Assets Attribution](https://github.com/RavenProject/Ravencoin/blob/master/doc/assets-attribution.md)
-- [Files](https://github.com/RavenProject/Ravencoin/blob/master/doc/files.md)
-- [Fuzz-testing](https://github.com/RavenProject/Ravencoin/blob/master/doc/fuzzing.md)
-- [Reduce Traffic](https://github.com/RavenProject/Ravencoin/blob/master/doc/reduce-traffic.md)
-- [Tor Support](https://github.com/RavenProject/Ravencoin/blob/master/doc/tor.md)
-- [Init Scripts (systemd/upstart/openrc)](https://github.com/RavenProject/Ravencoin/blob/master/doc/init.md)
-- [ZMQ](https://github.com/RavenProject/Ravencoin/blob/master/doc/zmq.md)
+- [Assets Attribution](https://github.com/blastdev/blast-core/blob/master/doc/assets-attribution.md)
+- [Files](https://github.com/blastdev/blast-core/blob/master/doc/files.md)
+- [Fuzz-testing](https://github.com/blastdev/blast-core/blob/master/doc/fuzzing.md)
+- [Reduce Traffic](https://github.com/blastdev/blast-core/blob/master/doc/reduce-traffic.md)
+- [Tor Support](https://github.com/blastdev/blast-core/blob/master/doc/tor.md)
+- [Init Scripts (systemd/upstart/openrc)](https://github.com/blastdev/blast-core/blob/master/doc/init.md)
+- [ZMQ](https://github.com/blastdev/blast-core/blob/master/doc/zmq.md)
 
 License
 ---------------------
-Distributed under the [MIT software license](https://github.com/RavenProject/Ravencoin/blob/master/COPYING).
+Distributed under the [MIT software license](https://github.com/blastdev/blast-core/blob/master/COPYING).
 This product includes software developed by the OpenSSL Project for use in the [OpenSSL Toolkit](https://www.openssl.org/). This product includes
 cryptographic software written by Eric Young ([eay@cryptsoft.com](mailto:eay@cryptsoft.com)), and UPnP software written by Thomas Bernard.

@@ -1,3 +1,3 @@
 Releases have been moved to:
 
-https://github.com/RavenProject/Ravencoin/releases/latest
+https://github.com/blastdev/blast-core/releases/latest

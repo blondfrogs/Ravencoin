@@ -1,6 +1,6 @@
 [Protocol]
-exec=raven-qt '%u'
-protocol=raven
+exec=blast-qt '%u'
+protocol=blast
 input=none
 output=none
 helper=true

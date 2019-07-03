@@ -1,2 +1,2 @@
-contrib/ravend.bash-completion	ravend
-contrib/raven-cli.bash-completion	raven-cli
+contrib/blastd.bash-completion	blastd
+contrib/blast-cli.bash-completion	blast-cli

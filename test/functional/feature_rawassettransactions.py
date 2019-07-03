@@ -7,7 +7,7 @@
 """
 from io import BytesIO
 from pprint import *
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import BlastTestFramework
 from test_framework.util import *
 from test_framework.mininode import *
 import math
@@ -42,7 +42,7 @@ def get_tx_issue_hex(node, asset_name, asset_quantity, asset_units=0):
     return tx_issue_hex
 
 
-class RawAssetTransactionsTest(RavenTestFramework):
+class RawAssetTransactionsTest(BlastTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
         self.num_nodes = 3

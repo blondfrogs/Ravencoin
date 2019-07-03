@@ -5,7 +5,7 @@
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 """Test various net timeouts.
 
-- Create three ravend nodes:
+- Create three blastd nodes:
 
     no_verack_node - we never send a verack in response to their version
     no_version_node - we never send a version (only a ping)
@@ -25,7 +25,7 @@
 from time import sleep
 
 from test_framework.mininode import *
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import BlastTestFramework
 from test_framework.util import *
 
 class TestNode(NodeConnCB):
@@ -33,7 +33,7 @@ class TestNode(NodeConnCB):
         # Don't send a verack in response
         pass
 
-class TimeoutsTest(RavenTestFramework):
+class TimeoutsTest(BlastTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
         self.num_nodes = 1
