@@ -32,7 +32,7 @@ TEST_BITCOIN_CPP = \
 TEST_BITCOIN_H = \
   test/test_bitcoin.h
 
-qt_test_test_blast_qt_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(BITCOIN_QT_INCLUDES) \
+qt_test_test_blast_qt_CPPFLAGS = $(AM_CPPFLAGS) $(BLAST_INCLUDES) $(BITCOIN_QT_INCLUDES) \
   $(QT_INCLUDES) $(QT_TEST_INCLUDES) $(PROTOBUF_CFLAGS)
 
 qt_test_test_blast_qt_SOURCES = \
