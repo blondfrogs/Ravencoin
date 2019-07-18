@@ -15,7 +15,7 @@ To install:
 
 If you build yourself, you will either need to modify the paths in
 the .desktop file or copy or symlink your blast-qt binary to `/usr/bin`
-and the `../../share/pixmaps/bitcoin128.png` to `/usr/share/pixmaps`
+and the `../../share/pixmaps/blast128.png` to `/usr/share/pixmaps`
 
 blast-qt.protocol (KDE)
 
