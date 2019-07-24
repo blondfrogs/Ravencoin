@@ -123,8 +123,8 @@ public:
         consensus.nMajorityEnforceBlockUpgrade = 750;
         consensus.nMajorityRejectBlockOutdated = 950;
         consensus.nMajorityWindow = 1000;
-        consensus.nMasternodePaymentsStartBlock = 1500640;
-        consensus.nMasternodeMinimumConfirmations = 15;
+        consensus.nMasternodePaymentsStartBlock = 1564000;
+        consensus.nMasternodeMinimumConfirmations = 64;
 
         consensus.minerRewardPercent = 80;
         consensus.masternodeRewardPercent = 15;
@@ -132,10 +132,10 @@ public:
         consensus.devWalletAddress = "8XMNXVZvMTcxvp37wQFdjL2PhSPcCsC8kL";
 
         consensus.BIP34Height = 0;
-        consensus.BIP34Hash = uint256S("0x000000001d03315ec89ac7895ad122e3ae9c3c92a2ec5f63000794cdd6c18095"); // Genesis hash (height 0)
+        consensus.BIP34Hash = uint256S("0x00000000a6a47e28b4fea2ab47262d9a420bb1600dee375cad30fa54c9f6ec90"); // Genesis hash (height 0)
 
         consensus.nBIP34Enabled = true; // 00000000a6a47e28b4fea2ab47262d9a420bb1600dee375cad30fa54c9f6ec90
-        consensus.nBIP65Enabled = false; // 000000000000000004c2b624ed5d7756c508d90fd0da2c7c679febfa6c4735f0
+        consensus.nBIP65Enabled = false;
         consensus.nBIP66Enabled = true;
         consensus.nSegwitEnabled = false;
         consensus.nCSVEnabled = true;
@@ -154,7 +154,7 @@ public:
         consensus.nMinerConfirmationWindow = 60; // nPowTargetTimespan / nPowTargetSpacing
 
         consensus.nBlockV4UpgradeHeight = 470000; // Miners produce v4 blocks after height 470000
-        consensus.nBlockVersionRevertHeight = 2000000; // Stop forcing block v4 to allow asset activation
+        consensus.nBlockVersionRevertHeight = 1564000; // Stop forcing block v4 to allow asset activation
 
         consensus.nAuxPowStartHeight = AuxPow::START_MAINNET;
 
@@ -162,8 +162,8 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 1199145601; // January 1, 2008
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 1230767999; // December 31, 2008
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].bit = 6;  //Assets (RIP2)
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 1562095966; // July 24, 2019 4:25:30 AM
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 1595564730; // July 24, 2020 4:25:30 AM
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 1566028800; // August 17, 2019 8:00:00 AM
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 1597651200; // August 17, 2020 8:00:00 AM
 
         // Deployment of BIP68, BIP112, and BIP113.
         consensus.vDeployments[Consensus::DEPLOYMENT_CSV].bit = 0;
@@ -178,9 +178,8 @@ public:
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x000000000000000000000000000000000000000000008d50d55ed008a84c251c");  // Height 1442960
 
-        //TODO - Set this to genesis block
         // By default assume that the signatures in ancestors of this block are valid.
-        consensus.defaultAssumeValid = uint256S("0x00"); // 
+        consensus.defaultAssumeValid = uint256S("0x00000000a6a47e28b4fea2ab47262d9a420bb1600dee375cad30fa54c9f6ec90"); // Genesis hash (height 0)
 
         /**
          * The message start string is designed to be unlikely to occur in normal data.
@@ -283,7 +282,7 @@ public:
         consensus.nMajorityRejectBlockOutdated = 950;
         consensus.nMajorityWindow = 1000;
         consensus.nMasternodePaymentsStartBlock = 2;
-        consensus.nMasternodeMinimumConfirmations = 1;
+        consensus.nMasternodeMinimumConfirmations = 64;
 
         consensus.minerRewardPercent = 80;
         consensus.masternodeRewardPercent = 15;
@@ -462,13 +461,13 @@ public:
         nIssueUniqueAssetBurnAmount = 3 * COIN;
 
         // Burn Addresses
-        strIssueAssetBurnAddress = "bLXissueAssetXXXXXXXXXXXXXXXWDAJ5X"; // "n1issueAssetXXXXXXXXXXXXXXXXWdnemQ";
-        strReissueAssetBurnAddress = "bLXReissueAssetXXXXXXXXXXXXXZmwaH8"; // "n1ReissueAssetXXXXXXXXXXXXXXWG9NLd";
-        strIssueSubAssetBurnAddress = "bLXissueSubAssetXXXXXXXXXXXXawjcXz"; // "n1issueSubAssetXXXXXXXXXXXXXbNiH6v";
-        strIssueUniqueAssetBurnAddress = "bLXissueUniqueAssetXXXXXXXXXZQasDs"; // "n1issueUniqueAssetXXXXXXXXXXS4695i";
+        strIssueAssetBurnAddress = "bLXissueAssetXXXXXXXXXXXXXXXWDAJ5X";
+        strReissueAssetBurnAddress = "bLXReissueAssetXXXXXXXXXXXXXZmwaH8";
+        strIssueSubAssetBurnAddress = "bLXissueSubAssetXXXXXXXXXXXXawjcXz";
+        strIssueUniqueAssetBurnAddress = "bLXissueUniqueAssetXXXXXXXXXZQasDs";
 
         // Global Burn Address
-        strGlobalBurnAddress = "bLXBurnXXXXXXXXXXXXXXXXXXXXXU1AqD5"; // "n1BurnXXXXXXXXXXXXXXXXXXXXXXU1qejP";
+        strGlobalBurnAddress = "bLXBurnXXXXXXXXXXXXXXXXXXXXXU1AqD5";
 
         // DGW Activation
         nDGWActivationBlock = 0;
