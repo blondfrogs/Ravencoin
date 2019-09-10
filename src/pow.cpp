@@ -251,7 +251,7 @@ bool CheckBlockProofOfWork(const CBlockHeader *pblock, const Consensus::Params& 
 
     if (pblock->auxpow && (pblock->auxpow.get() != nullptr))
     {
-        if (params.fStrictChainId && !CheckAuxpow(pblock->auxpow, pblock->GetHash(), pblock->GetChainID(), params))
+        if (!CheckAuxpow(pblock->auxpow, pblock->GetHash(), pblock->GetChainID(), params))
             return error("CheckBlockProofOfWork() : AUX POW is not valid");
         // Check proof of work matches claimed amount
         if (!CheckProofOfWork(pblock->auxpow->GetParentBlockHash(), pblock->nBits, params))

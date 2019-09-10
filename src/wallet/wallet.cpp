@@ -11,6 +11,7 @@
 #include "chain.h"
 #include "wallet/coincontrol.h"
 #include "consensus/consensus.h"
+#include "consensus/merkle.h"
 #include "consensus/validation.h"
 #include "fs.h"
 #include "init.h"
@@ -4779,6 +4780,18 @@ void CMerkleTx::SetMerkleBranch(const CBlockIndex* pindex, int posInBlock)
 
     // set the position of the transaction in the block
     nIndex = posInBlock;
+
+    // Read the block from the disk
+    CBlock block;
+    if (!ReadBlockFromDisk(block, pindex, Params().GetConsensus())) {
+        LogPrintf("CMerkleTx::SetMerkleBranch: Failed to read block %s from disk\n", pindex->GetBlockHash().GetHex());
+        vMerkleBranch.clear()
+        nIndex = -1
+        return;
+    }
+
+    // Fill in merkle branch
+    vMerkleBranch = BlockMerkleBranch(block, nIndex);
 }
 
 int CMerkleTx::GetDepthInMainChain(const CBlockIndex* &pindexRet) const

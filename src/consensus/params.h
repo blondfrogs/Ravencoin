@@ -93,7 +93,6 @@ struct Params {
     int32_t nAuxpowChainId;
     int32_t nAlternateChainId;
     int nChainIdUpgradeHeight;
-    bool fStrictChainId;
 
     // BLAST: Block v4 Upgrade Height
     int nBlockV4UpgradeHeight;

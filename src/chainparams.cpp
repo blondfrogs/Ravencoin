@@ -146,7 +146,6 @@ public:
         consensus.nAuxpowChainId = 0x1940; // Auxpow Chain ID = 6464
         consensus.nAlternateChainId = 0x00A4; // Auxpow Chain ID = 164
         consensus.nChainIdUpgradeHeight = 796000; // Switch to Chain ID 164 after block 796000
-        consensus.fStrictChainId = false;
 
         consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
@@ -304,7 +303,6 @@ public:
         consensus.nAuxpowChainId = 0x1940; // Auxpow Chain ID = 6464
         consensus.nAlternateChainId = 0x00A4; // Auxpow Chain ID = 164
         consensus.nChainIdUpgradeHeight = 30; // Switch to Chain ID 164 after block 30
-        consensus.fStrictChainId = false;
 
         consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
@@ -516,7 +514,6 @@ public:
         consensus.nAuxpowChainId = 0x1940; // Auxpow Chain ID = 6464
         consensus.nAlternateChainId = 0x00A4; // Auxpow Chain ID = 164
         consensus.nChainIdUpgradeHeight = 0; // Switch to Chain ID 164 after block 0
-        consensus.fStrictChainId = false;
 
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = true;
