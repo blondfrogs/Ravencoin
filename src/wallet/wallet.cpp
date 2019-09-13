@@ -4785,8 +4785,8 @@ void CMerkleTx::SetMerkleBranch(const CBlockIndex* pindex, int posInBlock)
     CBlock block;
     if (!ReadBlockFromDisk(block, pindex, Params().GetConsensus())) {
         LogPrintf("CMerkleTx::SetMerkleBranch: Failed to read block %s from disk\n", pindex->GetBlockHash().GetHex());
-        vMerkleBranch.clear()
-        nIndex = -1
+        vMerkleBranch.clear();
+        nIndex = -1;
         return;
     }
 
