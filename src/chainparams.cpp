@@ -123,7 +123,7 @@ public:
         consensus.nMajorityEnforceBlockUpgrade = 750;
         consensus.nMajorityRejectBlockOutdated = 950;
         consensus.nMajorityWindow = 1000;
-        consensus.nMasternodePaymentsStartBlock = ‭1700000;
+        consensus.nMasternodePaymentsStartBlock = 1700000;
         consensus.nMasternodeMinimumConfirmations = 64;
 
         consensus.minerRewardPercent = 80;
@@ -153,7 +153,7 @@ public:
         consensus.nMinerConfirmationWindow = 60; // nPowTargetTimespan / nPowTargetSpacing
 
         consensus.nBlockV4UpgradeHeight = 470000; // Miners produce v4 blocks after height 470000
-        consensus.nBlockVersionRevertHeight = ‭1700000; // Stop forcing block v4 to allow asset activation
+        consensus.nBlockVersionRevertHeight = 1700000; // Stop forcing block v4 to allow asset activation
 
         consensus.nAuxPowStartHeight = AuxPow::START_MAINNET;
 
