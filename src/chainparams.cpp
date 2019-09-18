@@ -123,7 +123,7 @@ public:
         consensus.nMajorityEnforceBlockUpgrade = 750;
         consensus.nMajorityRejectBlockOutdated = 950;
         consensus.nMajorityWindow = 1000;
-        consensus.nMasternodePaymentsStartBlock = 1564000;
+        consensus.nMasternodePaymentsStartBlock = ‭1700000;
         consensus.nMasternodeMinimumConfirmations = 64;
 
         consensus.minerRewardPercent = 80;
@@ -153,7 +153,7 @@ public:
         consensus.nMinerConfirmationWindow = 60; // nPowTargetTimespan / nPowTargetSpacing
 
         consensus.nBlockV4UpgradeHeight = 470000; // Miners produce v4 blocks after height 470000
-        consensus.nBlockVersionRevertHeight = 1564000; // Stop forcing block v4 to allow asset activation
+        consensus.nBlockVersionRevertHeight = ‭1700000; // Stop forcing block v4 to allow asset activation
 
         consensus.nAuxPowStartHeight = AuxPow::START_MAINNET;
 
@@ -175,7 +175,7 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_SEGWIT].nTimeout = 1519146928; // February 20th, 2018
 
         // The best chain should have at least this much work.
-        consensus.nMinimumChainWork = uint256S("0x000000000000000000000000000000000000000000008d50d55ed008a84c251c");  // Height 1442960
+        consensus.nMinimumChainWork = uint256S("0x00000000000000000000000000000000000000000000ca8be6fe903dea905ffa");  // Height 1642760
 
         // By default assume that the signatures in ancestors of this block are valid.
         consensus.defaultAssumeValid = uint256S("0x00000000a6a47e28b4fea2ab47262d9a420bb1600dee375cad30fa54c9f6ec90"); // Genesis hash (height 0)
@@ -229,16 +229,17 @@ public:
                 {  470001, uint256S("0x0000000000000091e9201aac0d7de4644d840f77343a383abcbfe4cdb143d00c")},
                 {  741975, uint256S("0xc0e8ef621936909064f627478d7031adda683bbcd7477cffd8eca571cf868c32")},
                 { 1442960, uint256S("0xf26d6870d649fbddc13f5fb1e575f9e52eb06b78c184615179a84b4632fd6218")},
+                { 1642760, uint256S("0xacaf798f33b314ed2c5c3396b0c43f85175f0ea895201259e04eb6294d731c7e")},
             }
         };
 
         chainTxData = ChainTxData{
             // Update as we know more about the contents of the BLAST chain
-            // Data from rpc: getchaintxstats 4096 f26d6870d649fbddc13f5fb1e575f9e52eb06b78c184615179a84b4632fd6218
-            1562094659,             // * UNIX timestamp of last known number of transactions
-            1481890,                // * total number of transactions between genesis and that timestamp
+            // Data from rpc: getchaintxstats 4096 acaf798f33b314ed2c5c3396b0c43f85175f0ea895201259e04eb6294d731c7e
+            1568804413,             // * UNIX timestamp of last known number of transactions
+            1686131,                // * total number of transactions between genesis and that timestamp
                                     //   (the tx=... number in the SetBestChain debug.log lines)
-            0.03027175532572118     // * estimated number of transactions per second after that timestamp
+            0.03069375295272014     // * estimated number of transactions per second after that timestamp
         };
 
         /** BLAST Start **/
