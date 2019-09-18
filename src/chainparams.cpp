@@ -138,7 +138,7 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 1540944000; // Oct 31, 2018
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 1572480000; // Oct 31, 2019
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSET_FIX].bit = 7;
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSET_FIX].nStartTime = 1569002400; // Oct 20, 2019
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSET_FIX].nStartTime = 1568641754; // Oct 16, 2019
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSET_FIX].nTimeout = 1600624800; // Oct 20, 2020
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSET_FIX].nOverrideMinerConfirmationWindow = 2016; // ~1.4 days
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSET_FIX].nOverrideRuleChangeActivationThreshold = 1612; // ~80%
@@ -294,7 +294,7 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nStartTime = 1533924000; // GMT: Friday, August 10, 2018 6:00:00 PM
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSETS].nTimeout = 1538351999; // GMT: Sunday, September 30, 2018 11:59:59 PM
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSET_FIX].bit = 7;
-        consensus.vDeployments[Consensus::DEPLOYMENT_ASSET_FIX].nStartTime = 1569002400; // Oct 20, 2019
+        consensus.vDeployments[Consensus::DEPLOYMENT_ASSET_FIX].nStartTime = 1568641754; // Oct 16, 2019
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSET_FIX].nTimeout = 1600624800; // Oct 20, 2020
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSET_FIX].nOverrideMinerConfirmationWindow = 2016; // ~1.4 days
         consensus.vDeployments[Consensus::DEPLOYMENT_ASSET_FIX].nOverrideRuleChangeActivationThreshold = 1612; // ~80%
