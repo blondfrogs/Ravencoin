@@ -31,9 +31,16 @@
 #include "utilmoneystr.h"
 #include "utilstrencodings.h"
 #include "validationinterface.h"
+#include "auxpow/serialize.h"
+#include "spork.h"
+#include "masternode-payments.h"
+#include "masternode-sync.h"
+#include "masternodeman.h"
+
+#include <boost/foreach.hpp>
 
 #if defined(NDEBUG)
-# error "Raven cannot be compiled without assertions."
+# error "BLAST cannot be compiled without assertions."
 #endif
 
 std::atomic<int64_t> nTimeBestReceived(0); // Used only to inform the wallet of when we last received a block
@@ -945,6 +952,41 @@ bool static AlreadyHave(const CInv& inv) EXCLUSIVE_LOCKS_REQUIRED(cs_main)
     case MSG_BLOCK:
     case MSG_WITNESS_BLOCK:
         return mapBlockIndex.count(inv.hash);
+/* 
+        BLAST Related Inventory Messages
+
+        --
+
+        We shouldn't update the sync times for each of the messages when we already have it. 
+        We're going to be asking many nodes upfront for the full inventory list, so we'll get duplicates of these.
+        We want to only update the time on new hits, so that we can time out appropriately if needed.
+    */
+    // case MSG_TXLOCK_REQUEST:
+    //     return instantsend.AlreadyHave(inv.hash);
+
+    // case MSG_TXLOCK_VOTE:
+    //     return instantsend.AlreadyHave(inv.hash);
+
+    case MSG_SPORK:
+        return mapSporks.count(inv.hash);
+
+    case MSG_MASTERNODE_PAYMENT_VOTE:
+        return mnpayments.mapMasternodePaymentVotes.count(inv.hash);
+
+    case MSG_MASTERNODE_PAYMENT_BLOCK:
+        {
+            BlockMap::iterator mi = mapBlockIndex.find(inv.hash);
+            return mi != mapBlockIndex.end() && mnpayments.mapMasternodeBlocks.find(mi->second->nHeight) != mnpayments.mapMasternodeBlocks.end();
+        }
+
+    case MSG_MASTERNODE_ANNOUNCE:
+        return mnodeman.mapSeenMasternodeBroadcast.count(inv.hash) && !mnodeman.IsMnbRecoveryRequested(inv.hash);
+
+    case MSG_MASTERNODE_PING:
+        return mnodeman.mapSeenMasternodePing.count(inv.hash);
+
+    case MSG_MASTERNODE_VERIFY:
+        return mnodeman.mapSeenMasternodeVerification.count(inv.hash);
     }
     // Don't know what it is, just say we already got one
     return true;
@@ -1139,7 +1181,7 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                     }
                 }
             }
-            else if (inv.type == MSG_TX || inv.type == MSG_WITNESS_TX)
+            else if (inv.IsKnownType())
             {
                 // Send stream from relay memory
                 bool push = false;
@@ -1157,9 +1199,60 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                         push = true;
                     }
                 }
-                if (!push) {
-                    vNotFound.push_back(inv);
+
+                if (!push && inv.type == MSG_SPORK) {
+                    if(mapSporks.count(inv.hash)) {
+                        connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::SPORK, mapSporks[inv.hash]));
+                        push = true;
+                    }
                 }
+
+                if (!push && inv.type == MSG_MASTERNODE_PAYMENT_VOTE) {
+                    if(mnpayments.HasVerifiedPaymentVote(inv.hash)) {
+                        connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::MASTERNODEPAYMENTVOTE, mnpayments.mapMasternodePaymentVotes[inv.hash]));
+                        push = true;
+                    }
+                }
+
+                if (!push && inv.type == MSG_MASTERNODE_PAYMENT_BLOCK) {
+                    BlockMap::iterator mi = mapBlockIndex.find(inv.hash);
+                    LOCK(cs_mapMasternodeBlocks);
+                    if (mi != mapBlockIndex.end() && mnpayments.mapMasternodeBlocks.count(mi->second->nHeight)) {
+                        BOOST_FOREACH(CMasternodePayee& payee, mnpayments.mapMasternodeBlocks[mi->second->nHeight].vecPayees) {
+                            std::vector<uint256> vecVoteHashes = payee.GetVoteHashes();
+                            BOOST_FOREACH(uint256& hash, vecVoteHashes) {
+                                if(mnpayments.HasVerifiedPaymentVote(hash)) {
+                                    connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::MASTERNODEPAYMENTVOTE, mnpayments.mapMasternodePaymentVotes[hash]));
+                                }
+                            }
+                        }
+                        push = true;
+                    }
+                }
+
+                if (!push && inv.type == MSG_MASTERNODE_ANNOUNCE) {
+                    if(mnodeman.mapSeenMasternodeBroadcast.count(inv.hash)){
+                        connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::MNANNOUNCE, mnodeman.mapSeenMasternodeBroadcast[inv.hash].second));
+                        push = true;
+                    }
+                }
+
+                if (!push && inv.type == MSG_MASTERNODE_PING) {
+                    if(mnodeman.mapSeenMasternodePing.count(inv.hash)) {
+                        connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::MNPING, mnodeman.mapSeenMasternodePing[inv.hash]));
+                        push = true;
+                    }
+                }
+
+                if (!push && inv.type == MSG_MASTERNODE_VERIFY) {
+                    if(mnodeman.mapSeenMasternodeVerification.count(inv.hash)) {
+                        connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::MNVERIFY, mnodeman.mapSeenMasternodeVerification[inv.hash]));
+                        push = true;
+                    }
+                }
+
+                if (!push)
+                    vNotFound.push_back(inv);
             }
 
             // Track requests for our stuff.
@@ -1674,8 +1767,10 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
                     // fell back to inv we probably have a reorg which we should get the headers for first,
                     // we now only provide a getheaders response here. When we receive the headers, we will
                     // then ask for the blocks we need.
-                    connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::GETHEADERS, chainActive.GetLocator(pindexBestHeader), inv.hash));
-                    LogPrint(BCLog::NET, "getheaders (%d) %s to peer=%d\n", pindexBestHeader->nHeight, inv.hash.ToString(), pfrom->GetId());
+                    if (!IsInitialBlockDownload()) {
+                        connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::GETHEADERS, chainActive.GetLocator(pindexBestHeader), inv.hash));
+                        LogPrint(BCLog::NET, "getheaders (%d) %s to peer=%d\n", pindexBestHeader->nHeight, inv.hash.ToString(), pfrom->GetId());
+                    }
                 }
             }
             else
@@ -1902,7 +1997,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         LogPrint(BCLog::NET, "getheaders %d to %s from peer=%d\n", (pindex ? pindex->nHeight : -1), hashStop.IsNull() ? "end" : hashStop.ToString(), pfrom->GetId());
         for (; pindex; pindex = chainActive.Next(pindex))
         {
-            vHeaders.push_back(pindex->GetBlockHeader());
+            vHeaders.push_back(pindex->GetBlockHeader(mapDirtyAuxPow));
             if (--nLimit <= 0 || pindex->GetBlockHash() == hashStop)
                 break;
         }
@@ -2016,7 +2111,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
                         if (!orphanTx.HasWitness() && !stateDummy.CorruptionPossible()) {
                             // Do not use rejection cache for witness transactions or
                             // witness-stripped transactions, as they can have been malleated.
-                            // See https://github.com/RavenProject/Ravencoin/issues/8279 for details.
+                            // See https://github.com/bitcoin/bitcoin/issues/8279 for details.
                             assert(recentRejects);
                             recentRejects->insert(orphanHash);
                         }
@@ -2062,7 +2157,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             if (!tx.HasWitness() && !state.CorruptionPossible()) {
                 // Do not use rejection cache for witness transactions or
                 // witness-stripped transactions, as they can have been malleated.
-                // See https://github.com/RavenProject/Ravencoin/issues/8279 for details.
+                // See https://github.com/bitcoin/bitcoin/issues/8279 for details.
                 assert(recentRejects);
                 recentRejects->insert(tx.GetHash());
                 if (RecursiveDynamicUsage(*ptx) < 100000) {
@@ -2489,8 +2584,14 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
             // Headers message had its maximum size; the peer may have more headers.
             // TODO: optimize: if pindexLast is an ancestor of chainActive.Tip or pindexBestHeader, continue
             // from there instead.
-            LogPrint(BCLog::NET, "more getheaders (%d) to end to peer=%d (startheight:%d)\n", pindexLast->nHeight, pfrom->GetId(), pfrom->nStartingHeight);
-            connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::GETHEADERS, chainActive.GetLocator(pindexLast), uint256()));
+            //
+            // BLAST: okay, let us optimize.
+            const CBlockIndex *bestByHeader = LastCommonAncestor(pindexLast, pindexBestHeader) == pindexLast ? pindexBestHeader : pindexLast;
+            const CBlockIndex *tip = chainActive.Tip();
+            const CBlockIndex *start = LastCommonAncestor(bestByHeader, tip) == tip ? bestByHeader : tip;
+
+            LogPrint(BCLog::NET, "more getheaders (%d) to end to peer=%d (startheight:%d) (bestheader:%d)\n", start->nHeight, pfrom->GetId(), pfrom->nStartingHeight, pindexBestHeader->nHeight);
+            connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::GETHEADERS, chainActive.GetLocator(start), uint256()));
         }
 
         bool fCanDirectFetch = CanDirectFetch(chainparams.GetConsensus());
@@ -2817,11 +2918,35 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
     }
 
     else {
-        // Ignore unknown commands for extensibility
-        LogPrint(BCLog::NET, "Unknown command \"%s\" from peer=%d\n", SanitizeString(strCommand), pfrom->GetId());
+
+        bool found = false;
+        const std::vector<std::string> &allMessages = getAllNetMessageTypes();
+        BOOST_FOREACH(const std::string msg, allMessages) {
+            if(msg == strCommand) {
+                found = true;
+                break;
+            }
+        }
+
+        if (found)
+        {
+            //probably one the extensions
+#ifdef ENABLE_WALLET
+            //privateSendClient.ProcessMessage(pfrom, strCommand, vRecv, connman);
+#endif // ENABLE_WALLET
+            //privateSendServer.ProcessMessage(pfrom, strCommand, vRecv, connman);
+            mnodeman.ProcessMessage(pfrom, strCommand, vRecv, *connman);
+            mnpayments.ProcessMessage(pfrom, strCommand, vRecv, *connman);
+            //instantsend.ProcessMessage(pfrom, strCommand, vRecv, connman);
+            sporkManager.ProcessSpork(pfrom, strCommand, vRecv, *connman);
+            masternodeSync.ProcessMessage(pfrom, strCommand, vRecv);
+        }
+        else
+        {
+            // Ignore unknown commands for extensibility
+            LogPrint(BCLog::NET, "Unknown command \"%s\" from peer=%d\n", SanitizeString(strCommand), pfrom->GetId());
+        }
     }
-
-
 
     return true;
 }
@@ -3239,14 +3364,14 @@ bool PeerLogicValidation::SendMessages(CNode* pto, std::atomic<bool>& interruptM
                     pBestIndex = pindex;
                     if (fFoundStartingHeader) {
                         // add this to the headers message
-                        vHeaders.push_back(pindex->GetBlockHeader());
+                        vHeaders.push_back(pindex->GetBlockHeader(mapDirtyAuxPow));
                     } else if (PeerHasHeader(&state, pindex)) {
                         continue; // keep looking for the first new block
                     } else if (pindex->pprev == nullptr || PeerHasHeader(&state, pindex->pprev)) {
                         // Peer doesn't have this header but they do have the prior one.
                         // Start sending headers.
                         fFoundStartingHeader = true;
-                        vHeaders.push_back(pindex->GetBlockHeader());
+                        vHeaders.push_back(pindex->GetBlockHeader(mapDirtyAuxPow));
                     } else {
                         // Peer doesn't have this header or the prior one -- nothing will
                         // connect, so bail out.
@@ -3459,6 +3584,16 @@ bool PeerLogicValidation::SendMessages(CNode* pto, std::atomic<bool>& interruptM
                     pto->filterInventoryKnown.insert(hash);
                 }
             }
+
+            // Send non-tx/non-block inventory items
+            for (const auto& inv : pto->vInventoryOtherToSend) {
+                vInv.push_back(inv);
+                if (vInv.size() == MAX_INV_SZ) {
+                    connman->PushMessage(pto, msgMaker.Make(NetMsgType::INV, vInv));
+                    vInv.clear();
+                }
+            }
+            pto->vInventoryOtherToSend.clear();
         }
         if (!vInv.empty())
             connman->PushMessage(pto, msgMaker.Make(NetMsgType::INV, vInv));

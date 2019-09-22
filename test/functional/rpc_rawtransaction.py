@@ -13,11 +13,11 @@ Test the following RPCs:
    - getrawtransaction
 """
 
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import BlastTestFramework
 from test_framework.util import *
 
 # Create one-input, one-output, no-fee transaction:
-class RawTransactionsTest(RavenTestFramework):
+class RawTransactionsTest(BlastTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
         self.num_nodes = 3
@@ -66,7 +66,7 @@ class RawTransactionsTest(RavenTestFramework):
         #use balance deltas instead of absolute values
         bal = self.nodes[2].getbalance()
 
-        # send 1.2 RVN to msig adr
+        # send 1.2 BLAST to msig adr
         txId = self.nodes[0].sendtoaddress(mSigObj, 1.2)
         self.sync_all()
         self.nodes[0].generate(1)

@@ -5,7 +5,7 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #ifdef HAVE_CONFIG_H
-#include "config/raven-config.h"
+#include "config/bitcoin-config.h"
 #endif
 
 #include "netbase.h"
@@ -538,6 +538,18 @@ bool ConnectSocketDirectly(const CService &addrConnect, SOCKET& hSocketRet, int 
 
     hSocketRet = hSocket;
     return true;
+}
+
+bool ConnectSocket(const CService &addrDest, SOCKET& hSocketRet, int nTimeout, bool *outProxyConnectionFailed)
+{
+    proxyType proxy;
+    if (outProxyConnectionFailed)
+        *outProxyConnectionFailed = false;
+
+    if (GetProxy(addrDest.GetNetwork(), proxy))
+        return ConnectThroughProxy(proxy, addrDest.ToStringIP(), addrDest.GetPort(), hSocketRet, nTimeout, outProxyConnectionFailed);
+    else // no proxy needed (none set for target network)
+        return ConnectSocketDirectly(addrDest, hSocketRet, nTimeout);
 }
 
 bool SetProxy(enum Network net, const proxyType &addrProxy) {

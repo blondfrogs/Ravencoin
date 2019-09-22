@@ -1,11 +1,12 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
 // Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The BLAST Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_VALIDATIONINTERFACE_H
-#define RAVEN_VALIDATIONINTERFACE_H
+#ifndef BITCOIN_VALIDATIONINTERFACE_H
+#define BITCOIN_VALIDATIONINTERFACE_H
 
 #include <memory>
 
@@ -33,6 +34,10 @@ void UnregisterAllValidationInterfaces();
 
 class CValidationInterface {
 protected:
+    /** Notifies listeners of accepted block header */
+    virtual void AcceptedBlockHeader(const CBlockIndex *pindexNew) {}
+    /** Notifies listeners of updated block header tip */
+    virtual void NotifyHeaderTip(const CBlockIndex *pindexNew, bool fInitialDownload) {}
     /** Notifies listeners of updated block chain tip */
     virtual void UpdatedBlockTip(const CBlockIndex *pindexNew, const CBlockIndex *pindexFork, bool fInitialDownload) {}
     /** Notifies listeners of a transaction having been added to mempool. */
@@ -89,7 +94,9 @@ public:
     /** Call any remaining callbacks on the calling thread */
     void FlushBackgroundCallbacks();
 
-    void UpdatedBlockTip(const CBlockIndex *, const CBlockIndex *, bool fInitialDownload);
+    void AcceptedBlockHeader(const CBlockIndex *);
+    void NotifyHeaderTip(const CBlockIndex *, bool);
+    void UpdatedBlockTip(const CBlockIndex *, const CBlockIndex *, bool);
     void TransactionAddedToMempool(const CTransactionRef &);
     void BlockConnected(const std::shared_ptr<const CBlock> &, const CBlockIndex *pindex, const std::vector<CTransactionRef> &);
     void BlockDisconnected(const std::shared_ptr<const CBlock> &);
@@ -105,4 +112,4 @@ public:
 
 CMainSignals& GetMainSignals();
 
-#endif // RAVEN_VALIDATIONINTERFACE_H
+#endif // BITCOIN_VALIDATIONINTERFACE_H

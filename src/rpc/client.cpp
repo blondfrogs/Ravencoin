@@ -179,6 +179,7 @@ static const CRPCConvertParam vRPCConvertParams[] =
     { "listassetbalancesbyaddress", 1, "totalonly"},
     { "listassetbalancesbyaddress", 2, "count"},
     { "listassetbalancesbyaddress", 3, "start"},
+    { "spork", 1, "value" },
 };
 
 class CRPCConvertTable

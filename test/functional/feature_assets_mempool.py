@@ -6,20 +6,20 @@
 """Testing asset mempool use cases
 
 """
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import BlastTestFramework
 from test_framework.util import *
 
 
 import string
 
-class AssetMempoolTest(RavenTestFramework):
+class AssetMempoolTest(BlastTestFramework):
     def set_test_params(self):
         self.setup_clean_chain = True
         self.num_nodes = 2
 
 
     def activate_assets(self):
-        self.log.info("Generating RVN and activating assets...")
+        self.log.info("Generating BLAST and activating assets...")
         n0, n1 = self.nodes[0], self.nodes[1]
 
         n0.generate(1)

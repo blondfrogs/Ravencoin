@@ -1,0 +1,81 @@
+policy_module(blast, 1.100.1)
+
+########################################
+#
+# Declarations
+#
+
+type blast_t;
+type blast_exec_t;
+init_daemon_domain(blast_t, blast_exec_t)
+
+permissive blast_t;
+
+type blast_initrc_exec_t;
+init_script_file(blast_initrc_exec_t)
+
+type blast_conf_t;
+files_type(blast_conf_t)
+
+type blast_var_lib_t;
+files_type(blast_var_lib_t)
+
+type blast_var_run_t;
+files_type(blast_var_run_t)
+
+type blast_port_t;
+corenet_port(blast_port_t)
+
+########################################
+#
+# blast local policy
+#
+allow blast_t self:process { fork };
+
+allow blast_t self:fifo_file rw_fifo_file_perms;
+allow blast_t self:unix_stream_socket create_stream_socket_perms;
+
+manage_dirs_pattern(blast_t, blast_conf_t, blast_conf_t)
+manage_files_pattern(blast_t, blast_conf_t, blast_conf_t)
+
+manage_dirs_pattern(blast_t, blast_var_lib_t, blast_var_lib_t)
+manage_files_pattern(blast_t, blast_var_lib_t, blast_var_lib_t)
+files_var_lib_filetrans(blast_t, blast_var_lib_t, { dir file })
+
+manage_dirs_pattern(blast_t, blast_var_run_t, blast_var_run_t)
+manage_files_pattern(blast_t, blast_var_run_t, blast_var_run_t)
+
+sysnet_dns_name_resolve(blast_t)
+corenet_all_recvfrom_unlabeled(blast_t)
+
+allow blast_t self:tcp_socket create_stream_socket_perms;
+corenet_tcp_sendrecv_generic_if(blast_t)
+corenet_tcp_sendrecv_generic_node(blast_t)
+corenet_tcp_sendrecv_all_ports(blast_t)
+corenet_tcp_bind_generic_node(blast_t)
+
+gen_require(`
+    type blast_port_t;
+')
+allow blast_t blast_port_t:tcp_socket name_bind;
+
+gen_require(`
+    type blast_port_t;
+')
+allow blast_t blast_port_t:tcp_socket name_connect;
+
+domain_use_interactive_fds(blast_t)
+
+files_read_etc_files(blast_t)
+
+miscfiles_read_localization(blast_t)
+
+sysnet_dns_name_resolve(blast_t)
+
+allow blast_t blast_exec_t:file execute_no_trans;
+allow blast_t self:process setsched;
+corecmd_exec_ls(blast_t)
+corenet_tcp_connect_http_port(blast_t)
+dev_read_urand(blast_t)
+fs_getattr_xattr_fs(blast_t)
+kernel_read_system_state(blast_t)

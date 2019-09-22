@@ -1,11 +1,12 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
 // Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The BLAST Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #if defined(HAVE_CONFIG_H)
-#include "config/raven-config.h"
+#include "config/bitcoin-config.h"
 #endif
 
 #include "util.h"
@@ -78,9 +79,16 @@
 #endif
 
 #include <boost/algorithm/string/case_conv.hpp> // for to_lower()
+#include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/predicate.hpp> // for startswith() and endswith()
+#include <boost/algorithm/string/split.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
+#include <boost/foreach.hpp>
+#include <boost/algorithm/string/classification.hpp>
 #include <boost/program_options/detail/config_file.hpp>
 #include <boost/thread.hpp>
+#include <boost/lexical_cast.hpp>
 #include <openssl/crypto.h>
 #include <openssl/rand.h>
 #include <openssl/conf.h>
@@ -88,13 +96,16 @@
 // Application startup time (used for uptime calculation)
 const int64_t nStartupTime = GetTime();
 
-const char *const RAVEN_CONF_FILENAME = "raven.conf";
-const char *const RAVEN_PID_FILENAME = "ravend.pid";
+const char *const BITCOIN_CONF_FILENAME = "blast.conf";
+const char *const BITCOIN_PID_FILENAME = "blastd.pid";
 
 ArgsManager gArgs;
+bool fDebug = false;
+bool fLiteMode = false;
+bool fMasternodeMode = false;
 bool fPrintToConsole = false;
 bool fPrintToDebugLog = true;
-
+bool fUnitTest = false;
 bool fLogTimestamps = DEFAULT_LOGTIMESTAMPS;
 bool fLogTimeMicros = DEFAULT_LOGTIMEMICROS;
 bool fLogIPs = DEFAULT_LOGIPS;
@@ -225,6 +236,59 @@ struct CLogCategoryDesc
     std::string category;
 };
 
+bool LogAcceptCategory(const char* category)
+{
+    if (category != NULL)
+    {
+        // Give each thread quick access to -debug settings.
+        // This helps prevent issues debugging global destructors,
+        // where mapMultiArgs might be deleted before another
+        // global destructor calls LogPrint()
+        static boost::thread_specific_ptr<std::set<std::string> > ptrCategory;
+
+        if (!fDebug) {
+            if (ptrCategory.get() != NULL) {
+                LogPrintf("debug turned off: thread %s\n", GetThreadName());
+                ptrCategory.release();
+            }
+            return false;
+        }
+
+        if (ptrCategory.get() == NULL)
+        {
+            if (gArgs.GetArgs("-debug").size() > 0) {
+                std::string strThreadName = GetThreadName();
+                LogPrintf("debug turned on:\n");
+                for (int i = 0; i < (int)gArgs.GetArgs("-debug").size(); ++i)
+                    LogPrintf("  thread %s category %s\n", strThreadName, gArgs.GetArgs("-debug")[i]);
+                const std::vector<std::string>& categories = gArgs.GetArgs("-debug");
+                ptrCategory.reset(new std::set<std::string>(categories.begin(), categories.end()));
+                // thread_specific_ptr automatically deletes the set when the thread ends.
+                // "BLAST" is a composite category enabling all BLAST-related debug output
+                if(ptrCategory->count(std::string("blast"))) {
+                    ptrCategory->insert(std::string("privatesend"));
+                    ptrCategory->insert(std::string("instantsend"));
+                    ptrCategory->insert(std::string("masternode"));
+                    ptrCategory->insert(std::string("spork"));
+                    ptrCategory->insert(std::string("keepass"));
+                    ptrCategory->insert(std::string("mnpayments"));
+                    ptrCategory->insert(std::string("gobject"));
+                }
+            } else {
+                ptrCategory.reset(new std::set<std::string>());
+            }
+        }
+        const std::set<std::string>& setCategories = *ptrCategory.get();
+
+        // if not debugging everything and not debugging specific category, LogPrint does nothing.
+        if (setCategories.count(std::string("")) == 0 &&
+            setCategories.count(std::string("1")) == 0 &&
+            setCategories.count(std::string(category)) == 0)
+            return false;
+    }
+    return true;
+}
+
 const CLogCategoryDesc LogCategories[] =
         {
                 {BCLog::NONE,        "0"},
@@ -249,6 +313,8 @@ const CLogCategoryDesc LogCategories[] =
                 {BCLog::COINDB,      "coindb"},
                 {BCLog::QT,          "qt"},
                 {BCLog::LEVELDB,     "leveldb"},
+                {BCLog::MASTERNODE,  "masternode"},
+                {BCLog::MNPAYMENT,   "mnpayment"},
                 {BCLog::ALL,         "1"},
                 {BCLog::ALL,         "all"},
         };
@@ -498,6 +564,11 @@ void ArgsManager::ForceSetArg(const std::string &strArg, const std::string &strV
     mapMultiArgs[strArg] = {strValue};
 }
 
+void ArgsManager::ForceSetMultiArgs(const std::string& strArg, const std::vector<std::string>& values)
+{
+    LOCK(cs_args);
+    mapMultiArgs[strArg] = values;
+}
 
 static const int screenWidth = 79;
 static const int optIndent = 2;
@@ -522,7 +593,7 @@ static std::string FormatException(const std::exception *pex, const char *pszThr
     char pszModule[MAX_PATH] = "";
     GetModuleFileNameA(nullptr, pszModule, sizeof(pszModule));
 #else
-    const char *pszModule = "raven";
+    const char *pszModule = "blast";
 #endif
     if (pex)
         return strprintf(
@@ -541,13 +612,13 @@ void PrintExceptionContinue(const std::exception *pex, const char *pszThread)
 
 fs::path GetDefaultDataDir()
 {
-    // Windows < Vista: C:\Documents and Settings\Username\Application Data\Raven
-    // Windows >= Vista: C:\Users\Username\AppData\Roaming\Raven
-    // Mac: ~/Library/Application Support/Raven
-    // Unix: ~/.raven
+    // Windows < Vista: C:\Documents and Settings\Username\Application Data\BLAST
+    // Windows >= Vista: C:\Users\Username\AppData\Roaming\BLAST
+    // Mac: ~/Library/Application Support/BLAST
+    // Unix: ~/.blast
 #ifdef WIN32
     // Windows
-    return GetSpecialFolderPath(CSIDL_APPDATA) / "Raven";
+    return GetSpecialFolderPath(CSIDL_APPDATA) / "BLAST";
 #else
     fs::path pathRet;
     char *pszHome = getenv("HOME");
@@ -557,10 +628,10 @@ fs::path GetDefaultDataDir()
         pathRet = fs::path(pszHome);
 #ifdef MAC_OSX
     // Mac
-    return pathRet / "Library/Application Support/Raven";
+    return pathRet / "Library/Application Support/BLAST";
 #else
     // Unix
-    return pathRet / ".raven";
+    return pathRet / ".blast";
 #endif
 #endif
 }
@@ -618,11 +689,19 @@ fs::path GetConfigFile(const std::string &confPath)
     return pathConfigFile;
 }
 
+boost::filesystem::path GetMasternodeConfigFile()
+{
+    boost::filesystem::path pathConfigFile(gArgs.GetArg("-mnconf", "masternode.conf"));
+    if (!pathConfigFile.is_complete())
+        pathConfigFile = GetDataDir() / pathConfigFile;
+    return pathConfigFile;
+}
+
 void ArgsManager::ReadConfigFile(const std::string &confPath)
 {
     fs::ifstream streamConfig(GetConfigFile(confPath));
     if (!streamConfig.good())
-        return; // No raven.conf file is OK
+        return; // No blast.conf file is OK
 
     {
         LOCK(cs_args);
@@ -631,7 +710,7 @@ void ArgsManager::ReadConfigFile(const std::string &confPath)
 
         for (boost::program_options::detail::config_file_iterator it(streamConfig, setOptions), end; it != end; ++it)
         {
-            // Don't overwrite existing settings so command line settings override raven.conf
+            // Don't overwrite existing settings so command line settings override blast.conf
             std::string strKey = std::string("-") + it->string_key;
             std::string strValue = it->value[0];
             InterpretNegativeSetting(strKey, strValue);
@@ -648,7 +727,7 @@ void ArgsManager::ReadConfigFile(const std::string &confPath)
 
 fs::path GetPidFile()
 {
-    fs::path pathPidFile(gArgs.GetArg("-pid", RAVEN_PID_FILENAME));
+    fs::path pathPidFile(gArgs.GetArg("-pid", BITCOIN_PID_FILENAME));
     if (!pathPidFile.is_complete()) pathPidFile = GetDataDir() / pathPidFile;
     return pathPidFile;
 }
@@ -862,6 +941,21 @@ void RenameThread(const char *name)
 #endif
 }
 
+std::string GetThreadName()
+{
+    char name[16];
+#if defined(PR_GET_NAME)
+    // Only the first 15 characters are used (16 - NUL terminator)
+    ::prctl(PR_GET_NAME, name, 0, 0, 0);
+#elif defined(MAC_OSX)
+    pthread_getname_np(pthread_self(), name, 16);
+// #elif (defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__DragonFly__))
+// #else
+    // no get_name here
+#endif
+    return std::string(name);
+}
+
 void SetupEnvironment()
 {
 #ifdef HAVE_MALLOPT_ARENA_MAX
@@ -918,10 +1012,10 @@ std::string CopyrightHolders(const std::string &strPrefix)
 {
     std::string strCopyrightHolders = strPrefix + strprintf(_(COPYRIGHT_HOLDERS), _(COPYRIGHT_HOLDERS_SUBSTITUTION));
 
-    // Check for untranslated substitution to make sure Raven Core copyright is not removed by accident
-    if (strprintf(COPYRIGHT_HOLDERS, COPYRIGHT_HOLDERS_SUBSTITUTION).find("Raven Core") == std::string::npos)
+    // Check for untranslated substitution to make sure BLAST Core copyright is not removed by accident
+    if (strprintf(COPYRIGHT_HOLDERS, COPYRIGHT_HOLDERS_SUBSTITUTION).find("BLAST Core") == std::string::npos)
     {
-        strCopyrightHolders += "\n" + strPrefix + "The Raven Core developers";
+        strCopyrightHolders += "\n" + strPrefix + "The BLAST Core developers";
     }
     return strCopyrightHolders;
 }
@@ -943,4 +1037,52 @@ void SetThreadPriority(int nPriority)
     setpriority(PRIO_PROCESS, 0, nPriority);
 #endif // PRIO_THREAD
 #endif // WIN32
+}
+
+uint32_t StringVersionToInt(const std::string& strVersion)
+{
+    std::vector<std::string> tokens;
+    boost::split(tokens, strVersion, boost::is_any_of("."));
+    if(tokens.size() != 3)
+        throw std::bad_cast();
+    uint32_t nVersion = 0;
+    for(unsigned idx = 0; idx < 3; idx++)
+    {
+        if(tokens[idx].length() == 0)
+            throw std::bad_cast();
+        uint32_t value = boost::lexical_cast<uint32_t>(tokens[idx]);
+        if(value > 255)
+            throw std::bad_cast();
+        nVersion <<= 8;
+        nVersion |= value;
+    }
+    return nVersion;
+}
+
+std::string IntVersionToString(uint32_t nVersion)
+{
+    if((nVersion >> 24) > 0) // MSB is always 0
+        throw std::bad_cast();
+    if(nVersion == 0)
+        throw std::bad_cast();
+    std::array<std::string, 3> tokens;
+    for(unsigned idx = 0; idx < 3; idx++)
+    {
+        unsigned shift = (2 - idx) * 8;
+        uint32_t byteValue = (nVersion >> shift) & 0xff;
+        tokens[idx] = boost::lexical_cast<std::string>(byteValue);
+    }
+    return boost::join(tokens, ".");
+}
+
+std::string SafeIntVersionToString(uint32_t nVersion)
+{
+    try
+    {
+        return IntVersionToString(nVersion);
+    }
+    catch(const std::bad_cast&)
+    {
+        return "invalid_version";
+    }
 }

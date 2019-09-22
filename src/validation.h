@@ -1,14 +1,15 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
 // Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The BLAST Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_VALIDATION_H
-#define RAVEN_VALIDATION_H
+#ifndef BITCOIN_VALIDATION_H
+#define BITCOIN_VALIDATION_H
 
 #if defined(HAVE_CONFIG_H)
-#include "config/raven-config.h"
+#include "config/bitcoin-config.h"
 #endif
 
 #include "amount.h"
@@ -19,6 +20,7 @@
 #include "script/script_error.h"
 #include "sync.h"
 #include "versionbits.h"
+#include "chain.h"
 #include "spentindex.h"
 #include "addressindex.h"
 #include "timestampindex.h"
@@ -106,7 +108,7 @@ static const int MAX_BLOCKTXN_DEPTH = 10;
  *  Larger windows tolerate larger download speed differences between peer, but increase the potential
  *  degree of disordering of blocks on disk (which make reindexing and pruning harder). We'll probably
  *  want to make this a per-peer adaptive value at some point. */
-static const unsigned int BLOCK_DOWNLOAD_WINDOW = 1024;
+static const unsigned int BLOCK_DOWNLOAD_WINDOW = 1024 * 32;
 /** Time to wait (in seconds) between writing blocks/block index to disk. */
 static const unsigned int DATABASE_WRITE_INTERVAL = 60 * 60;
 /** Time to wait (in seconds) between flushing chainstate to disk. */
@@ -129,12 +131,12 @@ static const unsigned int INVENTORY_BROADCAST_MAX = 7 * INVENTORY_BROADCAST_INTE
 static const unsigned int AVG_FEEFILTER_BROADCAST_INTERVAL = 10 * 60;
 /** Maximum feefilter broadcast delay after significant change. */
 static const unsigned int MAX_FEEFILTER_CHANGE_DELAY = 5 * 60;
-/** Block download timeout base, expressed in millionths of the block interval (i.e. 10 min) */ // TODO Should we change this for raven, with 1 minutes block intervals?
+/** Block download timeout base, expressed in millionths of the block interval (i.e. 10 min) */ // TODO Should we change this for BLAST, with 1 minutes block intervals?
 static const int64_t BLOCK_DOWNLOAD_TIMEOUT_BASE = 1000000;
 /** Additional block download timeout per parallel downloading peer (i.e. 5 min) */
 static const int64_t BLOCK_DOWNLOAD_TIMEOUT_PER_PEER = 500000;
 
-static const int64_t DEFAULT_MAX_TIP_AGE = 24 * 60 * 60;
+static const int64_t DEFAULT_MAX_TIP_AGE = 7 * 24 * 60 * 60;
 /** Maximum age of our tip in seconds for us to be considered current for fee estimation */
 static const int64_t MAX_FEE_ESTIMATION_TIP_AGE = 3 * 60 * 60;
 
@@ -196,6 +198,7 @@ extern bool fIsBareMultisigStd;
 extern bool fRequireStandard;
 extern bool fCheckBlockIndex;
 extern bool fCheckpointsEnabled;
+extern bool fLogThreadpool;
 extern size_t nCoinCacheUsage;
 /** A fee rate smaller than this is considered zero fee (for relaying, mining and transaction creation) */
 extern CFeeRate minRelayTxFee;
@@ -213,6 +216,8 @@ extern arith_uint256 nMinimumChainWork;
 
 /** Best header we've seen so far (used for getheaders queries' starting points). */
 extern CBlockIndex *pindexBestHeader;
+
+extern std::map<uint256, int64_t> mapRejectedBlocks;
 
 /** Minimum disk space required - used in CheckDiskSpace() */
 static const uint64_t nMinDiskSpace = 52428800;
@@ -299,10 +304,23 @@ bool IsInitialSyncSpeedUp();
 bool GetTransaction(const uint256 &hash, CTransactionRef &tx, const Consensus::Params& params, uint256 &hashBlock, bool fAllowSlow = false);
 /** Find the best known block, and make it the tip of the block chain */
 bool ActivateBestChain(CValidationState& state, const CChainParams& chainparams, std::shared_ptr<const CBlock> pblock = std::shared_ptr<const CBlock>());
-CAmount GetBlockSubsidy(int nHeight, const Consensus::Params& consensusParams);
-
 /** Guess verification progress (as a fraction between 0.0=genesis and 1.0=current tip). */
 double GuessVerificationProgress(const ChainTxData& data, CBlockIndex* pindex);
+
+struct BlockSubsidies {
+    CAmount masternode, miner, dev, total;
+
+    BlockSubsidies(const CAmount& reward);
+};
+
+// Calculates the total reward for a block of given height
+CAmount GetTotalReward(int nHeight, const Consensus::Params& consensusParams);
+
+/**
+ * Return true if hash can be found in chainActive at nBlockHeight height.
+ * Fills hashRet with found hash, if no nBlockHeight is specified - chainActive.Height() is used.
+ */
+bool GetBlockHash(uint256& hashRet, int nBlockHeight = -1);
 
 /** Calculate the amount of disk space the block & undo files currently use */
 uint64_t CalculateCurrentUsage();
@@ -316,6 +334,10 @@ void PruneOneBlockFile(const int fileNumber);
  *  Actually unlink the specified files
  */
 void UnlinkPrunedFiles(const std::set<int>& setFilesToPrune);
+
+bool GetUTXOCoin(const COutPoint& outpoint, Coin& coin);
+int GetUTXOHeight(const COutPoint& outpoint);
+int GetUTXOConfirmations(const COutPoint& outpoint);
 
 /** Create a new block index entry for a given block hash */
 CBlockIndex * InsertBlockIndex(uint256 hash);
@@ -455,6 +477,10 @@ void UpdateUncommittedBlockStructures(CBlock& block, const CBlockIndex* pindexPr
 /** Produce the necessary coinbase commitment for a block (modifies the hash, don't call for mined blocks). */
 std::vector<unsigned char> GenerateCoinbaseCommitment(CBlock& block, const CBlockIndex* pindexPrev, const Consensus::Params& consensusParams);
 
+/** Reprocess a number of blocks to try and get on the correct chain again **/
+bool DisconnectBlocks(int blocks);
+void ReprocessBlocks(int nBlocks);
+
 /** RAII wrapper for VerifyDB: Verify consistency of the block and coin databases */
 class CVerifyDB {
 public:
@@ -490,14 +516,14 @@ extern CCoinsViewCache *pcoinsTip;
 /** Global variable that points to the active block tree (protected by cs_main) */
 extern CBlockTreeDB *pblocktree;
 
-/** RVN START */
+/** BLAST START */
 /** Global variable that point to the active assets database (protexted by cs_main) */
 extern CAssetsDB *passetsdb;
 /** Global variable that point to the active assets (protexted by cs_main) */
 extern CAssetsCache *passets;
 /** Global variable that point to the assets LRU Cache (protexted by cs_main) */
 extern CLRUCache<std::string, CDatabasedAssetData> *passetsCache;
-/** RVN END */
+/** BLAST END */
 
 /**
  * Return the spend height, which is one more than the inputs.GetBestBlock().
@@ -530,12 +556,12 @@ bool DumpMempool();
 /** Load the mempool from disk. */
 bool LoadMempool();
 
-/** RVN START */
+/** BLAST START */
 bool AreAssetsDeployed();
 
 bool IsDGWActive(unsigned int nBlockNumber);
 
 CAssetsCache* GetCurrentAssetCache();
-/** RVN END */
+/** BLAST END */
 
-#endif // RAVEN_VALIDATION_H
+#endif // BITCOIN_VALIDATION_H

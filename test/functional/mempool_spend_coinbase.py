@@ -13,11 +13,11 @@ in the next block are accepted into the memory pool,
 but less mature coinbase spends are NOT.
 """
 
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import BlastTestFramework
 from test_framework.util import *
 
 # Create one-input, one-output, no-fee transaction:
-class MempoolSpendCoinbaseTest(RavenTestFramework):
+class MempoolSpendCoinbaseTest(BlastTestFramework):
     def set_test_params(self):
         self.num_nodes = 1
         self.extra_args = [["-checkmempool"]]

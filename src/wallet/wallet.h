@@ -1,11 +1,12 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
 // Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The BLAST Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_WALLET_WALLET_H
-#define RAVEN_WALLET_WALLET_H
+#ifndef BITCOIN_WALLET_WALLET_H
+#define BITCOIN_WALLET_WALLET_H
 
 #include "amount.h"
 #include "policy/feerate.h"
@@ -102,6 +103,14 @@ enum WalletFeature
     FEATURE_LATEST = FEATURE_COMPRPUBKEY // HD is optional, use FEATURE_COMPRPUBKEY as latest version
 };
 
+enum AvailableCoinsType
+{
+    ALL_COINS,
+    ONLY_DENOMINATED,
+    ONLY_NONDENOMINATED,
+    ONLY_1000, // find masternode outputs including locked ones (use with caution)
+    ONLY_PRIVATESEND_COLLATERAL
+};
 
 /** A key pool entry */
 class CKeyPool
@@ -187,7 +196,7 @@ struct COutputEntry
     int vout;
 };
 
-/** RVN START */
+/** BLAST START */
 struct CAssetOutputEntry
 {
     txnouttype type;
@@ -196,7 +205,7 @@ struct CAssetOutputEntry
     CAmount nAmount;
     int vout;
 };
-/** RVN END */
+/** BLAST END */
 
 /** A transaction with a merkle branch linking it to the block chain. */
 class CMerkleTx
@@ -209,6 +218,11 @@ public:
     CTransactionRef tx;
     uint256 hashBlock;
 
+    // BLAST: SegWit removed the coinbase merkle tree and only included it for
+    // BLAST: backwards compatibility with older bitcoin clients.
+    // BLAST: BLAST still needs it here
+    std::vector<uint256> vMerkleBranch;
+    
     /* An nIndex == -1 means that hashBlock (in nonzero) refers to the earliest
      * block in the chain we know this or any in-wallet dependency conflicts
      * with. Older clients interpret nIndex == -1 as unconfirmed for backward
@@ -247,7 +261,6 @@ public:
 
     template <typename Stream, typename Operation>
     inline void SerializationOp(Stream& s, Operation ser_action) {
-        std::vector<uint256> vMerkleBranch; // For compatibility with older versions.
         READWRITE(tx);
         READWRITE(hashBlock);
         READWRITE(vMerkleBranch);
@@ -327,7 +340,7 @@ public:
     unsigned int nTimeSmart;
     /**
      * From me flag is set to 1 for transactions that were created by the wallet
-     * on this raven node, and set to 0 for transactions that were created
+     * on this BLAST node, and set to 0 for transactions that were created
      * externally and came in through the network or sendrawtransaction RPC.
      */
     char fFromMe;
@@ -837,11 +850,11 @@ public:
      * populate vCoins with vector of available COutputs, and populates vAssetCoins in fWithAssets is set to true.
      */
     void AvailableCoinsAll(std::vector<COutput>& vCoins, std::map<std::string, std::vector<COutput> >& mapAssetCoins,
-                            bool fGetRVN = true, bool fOnlyAssets = false,
+                            bool fGetBLAST = true, bool fOnlyAssets = false,
                             bool fOnlySafe = true, const CCoinControl *coinControl = nullptr,
                             const CAmount& nMinimumAmount = 1, const CAmount& nMaximumAmount = MAX_MONEY,
                             const CAmount& nMinimumSumAmount = MAX_MONEY, const uint64_t& nMaximumCount = 0,
-                            const int& nMinDepth = 0, const int& nMaxDepth = 9999999) const;
+                            const int& nMinDepth = 0, const int& nMaxDepth = 9999999, AvailableCoinsType nCoinType=ALL_COINS) const;
 
     /**
      * Helper function that calls AvailableCoinsAll, used for transfering assets
@@ -852,7 +865,7 @@ public:
                          const uint64_t &nMaximumCount = 0, const int &nMinDepth = 0, const int &nMaxDepth = 9999999) const;
 
     /**
-     * Helper function that calls AvailableCoinsAll, used to receive all coins, Assets and RVN
+     * Helper function that calls AvailableCoinsAll, used to receive all coins, Assets and BLAST
      */
     void AvailableCoinsWithAssets(std::vector<COutput> &vCoins, std::map<std::string, std::vector<COutput> > &mapAssetCoins,
                                   bool fOnlySafe = true, const CCoinControl *coinControl = nullptr, const CAmount &nMinimumAmount = 1,
@@ -862,7 +875,7 @@ public:
      * populate vCoins with vector of available COutputs.
      */
     void AvailableCoins(std::vector<COutput>& vCoins, bool fOnlySafe=true, const CCoinControl *coinControl = nullptr,
-                        const CAmount& nMinimumAmount = 1, const CAmount& nMaximumAmount = MAX_MONEY,
+                        AvailableCoinsType nCoinType=ALL_COINS, const CAmount& nMinimumAmount = 1, const CAmount& nMaximumAmount = MAX_MONEY,
                         const CAmount& nMinimumSumAmount = MAX_MONEY, const uint64_t& nMaximumCount = 0,
                         const int& nMinDepth = 0, const int& nMaxDepth = 9999999) const;
 
@@ -890,6 +903,11 @@ public:
      */
     bool SelectCoinsMinConf(const CAmount& nTargetValue, int nConfMine, int nConfTheirs, uint64_t nMaxAncestors, std::vector<COutput> vCoins, std::set<CInputCoin>& setCoinsRet, CAmount& nValueRet) const;
     bool SelectAssetsMinConf(const CAmount& nTargetValue, const int nConfMine, const int nConfTheirs, const uint64_t nMaxAncestors, const std::string& strAssetName, std::vector<COutput> vCoins, std::set<CInputCoin>& setCoinsRet, CAmount& nValueRet) const;
+
+    /// Get 100000 output and keys which can be used for the Masternode
+    bool GetMasternodeOutpointAndKeys(COutPoint& outpointRet, CPubKey& pubKeyRet, CKey& keyRet, const std::string& strTxHash = "", const std::string& strOutputIndex = "");
+    /// Extract txin information and keys from output
+    bool GetOutpointAndKeysFromOutput(const COutput& out, COutPoint& outpointRet, CPubKey& pubKeyRet, CKey& keyRet);
 
     bool IsSpent(const uint256& hash, unsigned int n) const;
 
@@ -994,7 +1012,7 @@ public:
     bool FundTransaction(CMutableTransaction& tx, CAmount& nFeeRet, int& nChangePosInOut, std::string& strFailReason, bool lockUnspents, const std::set<int>& setSubtractFeeFromOutputs, CCoinControl);
     bool SignTransaction(CMutableTransaction& tx);
 
-    /** RVN START */
+    /** BLAST START */
     bool CreateTransactionWithAssets(const std::vector<CRecipient>& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, CAmount& nFeeRet, int& nChangePosInOut,
                                    std::string& strFailReason, const CCoinControl& coin_control, const std::vector<CNewAsset> assets, const CTxDestination dest, const AssetType& assetType, bool sign = true);
 
@@ -1020,7 +1038,7 @@ public:
 
     bool CreateNewChangeAddress(CReserveKey& reservekey, CKeyID& keyID, std::string& strFailReason);
 
-    /** RVN END */
+    /** BLAST END */
 
     bool CommitTransaction(CWalletTx& wtxNew, CReserveKey& reservekey, CConnman* connman, CValidationState& state);
 
@@ -1274,4 +1292,4 @@ bool CWallet::DummySignTx(CMutableTransaction &txNew, const ContainerType &coins
     return true;
 }
 
-#endif // RAVEN_WALLET_WALLET_H
+#endif // BITCOIN_WALLET_WALLET_H

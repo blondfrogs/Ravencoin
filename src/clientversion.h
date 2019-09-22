@@ -3,16 +3,16 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_CLIENTVERSION_H
-#define RAVEN_CLIENTVERSION_H
+#ifndef BITCOIN_CLIENTVERSION_H
+#define BITCOIN_CLIENTVERSION_H
 
 #if defined(HAVE_CONFIG_H)
-#include "config/raven-config.h"
+#include "config/bitcoin-config.h"
 #endif //HAVE_CONFIG_H
 
 // Check that required client information is defined
 #if !defined(CLIENT_VERSION_MAJOR) || !defined(CLIENT_VERSION_MINOR) || !defined(CLIENT_VERSION_REVISION) || !defined(CLIENT_VERSION_BUILD) || !defined(CLIENT_VERSION_IS_RELEASE) || !defined(COPYRIGHT_YEAR)
-#error Client version information missing: version is not defined by raven-config.h or in any other way
+#error Client version information missing: version is not defined by bitcoin-config.h or in any other way
 #endif
 
 /**
@@ -23,10 +23,10 @@
 #define DO_STRINGIZE(X) #X
 
 //! Copyright string used in Windows .rc files
-#define COPYRIGHT_STR "2009-" STRINGIZE(COPYRIGHT_YEAR) " " COPYRIGHT_HOLDERS_FINAL
+#define COPYRIGHT_STR "2017-" STRINGIZE(COPYRIGHT_YEAR) " " COPYRIGHT_HOLDERS_FINAL
 
 /**
- * ravend-res.rc includes this file, but it cannot cope with real c++ code.
+ * bitcoind-res.rc includes this file, but it cannot cope with real c++ code.
  * WINDRES_PREPROC is defined to indicate that its pre-processor is running.
  * Anything other than a define should be guarded below.
  */
@@ -42,13 +42,15 @@ static const int CLIENT_VERSION =
                          +     100 * CLIENT_VERSION_REVISION
                          +       1 * CLIENT_VERSION_BUILD;
 
+static const int CLIENT_MASTERNODE_VERSION = 2000000;
+
 extern const std::string CLIENT_NAME;
 extern const std::string CLIENT_BUILD;
 
-
+std::string FormatVersion(int nVersion);
 std::string FormatFullVersion();
 std::string FormatSubVersion(const std::string& name, int nClientVersion, const std::vector<std::string>& comments);
 
 #endif // WINDRES_PREPROC
 
-#endif // RAVEN_CLIENTVERSION_H
+#endif // BITCOIN_CLIENTVERSION_H

@@ -16,7 +16,7 @@ import time
 
 from pprint import *
 from test_framework.mininode import *
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import BlastTestFramework
 from test_framework.util import *
 
 class TestNode(NodeConnCB):
@@ -31,7 +31,7 @@ class TestNode(NodeConnCB):
         message.block.calc_sha256()
         self.block_receive_map[message.block.sha256] += 1
 
-class MaxUploadTest(RavenTestFramework):
+class MaxUploadTest(BlastTestFramework):
  
     def set_test_params(self):
         self.setup_clean_chain = True

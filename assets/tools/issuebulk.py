@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-# Script to issue assets on the Ravencoin platform
+# Script to issue assets on the BLAST platform
 # Reads from a csv file
 # Template Google Spreadsheet at:  
 #   https://docs.google.com/spreadsheets/d/1Ym88-ggbw8yiMgVxOtVYDsCXJGNGZqlpOfgdbVK8iYU
 # In Google Sheets: File->Download As->.csv
-# Prerequisite: ravend daemon to be running
+# Prerequisite: blastd daemon to be running
 # In order to use metadata, you must install be running IPFS
 # Steps:
 #   1. Get IPFS - https://ipfs.io/
@@ -23,15 +23,15 @@ import json
 import hashlib
 
 
-#Set this to your raven-cli program
-cli = "raven-cli"
+#Set this to your blast-cli program
+cli = "blast-cli"
 
 mode =  "-testnet"
-rpc_port = 18766
+rpc_port = 64319
 #mode =  "-regtest"
-#rpc_port = 18443
-csv_file = "Raven Assets - Sheet1.csv"
-#Set this information in your raven.conf file (in datadir, not testnet3)
+#rpc_port = 32319
+csv_file = "BLAST Assets - Sheet1.csv"
+#Set this information in your blast.conf file (in datadir, not testnet3)
 rpc_user = 'rpcuser'
 rpc_pass = 'rpcpass555'
 

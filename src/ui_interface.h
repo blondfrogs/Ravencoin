@@ -1,14 +1,16 @@
 // Copyright (c) 2010 Satoshi Nakamoto
 // Copyright (c) 2012-2016 The Bitcoin Core developers
 // Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The BLAST Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_UI_INTERFACE_H
-#define RAVEN_UI_INTERFACE_H
+#ifndef BITCOIN_UI_INTERFACE_H
+#define BITCOIN_UI_INTERFACE_H
 
 #include <stdint.h>
 #include <string>
+#include "uint256.h"
 
 #include <boost/signals2/last_value.hpp>
 #include <boost/signals2/signal.hpp>
@@ -88,9 +90,10 @@ public:
     boost::signals2::signal<void (bool networkActive)> NotifyNetworkActiveChanged;
 
     /**
-     * Status bar alerts changed.
+     * New, updated or cancelled alert.
+     * @note called with lock cs_mapAlerts held.
      */
-    boost::signals2::signal<void ()> NotifyAlertChanged;
+    boost::signals2::signal<void (const uint256 &hash, ChangeType status)> NotifyAlertChanged;
 
     /** A wallet has been loaded. */
     boost::signals2::signal<void (CWallet* wallet)> LoadWallet;
@@ -106,6 +109,9 @@ public:
 
     /** Best header has changed */
     boost::signals2::signal<void (bool, const CBlockIndex *)> NotifyHeaderTip;
+
+    /** Additional data sync progress changed */
+    boost::signals2::signal<void (double nSyncProgress)> NotifyAdditionalDataSyncProgressChanged;
 
     /** Banlist did change. */
     boost::signals2::signal<void (void)> BannedListChanged;
@@ -123,4 +129,4 @@ std::string AmountErrMsg(const char* const optname, const std::string& strValue)
 
 extern CClientUIInterface uiInterface;
 
-#endif // RAVEN_UI_INTERFACE_H
+#endif // BITCOIN_UI_INTERFACE_H

@@ -30,6 +30,7 @@ static const char DB_TIMESTAMPINDEX = 's';
 static const char DB_BLOCKHASHINDEX = 'z';
 static const char DB_SPENTINDEX = 'p';
 static const char DB_BLOCK_INDEX = 'b';
+static const char DB_BLOCK_INDEX_AUXPOW = 'a';
 
 static const char DB_BEST_BLOCK = 'B';
 static const char DB_HEAD_BLOCKS = 'H';
@@ -231,16 +232,25 @@ void CCoinsViewDBCursor::Next()
     }
 }
 
-bool CBlockTreeDB::WriteBatchSync(const std::vector<std::pair<int, const CBlockFileInfo*> >& fileInfo, int nLastFile, const std::vector<const CBlockIndex*>& blockinfo) {
+bool CBlockTreeDB::WriteBatchSync(const std::vector<std::pair<int, const CBlockFileInfo*> >& fileInfo, int nLastFile, const std::vector<const CBlockIndex*>& blockinfo, const std::map<uint256, std::shared_ptr<CAuxPow> >& auxpows) {
     CDBBatch batch(*this);
     for (std::vector<std::pair<int, const CBlockFileInfo*> >::const_iterator it=fileInfo.begin(); it != fileInfo.end(); it++) {
         batch.Write(std::make_pair(DB_BLOCK_FILES, it->first), *it->second);
     }
     batch.Write(DB_LAST_BLOCK, nLastFile);
     for (std::vector<const CBlockIndex*>::const_iterator it=blockinfo.begin(); it != blockinfo.end(); it++) {
-        batch.Write(std::make_pair(DB_BLOCK_INDEX, (*it)->GetBlockHash()), CDiskBlockIndex(*it));
+        const std::map<uint256, std::shared_ptr<CAuxPow> >::const_iterator auxIt = auxpows.find((*it)->GetBlockHash());
+        if (auxIt != auxpows.end()) {
+            batch.Write(std::make_pair(std::make_pair(DB_BLOCK_INDEX, (*it)->GetBlockHash()), DB_BLOCK_INDEX_AUXPOW), CDiskBlockIndex(*it, auxIt->second));
+        }
+        batch.Write(std::make_pair(std::make_pair(DB_BLOCK_INDEX, (*it)->GetBlockHash()), DB_BLOCK_INDEX), **it);
     }
     return WriteBatch(batch, true);
+}
+
+bool CBlockTreeDB::ReadDiskBlockIndex(const uint256 &blkid, CDiskBlockIndex &diskblockindex)
+{
+    return Read(std::make_pair(std::make_pair(DB_BLOCK_INDEX, blkid), DB_BLOCK_INDEX_AUXPOW), diskblockindex);
 }
 
 bool CBlockTreeDB::ReadTxIndex(const uint256 &txid, CDiskTxPos &pos) {
@@ -322,7 +332,7 @@ bool CBlockTreeDB::ReadAddressUnspentIndex(uint160 addressHash, int type,
         if (pcursor->GetKey(key) && key.first == DB_ADDRESSUNSPENTINDEX && key.second.hashBytes == addressHash) {
             CAddressUnspentValue nValue;
             if (pcursor->GetValue(nValue)) {
-                if (key.second.asset != "RVN") {
+                if (key.second.asset != "BLAST") {
                     unspentOutputs.push_back(std::make_pair(key.second, nValue));
                 }
                 pcursor->Next();
@@ -461,17 +471,23 @@ bool CBlockTreeDB::LoadBlockIndexGuts(const Consensus::Params& consensusParams, 
 {
     std::unique_ptr<CDBIterator> pcursor(NewIterator());
 
-    pcursor->Seek(std::make_pair(DB_BLOCK_INDEX, uint256()));
+    auto ssKeySet(std::make_pair(std::make_pair(DB_BLOCK_INDEX, uint256()), DB_BLOCK_INDEX_AUXPOW));
+    pcursor->Seek(ssKeySet);
 
     // Load mapBlockIndex
     while (pcursor->Valid()) {
         boost::this_thread::interruption_point();
-        std::pair<char, uint256> key;
-        if (pcursor->GetKey(key) && key.first == DB_BLOCK_INDEX) {
+        std::pair<std::pair<char, uint256>, char> key;
+        if (pcursor->GetKey(key) && key.first.first == DB_BLOCK_INDEX) {
+
+            assert(key.second == DB_BLOCK_INDEX_AUXPOW);
+
             CDiskBlockIndex diskindex;
             if (pcursor->GetValue(diskindex)) {
                 // Construct block index object
-                CBlockIndex* pindexNew = insertBlockIndex(diskindex.GetBlockHash());
+                uint256 hash              = key.first.second;
+                CBlockIndex* pindexNew = insertBlockIndex(hash);
+                // CBlockIndex* pindexNew = insertBlockIndex(key.first.second);
                 pindexNew->pprev          = insertBlockIndex(diskindex.hashPrev);
                 pindexNew->nHeight        = diskindex.nHeight;
                 pindexNew->nFile          = diskindex.nFile;
@@ -485,9 +501,21 @@ bool CBlockTreeDB::LoadBlockIndexGuts(const Consensus::Params& consensusParams, 
                 pindexNew->nStatus        = diskindex.nStatus;
                 pindexNew->nTx            = diskindex.nTx;
 
-                if (!CheckProofOfWork(pindexNew->GetBlockHash(), pindexNew->nBits, consensusParams))
-                    return error("%s: CheckProofOfWork failed: %s", __func__, pindexNew->ToString());
+                pcursor->Next(); // now we should be on the 'b' subkey
+                pcursor->GetKey(key);
+//                pcursor->GetValue(*pindexNew);
 
+                // BLAST: Disable PoW Sanity check while loading block index from disk.
+                // We use the sha256 hash for the block index for performance reasons, which is recorded for later use.
+
+                // CheckProofOfWork() uses the PoW hash which is discarded after a block is accepted.
+                //While it is technically feasible to verify the PoW, doing so takes several minutes as it
+                // requires recomputing every PoW hash during every BLAST startup.
+                // We opt instead to simply trust the data that is on your local disk.
+                //if (!CheckProofOfWork(pindexNew->GetBlockHash(), pindexNew->nBits, consensusParams))
+                //    return error("%s: CheckProofOfWork failed: %s", __func__, pindexNew->ToString());
+
+                pcursor->GetValue(*pindexNew);
                 pcursor->Next();
             } else {
                 return error("%s: failed to read value", __func__);

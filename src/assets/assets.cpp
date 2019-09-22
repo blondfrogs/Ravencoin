@@ -1,4 +1,5 @@
 // Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The BLAST Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -57,7 +58,7 @@ static const std::regex CHANNEL_INDICATOR(R"(^[^^~#!]+~[^~#!\/]+$)");
 static const std::regex OWNER_INDICATOR(R"(^[^^~#!]+!$)");
 static const std::regex VOTE_INDICATOR(R"(^[^^~#!]+\^[^~#!\/]+$)");
 
-static const std::regex RAVEN_NAMES("^RVN$|^RAVEN$|^RAVENCOIN$");
+static const std::regex BLAST_NAMES("^BLAST$|^BLASTCOIN$");
 
 bool IsRootNameValid(const std::string& name)
 {
@@ -65,7 +66,7 @@ bool IsRootNameValid(const std::string& name)
         && !std::regex_match(name, DOUBLE_PUNCTUATION)
         && !std::regex_match(name, LEADING_PUNCTUATION)
         && !std::regex_match(name, TRAILING_PUNCTUATION)
-        && !std::regex_match(name, RAVEN_NAMES);
+        && !std::regex_match(name, BLAST_NAMES);
 }
 
 bool IsSubNameValid(const std::string& name)
@@ -218,7 +219,7 @@ bool IsTypeCheckNameValid(const AssetType type, const std::string& name, std::st
         return true;
     } else {
         if (name.size() > MAX_NAME_LENGTH - 1) { error = "Name is greater than max length of " + std::to_string(MAX_NAME_LENGTH - 1); return false; }  //Assets and sub-assets need to leave one extra char for OWNER indicator
-        if (!IsAssetNameASubasset(name) && name.size() < MIN_ASSET_LENGTH) { error = "Name must be contain " + std::to_string(MIN_ASSET_LENGTH) + " characters"; return false; }
+        if (!IsAssetNameASubasset(name) && name.size() < MIN_ASSET_LENGTH) { error = "Name must contain " + std::to_string(MIN_ASSET_LENGTH) + " characters"; return false; }
         bool valid = IsNameValidBeforeTag(name);
         if (!valid && IsAssetNameASubasset(name) && name.size() < 3) { error = "Name must have at least 3 characters (Valid characters are: A-Z 0-9 _ .)";  return false; }
         if (!valid) { error = "Name contains invalid characters (Valid characters are: A-Z 0-9 _ .) (special characters can't be the first or last characters)";  return false; }
@@ -438,13 +439,13 @@ void CNewAsset::ConstructTransaction(CScript& script) const
     ssAsset << *this;
 
     std::vector<unsigned char> vchMessage;
-    vchMessage.push_back(RVN_R); // r
-    vchMessage.push_back(RVN_V); // v
-    vchMessage.push_back(RVN_N); // n
-    vchMessage.push_back(RVN_Q); // q
+    vchMessage.push_back(BLAST_R); // r
+    vchMessage.push_back(BLAST_V); // v
+    vchMessage.push_back(BLAST_N); // n
+    vchMessage.push_back(BLAST_Q); // q
 
     vchMessage.insert(vchMessage.end(), ssAsset.begin(), ssAsset.end());
-    script << OP_RVN_ASSET << ToByteVector(vchMessage) << OP_DROP;
+    script << OP_BLAST_ASSET << ToByteVector(vchMessage) << OP_DROP;
 }
 
 void CNewAsset::ConstructOwnerTransaction(CScript& script) const
@@ -453,13 +454,13 @@ void CNewAsset::ConstructOwnerTransaction(CScript& script) const
     ssOwner << std::string(this->strName + OWNER_TAG);
 
     std::vector<unsigned char> vchMessage;
-    vchMessage.push_back(RVN_R); // r
-    vchMessage.push_back(RVN_V); // v
-    vchMessage.push_back(RVN_N); // n
-    vchMessage.push_back(RVN_O); // o
+    vchMessage.push_back(BLAST_R); // r
+    vchMessage.push_back(BLAST_V); // v
+    vchMessage.push_back(BLAST_N); // n
+    vchMessage.push_back(BLAST_O); // o
 
     vchMessage.insert(vchMessage.end(), ssOwner.begin(), ssOwner.end());
-    script << OP_RVN_ASSET << ToByteVector(vchMessage) << OP_DROP;
+    script << OP_BLAST_ASSET << ToByteVector(vchMessage) << OP_DROP;
 }
 
 bool AssetFromTransaction(const CTransaction& tx, CNewAsset& asset, std::string& strAddress)
@@ -661,7 +662,7 @@ bool CTransaction::IsNewAsset() const
 //! To be called on CTransactions where IsNewAsset returns true
 bool CTransaction::VerifyNewAsset(std::string& strError) const
 {
-    // Issuing an Asset must contain at least 3 CTxOut( Raven Burn Tx, Any Number of other Outputs ..., Owner Asset Tx, New Asset Tx)
+    // Issuing an Asset must contain at least 3 CTxOut( BLAST Burn Tx, Any Number of other Outputs ..., Owner Asset Tx, New Asset Tx)
     if (vout.size() < 3) {
         strError  = "bad-txns-issue-vout-size-to-small";
         return false;
@@ -746,7 +747,7 @@ bool CTransaction::IsNewUniqueAsset() const
 //! Call this function after IsNewUniqueAsset
 bool CTransaction::VerifyNewUniqueAsset(std::string& strError) const
 {
-    // Must contain at least 3 outpoints (RVN burn, owner change and one or more new unique assets that share a root (should be in trailing position))
+    // Must contain at least 3 outpoints (BLAST burn, owner change and one or more new unique assets that share a root (should be in trailing position))
     if (vout.size() < 3) {
         strError  = "bad-txns-unique-vout-size-to-small";
         return false;
@@ -848,7 +849,7 @@ bool CTransaction::IsReissueAsset() const
 //! To be called on CTransactions where IsReissueAsset returns true
 bool CTransaction::VerifyReissueAsset(std::string& strError) const
 {
-    // Reissuing an Asset must contain at least 3 CTxOut ( Raven Burn Tx, Any Number of other Outputs ..., Reissue Asset Tx, Owner Asset Change Tx)
+    // Reissuing an Asset must contain at least 3 CTxOut ( BLAST Burn Tx, Any Number of other Outputs ..., Reissue Asset Tx, Owner Asset Change Tx)
     if (vout.size() < 3) {
         strError  = "bad-txns-vout-size-to-small";
         return false;
@@ -939,13 +940,13 @@ void CAssetTransfer::ConstructTransaction(CScript& script) const
     ssTransfer << *this;
 
     std::vector<unsigned char> vchMessage;
-    vchMessage.push_back(RVN_R); // r
-    vchMessage.push_back(RVN_V); // v
-    vchMessage.push_back(RVN_N); // n
-    vchMessage.push_back(RVN_T); // t
+    vchMessage.push_back(BLAST_R); // r
+    vchMessage.push_back(BLAST_V); // v
+    vchMessage.push_back(BLAST_N); // n
+    vchMessage.push_back(BLAST_T); // t
 
     vchMessage.insert(vchMessage.end(), ssTransfer.begin(), ssTransfer.end());
-    script << OP_RVN_ASSET << ToByteVector(vchMessage) << OP_DROP;
+    script << OP_BLAST_ASSET << ToByteVector(vchMessage) << OP_DROP;
 }
 
 CReissueAsset::CReissueAsset(const std::string &strAssetName, const CAmount &nAmount, const int &nUnits, const int &nReissuable,
@@ -1021,13 +1022,13 @@ void CReissueAsset::ConstructTransaction(CScript& script) const
     ssReissue << *this;
 
     std::vector<unsigned char> vchMessage;
-    vchMessage.push_back(RVN_R); // r
-    vchMessage.push_back(RVN_V); // v
-    vchMessage.push_back(RVN_N); // n
-    vchMessage.push_back(RVN_R); // r
+    vchMessage.push_back(BLAST_R); // r
+    vchMessage.push_back(BLAST_V); // v
+    vchMessage.push_back(BLAST_N); // n
+    vchMessage.push_back(BLAST_R); // r
 
     vchMessage.insert(vchMessage.end(), ssReissue.begin(), ssReissue.end());
-    script << OP_RVN_ASSET << ToByteVector(vchMessage) << OP_DROP;
+    script << OP_BLAST_ASSET << ToByteVector(vchMessage) << OP_DROP;
 }
 
 bool CReissueAsset::IsNull() const
@@ -1992,7 +1993,7 @@ bool CheckIssueBurnTx(const CTxOut& txOut, const AssetType& type)
 
 bool CheckReissueBurnTx(const CTxOut& txOut)
 {
-    // Check the first transaction and verify that the correct RVN Amount
+    // Check the first transaction and verify that the correct BLAST Amount
     if (txOut.nValue != GetReissueAssetBurnAmount())
         return false;
 
@@ -2014,7 +2015,7 @@ bool CheckReissueBurnTx(const CTxOut& txOut)
 
 bool CheckIssueDataTx(const CTxOut& txOut)
 {
-    // Verify 'rvnq' is in the transaction
+    // Verify 'blastq' is in the transaction
     CScript scriptPubKey = txOut.scriptPubKey;
 
     int nStartingIndex = 0;
@@ -2023,7 +2024,7 @@ bool CheckIssueDataTx(const CTxOut& txOut)
 
 bool CheckReissueDataTx(const CTxOut& txOut)
 {
-    // Verify 'rvnr' is in the transaction
+    // Verify 'blastr' is in the transaction
     CScript scriptPubKey = txOut.scriptPubKey;
 
     return IsScriptReissueAsset(scriptPubKey);
@@ -2031,7 +2032,7 @@ bool CheckReissueDataTx(const CTxOut& txOut)
 
 bool CheckOwnerDataTx(const CTxOut& txOut)
 {
-    // Verify 'rvnq' is in the transaction
+    // Verify 'blastq' is in the transaction
     CScript scriptPubKey = txOut.scriptPubKey;
 
     return IsScriptOwnerAsset(scriptPubKey);
@@ -2039,7 +2040,7 @@ bool CheckOwnerDataTx(const CTxOut& txOut)
 
 bool CheckTransferOwnerTx(const CTxOut& txOut)
 {
-    // Verify 'rvnq' is in the transaction
+    // Verify 'blastq' is in the transaction
     CScript scriptPubKey = txOut.scriptPubKey;
 
     return IsScriptTransferAsset(scriptPubKey);
@@ -2555,7 +2556,7 @@ bool CreateAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const s
     if (!change_address.empty()) {
         CTxDestination destination = DecodeDestination(change_address);
         if (!IsValidDestination(destination)) {
-            error = std::make_pair(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + change_address);
+            error = std::make_pair(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid BLAST address: ") + change_address);
             return false;
         }
     } else {
@@ -2597,7 +2598,7 @@ bool CreateAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, const s
 
     CAmount curBalance = pwallet->GetBalance();
 
-    // Check to make sure the wallet has the RVN required by the burnAmount
+    // Check to make sure the wallet has the BLAST required by the burnAmount
     if (curBalance < burnAmount) {
         error = std::make_pair(RPC_WALLET_INSUFFICIENT_FUNDS, "Insufficient funds");
         return false;
@@ -2656,14 +2657,14 @@ bool CreateReissueAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, 
 
     // Check that validitity of the address
     if (!IsValidDestinationString(address)) {
-        error = std::make_pair(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + address);
+        error = std::make_pair(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid BLAST address: ") + address);
         return false;
     }
 
     if (!change_address.empty()) {
         CTxDestination destination = DecodeDestination(change_address);
         if (!IsValidDestination(destination)) {
-            error = std::make_pair(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + change_address);
+            error = std::make_pair(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid BLAST address: ") + change_address);
             return false;
         }
     } else {
@@ -2720,7 +2721,7 @@ bool CreateReissueAssetTransaction(CWallet* pwallet, CCoinControl& coinControl, 
     // Get the current burn amount for issuing an asset
     CAmount burnAmount = GetReissueAssetBurnAmount();
 
-    // Check to make sure the wallet has the RVN required by the burnAmount
+    // Check to make sure the wallet has the BLAST required by the burnAmount
     if (curBalance < burnAmount) {
         error = std::make_pair(RPC_WALLET_INSUFFICIENT_FUNDS, "Insufficient funds");
         return false;
@@ -2769,7 +2770,7 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
     // Check for a balance before processing transfers
     CAmount curBalance = pwallet->GetBalance();
     if (curBalance == 0) {
-        error = std::make_pair(RPC_WALLET_INSUFFICIENT_FUNDS, std::string("This wallet doesn't contain any RVN, transfering an asset requires a network fee"));
+        error = std::make_pair(RPC_WALLET_INSUFFICIENT_FUNDS, std::string("This wallet doesn't contain any BLAST, transfering an asset requires a network fee"));
         return false;
     }
 
@@ -2786,7 +2787,7 @@ bool CreateTransferAssetTransaction(CWallet* pwallet, const CCoinControl& coinCo
         CAmount nAmount = transfer.first.nAmount;
 
         if (!IsValidDestinationString(address)) {
-            error = std::make_pair(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid Raven address: ") + address);
+            error = std::make_pair(RPC_INVALID_ADDRESS_OR_KEY, std::string("Invalid BLAST address: ") + address);
             return false;
         }
         auto currentActiveAssetCache = GetCurrentAssetCache();

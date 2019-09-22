@@ -1,0 +1,33 @@
+# /etc/conf.d/blastd: config file for /etc/init.d/blastd
+
+# Config file location
+#BLASTD_CONFIGFILE="/etc/blast/blast.conf"
+
+# What directory to write pidfile to?  (created and owned by $BLASTD_USER)
+#BLASTD_PIDDIR="/var/run/blastd"
+
+# What filename to give the pidfile
+#BLASTD_PIDFILE="${BLASTD_PIDDIR}/blastd.pid"
+
+# Where to write blastd data (be mindful that the blockchain is large)
+#BLASTD_DATADIR="/var/lib/blastd"
+
+# User and group to own blastd process
+#BLASTD_USER="blast"
+#BLASTD_GROUP="blast"
+
+# Path to blastd executable
+#BLASTD_BIN="/usr/bin/blastd"
+
+# Nice value to run blastd under
+#BLASTD_NICE=0
+
+# Additional options (avoid -conf and -datadir, use flags above)
+#BLASTD_OPTS=""
+
+# The timeout in seconds OpenRC will wait for blastd to terminate
+# after a SIGTERM has been raised.
+# Note that this will be mapped as argument to start-stop-daemon's
+# '--retry' option, which means you can specify a retry schedule
+# here. For more information see man 8 start-stop-daemon.
+BLASTD_SIGTERM_TIMEOUT=60

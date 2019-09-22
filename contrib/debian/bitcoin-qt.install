@@ -1,0 +1,6 @@
+usr/local/bin/blast-qt usr/bin
+share/pixmaps/blast32.xpm usr/share/pixmaps
+share/pixmaps/blast16.xpm usr/share/pixmaps
+share/pixmaps/blast128.png usr/share/pixmaps
+debian/blast-qt.desktop usr/share/applications
+debian/blast-qt.protocol usr/share/kde4/services/

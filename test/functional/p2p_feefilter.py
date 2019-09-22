@@ -8,7 +8,7 @@
   (Wallet now has DEFAULT_TRANSACTION_MINFEE = 0.00050000"""
 
 from test_framework.mininode import *
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import BlastTestFramework
 from test_framework.util import *
 import time
 
@@ -39,7 +39,7 @@ class TestNode(NodeConnCB):
         with mininode_lock:
             self.txinvs = []
 
-class FeeFilterTest(RavenTestFramework):
+class FeeFilterTest(BlastTestFramework):
     def set_test_params(self):
         self.num_nodes = 2
 

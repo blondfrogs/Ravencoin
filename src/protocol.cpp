@@ -29,6 +29,7 @@ const char *GETADDR="getaddr";
 const char *MEMPOOL="mempool";
 const char *PING="ping";
 const char *PONG="pong";
+const char *ALERT="alert";
 const char *NOTFOUND="notfound";
 const char *FILTERLOAD="filterload";
 const char *FILTERADD="filteradd";
@@ -43,6 +44,16 @@ const char *BLOCKTXN="blocktxn";
 const char *GETASSETDATA="getassetdata";
 const char *ASSETDATA="assetdata";
 const char *ASSETNOTFOUND ="asstnotfound";
+
+const char *SPORK="spork";
+const char *GETSPORKS="getsporks";
+const char *MASTERNODEPAYMENTVOTE="mnw";
+const char *MASTERNODEPAYMENTSYNC="mnget";
+const char *MNANNOUNCE="mnb";
+const char *MNPING="mnp";
+const char *DSEG="dseg";
+const char *SYNCSTATUSCOUNT="ssc";
+const char *MNVERIFY="mnv";
 } // namespace NetMsgType
 
 /** All known message types. Keep this in the same order as the list of
@@ -77,8 +88,42 @@ const static std::string allNetMessageTypes[] = {
     NetMsgType::BLOCKTXN,
     NetMsgType::GETASSETDATA,
     NetMsgType::ASSETDATA,
-    NetMsgType::ASSETNOTFOUND
+    NetMsgType::ASSETNOTFOUND,
+
+    // BLAST message types
+    // NOTE: do NOT include non-implmented here, we want them to be "Unknown command" in ProcessMessage()
+    NetMsgType::SPORK,
+    NetMsgType::GETSPORKS,
+    NetMsgType::MASTERNODEPAYMENTVOTE,
+    NetMsgType::MASTERNODEPAYMENTSYNC,
+    NetMsgType::MNANNOUNCE,
+    NetMsgType::MNPING,
+    NetMsgType::DSEG,
+    NetMsgType::SYNCSTATUSCOUNT,
+    NetMsgType::MNVERIFY,
 };
+
+static const char* ppszTypeName[] =
+{
+    "ERROR", // Should never occur
+    NetMsgType::TX,
+    NetMsgType::BLOCK,
+    "filtered block", // Should never occur
+
+    // BLAST message types
+    // NOTE: include non-implmented here, we must keep this list in sync with enum in protocol.h
+    NetMsgType::SPORK,
+    NetMsgType::GETSPORKS,
+    NetMsgType::MASTERNODEPAYMENTVOTE,
+    NetMsgType::MASTERNODEPAYMENTSYNC,
+    NetMsgType::MNANNOUNCE,
+    NetMsgType::MNPING,
+    NetMsgType::DSEG,
+    NetMsgType::SYNCSTATUSCOUNT,
+    NetMsgType::MNVERIFY,
+    "compact block", // Should never occur
+};
+
 const static std::vector<std::string> allNetMessageTypesVec(allNetMessageTypes, allNetMessageTypes+ARRAYLEN(allNetMessageTypes));
 
 CMessageHeader::CMessageHeader(const MessageStartChars& pchMessageStartIn)
@@ -163,6 +208,11 @@ CInv::CInv(int typeIn, const uint256& hashIn) : type(typeIn), hash(hashIn) {}
 bool operator<(const CInv& a, const CInv& b)
 {
     return (a.type < b.type || (a.type == b.type && a.hash < b.hash));
+}
+
+bool CInv::IsKnownType() const
+{
+    return (type >= 1 && type < (int)ARRAYLEN(ppszTypeName)) || type == MSG_WITNESS_BLOCK || type == MSG_WITNESS_TX;
 }
 
 std::string CInv::GetCommand() const

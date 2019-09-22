@@ -9,13 +9,13 @@
 #
 
 import time
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import BlastTestFramework
 from test_framework.util import *
 from test_framework.script import *
 from test_framework.mininode import *
 import binascii
 
-class TxIndexTest(RavenTestFramework):
+class TxIndexTest(BlastTestFramework):
 
     def set_test_params(self):
         self.setup_clean_chain = True

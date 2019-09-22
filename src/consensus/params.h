@@ -1,11 +1,12 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
 // Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The BLAST Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_CONSENSUS_PARAMS_H
-#define RAVEN_CONSENSUS_PARAMS_H
+#ifndef BITCOIN_CONSENSUS_PARAMS_H
+#define BITCOIN_CONSENSUS_PARAMS_H
 
 #include "uint256.h"
 #include <map>
@@ -17,8 +18,8 @@ enum DeploymentPos
 {
     DEPLOYMENT_TESTDUMMY,
     DEPLOYMENT_ASSETS, // Deployment of RIP2
-    // DEPLOYMENT_CSV, // Deployment of BIP68, BIP112, and BIP113.
-//    DEPLOYMENT_SEGWIT, // Deployment of BIP141, BIP143, and BIP147.
+    DEPLOYMENT_CSV, // Deployment of BIP68, BIP112, and BIP113.
+    DEPLOYMENT_SEGWIT, // Deployment of BIP141, BIP143, and BIP147.
     // NOTE: Also add new deployments to VersionBitsDeploymentInfo in versionbits.cpp
     MAX_VERSION_BITS_DEPLOYMENTS
 };
@@ -45,11 +46,29 @@ struct Params {
     bool nBIP34Enabled;
     bool nBIP65Enabled;
     bool nBIP66Enabled;
-    // uint256 BIP34Hash;
+    /** Used to check majorities for block version upgrade */
+    int nMajorityEnforceBlockUpgrade;
+    int nMajorityRejectBlockOutdated;
+    int nMajorityWindow;
+    int nMasternodePaymentsStartBlock;
+    int nMasternodeMinimumConfirmations;
+
+    int minerRewardPercent;
+    int masternodeRewardPercent;
+    int devRewardPercent;
+    std::string devWalletAddress;
+
+    /** Block height and hash at which BIP34 becomes active */
+    int BIP34Height;
+    uint256 BIP34Hash;
     /** Block height at which BIP65 becomes active */
     // int BIP65Height;
     /** Block height at which BIP66 becomes active */
     // int BIP66Height;
+
+    /** AuxPow starting height for BLAST */
+    int nAuxPowStartHeight;
+
     /**
      * Minimum blocks including miner confirmation of the total of 2016 blocks in a retargeting period,
      * (nPowTargetTimespan / nPowTargetSpacing) which is also used for BIP9 deployments.
@@ -69,7 +88,18 @@ struct Params {
     uint256 defaultAssumeValid;
     bool nSegwitEnabled;
     bool nCSVEnabled;
+
+    // BLAST: Auxpow chain ID parameter
+    int32_t nAuxpowChainId;
+    int32_t nAlternateChainId;
+    int nChainIdUpgradeHeight;
+
+    // BLAST: Block v4 Upgrade Height
+    int nBlockV4UpgradeHeight;
+
+    // BLAST: Activate Assets and Deactivate Previous V4 Upgrade Effects
+    int nBlockVersionRevertHeight;
 };
 } // namespace Consensus
 
-#endif // RAVEN_CONSENSUS_PARAMS_H
+#endif // BITCOIN_CONSENSUS_PARAMS_H

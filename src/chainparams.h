@@ -4,8 +4,8 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_CHAINPARAMS_H
-#define RAVEN_CHAINPARAMS_H
+#ifndef BITCOIN_CHAINPARAMS_H
+#define BITCOIN_CHAINPARAMS_H
 
 #include "chainparamsbase.h"
 #include "consensus/params.h"
@@ -40,7 +40,7 @@ struct ChainTxData {
 
 /**
  * CChainParams defines various tweakable parameters of a given instance of the
- * Raven system. There are three: the main network on which people trade goods
+ * BLAST system. There are three: the main network on which people trade goods
  * and services, the public test network which gets reset from time to time and
  * a regression test mode which is intended for private networks only. It has
  * minimal difficulty to ensure that blocks can be found instantly.
@@ -71,6 +71,8 @@ public:
     uint64_t PruneAfterHeight() const { return nPruneAfterHeight; }
     /** Make miner stop after a block is found. In RPC, don't return until nGenProcLimit blocks are generated */
     bool MineBlocksOnDemand() const { return fMineBlocksOnDemand; }
+    /** Allow nodes with the same address and multiple ports */
+    bool AllowMultiplePorts() const { return fAllowMultiplePorts; }
     /** Return the BIP70 network string (main, test or regtest) */
     std::string NetworkIDString() const { return strNetworkID; }
     const std::vector<CDNSSeedData>& DNSSeeds() const { return vSeeds; }
@@ -89,7 +91,7 @@ public:
     bool BIP66();
     bool CSVEnabled() const;
 
-    /** RVN Start **/
+    /** BLAST Start **/
     const CAmount& IssueAssetBurnAmount() const { return nIssueAssetBurnAmount; }
     const CAmount& ReissueAssetBurnAmount() const { return nReissueAssetBurnAmount; }
     const CAmount& IssueSubAssetBurnAmount() const { return nIssueSubAssetBurnAmount; }
@@ -106,7 +108,10 @@ public:
     int MaxReorganizationDepth() const { return nMaxReorganizationDepth; }
     int MinReorganizationPeers() const { return nMinReorganizationPeers; }
     int MinReorganizationAge() const { return nMinReorganizationAge; }
-    /** RVN End **/
+    int FulfilledRequestExpireTime() const { return nFulfilledRequestExpireTime; }
+    CAmount MNCollateralAmount() const { return mnCollateralAmount; }
+    const std::string& SporkAddress() const { return strSporkAddress; }
+    /** BLAST End **/
 
 protected:
     CChainParams() {}
@@ -127,7 +132,7 @@ protected:
     CCheckpointData checkpointData;
     ChainTxData chainTxData;
 
-    /** RVN Start **/
+    /** BLAST Start **/
     // Burn Amounts
     CAmount nIssueAssetBurnAmount;
     CAmount nReissueAssetBurnAmount;
@@ -148,7 +153,11 @@ protected:
     int nMaxReorganizationDepth;
     int nMinReorganizationPeers;
     int nMinReorganizationAge;
-    /** RVN End **/
+    CAmount mnCollateralAmount;
+    bool fAllowMultiplePorts;
+    int nFulfilledRequestExpireTime;
+    std::string strSporkAddress;
+    /** BLAST End **/
 };
 
 /**
@@ -157,6 +166,11 @@ protected:
  * @throws a std::runtime_error if the chain is not supported.
  */
 std::unique_ptr<CChainParams> CreateChainParams(const std::string& chain);
+
+/**
+ * @returns CChainParams for the given BIP70 chain name.
+ */
+CChainParams& Params(const std::string& chain);
 
 /**
  * Return the currently selected parameters. This won't change after app
@@ -185,4 +199,4 @@ void TurnOffBIP66();
 
 void TurnOffCSV();
 
-#endif // RAVEN_CHAINPARAMS_H
+#endif // BITCOIN_CHAINPARAMS_H

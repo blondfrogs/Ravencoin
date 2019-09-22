@@ -7,7 +7,7 @@
 
 #include "addressbookpage.h"
 #include "askpassphrasedialog.h"
-#include "ravengui.h"
+#include "bitcoingui.h"
 #include "clientmodel.h"
 #include "guiutil.h"
 #include "optionsmodel.h"
@@ -34,7 +34,7 @@
 #include <QProgressDialog>
 #include <QPushButton>
 #include <QVBoxLayout>
-
+#include <QSettings>
 
 WalletView::WalletView(const PlatformStyle *_platformStyle, QWidget *parent):
     QStackedWidget(parent),
@@ -74,11 +74,17 @@ WalletView::WalletView(const PlatformStyle *_platformStyle, QWidget *parent):
     addWidget(receiveCoinsPage);
     addWidget(sendCoinsPage);
 
-    /** RVN START */
+    QSettings settings;
+    if (!fLiteMode && settings.value("fShowMasternodesTab").toBool()) {
+        masternodeListPage = new MasternodeList(platformStyle);
+        addWidget(masternodeListPage);
+    }
+
+    /** BLAST START */
     addWidget(assetsPage);
     addWidget(createAssetsPage);
     addWidget(manageAssetsPage);
-    /** RVN END */
+    /** BLAST END */
 
     // Clicking on a transaction on the overview pre-selects the transaction on the transaction history page
     connect(overviewPage, SIGNAL(transactionClicked(QModelIndex)), transactionView, SLOT(focusTransaction(QModelIndex)));
@@ -95,7 +101,7 @@ WalletView::WalletView(const PlatformStyle *_platformStyle, QWidget *parent):
     // Pass through messages from transactionView
     connect(transactionView, SIGNAL(message(QString,QString,unsigned int)), this, SIGNAL(message(QString,QString,unsigned int)));
 
-    /** RVN START */
+    /** BLAST START */
     connect(assetsPage, SIGNAL(message(QString,QString,unsigned int)), this, SIGNAL(message(QString,QString,unsigned int)));
     connect(createAssetsPage, SIGNAL(message(QString,QString,unsigned int)), this, SIGNAL(message(QString,QString,unsigned int)));
     connect(manageAssetsPage, SIGNAL(message(QString,QString,unsigned int)), this, SIGNAL(message(QString,QString,unsigned int)));
@@ -110,7 +116,7 @@ WalletView::~WalletView()
 {
 }
 
-void WalletView::setRavenGUI(RavenGUI *gui)
+void WalletView::setBitcoinGUI(BitcoinGUI *gui)
 {
     if (gui)
     {
@@ -152,6 +158,11 @@ void WalletView::setClientModel(ClientModel *_clientModel)
 
     overviewPage->setClientModel(_clientModel);
     sendCoinsPage->setClientModel(_clientModel);
+
+    QSettings settings;
+    if (!fLiteMode && settings.value("fShowMasternodesTab").toBool()) {
+        masternodeListPage->setClientModel(_clientModel);
+    }
 }
 
 void WalletView::setWalletModel(WalletModel *_walletModel)
@@ -161,12 +172,17 @@ void WalletView::setWalletModel(WalletModel *_walletModel)
     // Put transaction list in tabs
     transactionView->setModel(_walletModel);
     overviewPage->setWalletModel(_walletModel);
+    QSettings settings;
+    if (!fLiteMode && settings.value("fShowMasternodesTab").toBool()) {
+        masternodeListPage->setWalletModel(_walletModel);
+    }
+
     receiveCoinsPage->setModel(_walletModel);
     sendCoinsPage->setModel(_walletModel);
     usedReceivingAddressesPage->setModel(_walletModel ? _walletModel->getAddressTableModel() : nullptr);
     usedSendingAddressesPage->setModel(_walletModel ? _walletModel->getAddressTableModel() : nullptr);
 
-    /** RVN START */
+    /** BLAST START */
     assetsPage->setModel(_walletModel);
     createAssetsPage->setModel(_walletModel);
     manageAssetsPage->setModel(_walletModel);
@@ -205,7 +221,7 @@ void WalletView::processNewTransaction(const QModelIndex& parent, int start, int
     if (!ttm || ttm->processingQueuedTransactions())
         return;
 
-    /** RVN START */
+    /** BLAST START */
     // With the addition of asset transactions, there can be multiple transaction that need notifications
     // so we need to loop through all new transaction that were added to the transaction table and display
     // notifications for each individual transaction
@@ -222,7 +238,7 @@ void WalletView::processNewTransaction(const QModelIndex& parent, int start, int
         Q_EMIT incomingTransaction(date, walletModel->getOptionsModel()->getDisplayUnit(), amount, type, address, label,
                                    assetName);
     }
-    /** RVN END */
+    /** BLAST END */
 
     /** Everytime we get an new transaction. We should check to see if assets are enabled or not */
     overviewPage->showAssets();
@@ -244,6 +260,14 @@ void WalletView::gotoOverviewPage()
 void WalletView::gotoHistoryPage()
 {
     setCurrentWidget(transactionsPage);
+}
+
+void WalletView::gotoMasternodePage()
+{
+    QSettings settings;
+    if (!fLiteMode && settings.value("fShowMasternodesTab").toBool()) {
+        setCurrentWidget(masternodeListPage);
+    }
 }
 
 void WalletView::gotoReceiveCoinsPage()
@@ -397,7 +421,7 @@ void WalletView::requestedSyncWarningInfo()
 }
 
 bool fFirstVisit = true;
-/** RVN START */
+/** BLAST START */
 void WalletView::gotoAssetsPage()
 {
     if (fFirstVisit){
@@ -417,4 +441,4 @@ void WalletView::gotoManageAssetsPage()
 {
     setCurrentWidget(manageAssetsPage);
 }
-/** RVN END */
+/** BLAST END */

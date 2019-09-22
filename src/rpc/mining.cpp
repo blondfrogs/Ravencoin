@@ -1,6 +1,7 @@
 // Copyright (c) 2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
 // Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The BLAST Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -26,6 +27,9 @@
 #include "utilstrencodings.h"
 #include "validationinterface.h"
 #include "warnings.h"
+#include "spork.h"
+#include "masternode-payments.h"
+#include "masternode-sync.h"
 
 #include <memory>
 #include <stdint.h>
@@ -164,7 +168,7 @@ UniValue generatetoaddress(const JSONRPCRequest& request)
             "\nMine blocks immediately to a specified address (before the RPC call returns)\n"
             "\nArguments:\n"
             "1. nblocks      (numeric, required) How many blocks are generated immediately.\n"
-            "2. address      (string, required) The address to send the newly generated raven to.\n"
+            "2. address      (string, required) The address to send the newly generated BLAST to.\n"
             "3. maxtries     (numeric, optional) How many iterations to try (default = 1000000).\n"
             "\nResult:\n"
             "[ blockhashes ]     (array) hashes of blocks generated\n"
@@ -207,7 +211,7 @@ UniValue getmininginfo(const JSONRPCRequest& request)
             "  \"pooledtx\": n              (numeric) The size of the mempool\n"
             "  \"chain\": \"xxxx\",           (string) current network name as defined in BIP70 (main, test, regtest)\n"
             "  \"warnings\": \"...\"          (string) any network and blockchain warnings\n"
-            "  \"errors\": \"...\"            (string) DEPRECATED. Same as warnings. Only shown when ravend is started with -deprecatedrpc=getmininginfo\n"
+            "  \"errors\": \"...\"            (string) DEPRECATED. Same as warnings. Only shown when blastd is started with -deprecatedrpc=getmininginfo\n"
             "}\n"
             "\nExamples:\n"
             + HelpExampleCli("getmininginfo", "")
@@ -235,7 +239,7 @@ UniValue getmininginfo(const JSONRPCRequest& request)
 }
 
 
-// NOTE: Unlike wallet RPC (which use RVN values), mining RPCs follow GBT (BIP 22) in using satoshi amounts
+// NOTE: Unlike wallet RPC (which use BLAST values), mining RPCs follow GBT (BIP 22) in using satoshi amounts
 UniValue prioritisetransaction(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 3)
@@ -306,10 +310,10 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
             "\nIf the request parameters include a 'mode' key, that is used to explicitly select between the default 'template' request or a 'proposal'.\n"
             "It returns data needed to construct a block to work on.\n"
             "For full specification, see BIPs 22, 23, 9, and 145:\n"
-            "    https://github.com/raven/bips/blob/master/bip-0022.mediawiki\n"
-            "    https://github.com/raven/bips/blob/master/bip-0023.mediawiki\n"
-            "    https://github.com/raven/bips/blob/master/bip-0009.mediawiki#getblocktemplate_changes\n"
-            "    https://github.com/raven/bips/blob/master/bip-0145.mediawiki\n"
+            "    https://github.com/bitcoin/bips/blob/master/bip-0022.mediawiki\n"
+            "    https://github.com/bitcoin/bips/blob/master/bip-0023.mediawiki\n"
+            "    https://github.com/bitcoin/bips/blob/master/bip-0009.mediawiki#getblocktemplate_changes\n"
+            "    https://github.com/bitcoin/bips/blob/master/bip-0145.mediawiki\n"
 
             "\nArguments:\n"
             "1. template_request         (json object, optional) A json object in the following spec\n"
@@ -449,10 +453,17 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_CLIENT_P2P_DISABLED, "Error: Peer-to-peer functionality missing or disabled");
 
     if (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) == 0)
-        throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, "Raven is not connected!");
+        throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, "BLAST is not connected!");
 
     if (IsInitialBlockDownload())
-        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Raven is downloading blocks...");
+        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "BLAST is downloading blocks...");
+
+    // when masternode payment is on we need information about a masternode payee or otherwise our block is going to be orphaned by the network
+    CScript payee;
+    if (chainActive.Height() + 1 >= Params().GetConsensus().nMasternodePaymentsStartBlock
+        && !masternodeSync.IsWinnersListSynced()
+        && !mnpayments.GetBlockPayee(chainActive.Height() + 1, payee))
+            throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "BLAST Core is downloading masternode winners...");
 
     static unsigned int nTransactionsUpdatedLast;
 
@@ -502,11 +513,11 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
         // TODO: Maybe recheck connections/IBD and (if something wrong) send an expires-immediately template to stop miners?
     }
 
-//    const struct VBDeploymentInfo& segwit_info = VersionBitsDeploymentInfo[Consensus::DEPLOYMENT_SEGWIT];
+    const struct VBDeploymentInfo& segwit_info = VersionBitsDeploymentInfo[Consensus::DEPLOYMENT_SEGWIT];
     // If the caller is indicating segwit support, then allow CreateNewBlock()
     // to select witness transactions, after segwit activates (otherwise
     // don't).
-    bool fSupportsSegwit = Params().GetConsensus().nSegwitEnabled;
+    bool fSupportsSegwit = setClientRules.find(segwit_info.name) != setClientRules.end();
 
     // Update block
     static CBlockIndex* pindexPrev;
@@ -545,7 +556,7 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
     pblock->nNonce = 0;
 
     // NOTE: If at some point we support pre-segwit miners post-segwit-activation, this needs to take segwit support into consideration
-    const bool fPreSegWit = false; //(THRESHOLD_ACTIVE != VersionBitsState(pindexPrev, consensusParams, Consensus::DEPLOYMENT_SEGWIT, versionbitscache));
+    const bool fPreSegWit = (THRESHOLD_ACTIVE != VersionBitsState(pindexPrev, consensusParams, Consensus::DEPLOYMENT_SEGWIT, versionbitscache));
 
     UniValue aCaps(UniValue::VARR); aCaps.push_back("proposal");
 
@@ -685,6 +696,19 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
         result.push_back(Pair("default_witness_commitment", HexStr(pblocktemplate->vchCoinbaseCommitment.begin(), pblocktemplate->vchCoinbaseCommitment.end())));
     }
 
+    UniValue masternodeObj(UniValue::VOBJ);
+    if(pblocktemplate->txoutMasternode != CTxOut()) {
+        CTxDestination address1;
+        ExtractDestination(pblocktemplate->txoutMasternode.scriptPubKey, address1);
+        CBitcoinAddress address2(address1);
+        masternodeObj.push_back(Pair("payee", address2.ToString().c_str()));
+        masternodeObj.push_back(Pair("script", HexStr(pblocktemplate->txoutMasternode.scriptPubKey)));
+        masternodeObj.push_back(Pair("amount", pblocktemplate->txoutMasternode.nValue));
+    }
+
+    result.push_back(Pair("masternode", masternodeObj));
+    result.push_back(Pair("masternode_payments_started", pindexPrev->nHeight + 1 > consensusParams.nMasternodePaymentsStartBlock));
+
     return result;
 }
 
@@ -713,7 +737,7 @@ UniValue submitblock(const JSONRPCRequest& request)
         throw std::runtime_error(
             "submitblock \"hexdata\"  ( \"dummy\" )\n"
             "\nAttempts to submit new block to network.\n"
-            "See https://en.raven.it/wiki/BIP_0022 for full specification.\n"
+            "See https://en.bitcoin.it/wiki/BIP_0022 for full specification.\n"
 
             "\nArguments\n"
             "1. \"hexdata\"        (string, required) the hex-encoded block data to submit\n"
@@ -777,6 +801,154 @@ UniValue submitblock(const JSONRPCRequest& request)
     return BIP22ValidationResult(sc.state);
 }
 
+CKeyID GetAuxpowMiningKey()
+{
+    CKeyID result;
+    CBitcoinAddress auxminingaddr(gArgs.GetArg("-auxminingaddr", ""));
+    if (!auxminingaddr.GetKeyID(result)) {
+        CReserveKey reservekey(vpwallets[0]);
+        CPubKey pubkey;
+        reservekey.GetReservedKey(pubkey);
+        result = pubkey.GetID();
+    }
+    return result;
+}
+
+UniValue getauxblock(const JSONRPCRequest& request)
+{
+    if (request.fHelp || (request.params.size() != 0 && request.params.size() != 2))
+        throw std::runtime_error(
+                "getauxblock <hash> <auxpow>\n"
+                        " create a new block\n"
+                        "If <hash>, <auxpow> is not specified, returns a new block hash.\n"
+                        "If <hash>, <auxpow> is specified, tries to solve the block based on\n"
+                        "the aux proof of work and returns true if it was successful."
+                + HelpExampleCli("getauxblock", "\"myhash\" \"auxpow\"")
+                + HelpExampleRpc("getauxblock", "\"myhash\" \"auxpow\"")
+        );
+
+    if (g_connman->GetNodeCount(CConnman::CONNECTIONS_ALL) == 0)
+        throw JSONRPCError(-9, "BLAST is not connected!");
+
+    if (IsInitialBlockDownload())
+        throw JSONRPCError(-10, "BLAST is downloading blocks...");
+
+    static std::map<uint256, CBlock*> mapNewBlock;
+    static std::vector< std::unique_ptr<CBlockTemplate> > vNewBlockTemplate;
+    const Consensus::Params& consensusParams = Params().GetConsensus();
+
+    LOCK(cs_main);
+
+    if (request.params.size() == 0)
+    {
+        // Update block
+        static unsigned int nTransactionsUpdatedLast;
+        static CBlockIndex* pindexPrev;
+        static uint64_t nStart;
+        static CBlock* pblock;
+        static std::unique_ptr<CBlockTemplate> pblocktemplate;
+
+        if (chainActive.Tip()->nHeight < consensusParams.nAuxPowStartHeight - 1)
+            throw JSONRPCError(-1, "Merged mining not enabled at current block height yet");
+        if (pindexPrev != chainActive.Tip() ||
+            (mempool.GetTransactionsUpdated() != nTransactionsUpdatedLast && GetTime() - nStart > 20))
+        {
+            if (pindexPrev != chainActive.Tip())
+            {
+                // Deallocate old blocks since they're obsolete now
+                mapNewBlock.clear();
+                for (auto&& pnblocktemplate : vNewBlockTemplate)
+                    pnblocktemplate = nullptr;
+                vNewBlockTemplate.clear();
+            }
+            nTransactionsUpdatedLast = mempool.GetTransactionsUpdated();
+            pindexPrev = chainActive.Tip();
+            nStart = static_cast<uint64_t>(GetTime());
+
+            static const CKeyID keyID = GetAuxpowMiningKey();
+
+            // Create new block with nonce = 0 and extraNonce = 1
+            CScript scriptCoinbase = GetScriptForDestination(keyID);
+            pblocktemplate = BlockAssembler(Params()).CreateNewBlock(scriptCoinbase);
+            if (!pblocktemplate)
+                throw JSONRPCError(-7, "Out of memory");
+
+            pblock = &pblocktemplate->block;
+            // Update nTime
+            pblock->nTime = (uint32_t) std::max(pindexPrev->GetMedianTimePast() + 1, GetAdjustedTime());
+            pblock->nNonce = 0;
+
+            // Update nExtraNonce
+            static unsigned int nExtraNonce = 0;
+            IncrementExtraNonce(pblock, pindexPrev, nExtraNonce);
+
+            // Sets the version
+            pblock->SetAuxPow(new CAuxPow());
+
+            // Save
+            mapNewBlock[pblock->GetHash()] = pblock;
+
+            vNewBlockTemplate.push_back(std::move(pblocktemplate));
+        }
+
+        bool fNegative, fOverflow;
+        arith_uint256 hashTarget = arith_uint256().SetCompact(pblock->nBits, &fNegative, &fOverflow);
+        if (hashTarget == 0 || fNegative || fOverflow)
+            throw std::runtime_error("block has invalid difficulty bits");
+
+        UniValue result(UniValue::VOBJ);
+        result.push_back(Pair("target", HexStr(BEGIN(hashTarget), END(hashTarget))));
+        result.push_back(Pair("hash", pblock->GetHash().GetHex()));
+        result.push_back(Pair("chainid", pblock->GetChainID()));
+        result.push_back(Pair("previousblockhash", pblock->hashPrevBlock.GetHex()));
+        result.push_back(Pair("coinbasevalue", (int64_t)pblock->vtx[0]->vout[0].nValue));
+        result.push_back(Pair("bits", strprintf("%08x", pblock->nBits)));
+        result.push_back(Pair("height", static_cast<int64_t> (pindexPrev->nHeight + 1)));
+        return result;
+    }
+    else
+    {
+        uint256 hash;
+        hash.SetHex(request.params[0].get_str());
+        std::vector<unsigned char> vchAuxPow = ParseHex(request.params[1].get_str());
+        CDataStream ss(vchAuxPow, SER_GETHASH, PROTOCOL_VERSION);
+        auto* pow = new CAuxPow();
+        ss >> *pow;
+        if (!mapNewBlock.count(hash))
+            return "stale-work";
+
+        CBlock* pblock = mapNewBlock[hash];
+        pblock->SetAuxPow(pow);
+
+        bool fBlockPresent = false;
+        BlockMap::iterator mi = mapBlockIndex.find(hash);
+        if (mi != mapBlockIndex.end()) {
+            CBlockIndex *pindex = mi->second;
+            if (pindex->IsValid(BLOCK_VALID_SCRIPTS))
+                return "duplicate";
+            if (pindex->nStatus & BLOCK_FAILED_MASK)
+                return "duplicate-invalid";
+            fBlockPresent = true;
+        }
+
+        submitblock_StateCatcher sc(pblock->GetHash());
+        RegisterValidationInterface(&sc);
+        auto spblock = std::make_shared<CBlock>(*pblock);
+        bool fAccepted = ProcessNewBlock(Params(), spblock, true, nullptr);
+        UnregisterValidationInterface(&sc);
+        if (fBlockPresent) {
+            if (fAccepted && !sc.found) {
+                return "duplicate-inconclusive";
+            }
+            return "duplicate";
+        }
+        if (!sc.found) {
+            return "inconclusive";
+        }
+        return BIP22ValidationResult(sc.state);
+    }
+}
+
 UniValue estimatefee(const JSONRPCRequest& request)
 {
     if (request.fHelp || request.params.size() != 1)
@@ -801,7 +973,7 @@ UniValue estimatefee(const JSONRPCRequest& request)
 
     if (!IsDeprecatedRPCEnabled("estimatefee")) {
         throw JSONRPCError(RPC_METHOD_DEPRECATED, "estimatefee is deprecated and will be fully removed in v0.17. "
-            "To use estimatefee in v0.16, restart ravend with -deprecatedrpc=estimatefee.\n"
+            "To use estimatefee in v0.16, restart blastd with -deprecatedrpc=estimatefee.\n"
             "Projects should transition to using estimatesmartfee before upgrading to v0.17");
     }
 
@@ -988,7 +1160,7 @@ UniValue getgenerate(const JSONRPCRequest& request)
         throw std::runtime_error(
             "getgenerate\n"
             "\nReturn if the server is set to generate coins or not. The default is false.\n"
-            "It is set with the command line argument -gen (or " + std::string(RAVEN_CONF_FILENAME) + " setting gen)\n"
+            "It is set with the command line argument -gen (or " + std::string(BITCOIN_CONF_FILENAME) + " setting gen)\n"
             "It can also be set with the setgenerate call.\n"
             "\nResult\n"
             "true|false      (boolean) If the server is set to generate coins or not\n"
@@ -1043,7 +1215,7 @@ UniValue setgenerate(const JSONRPCRequest& request)
     gArgs.SoftSetArg("-genproclimit", itostr(nGenProcLimit));
     //mapArgs["-gen"] = (fGenerate ? "1" : "0");
     //mapArgs ["-genproclimit"] = itostr(nGenProcLimit);
-    int numCores = GenerateRavens(fGenerate, nGenProcLimit, Params());
+    int numCores = GenerateBitcoins(fGenerate, nGenProcLimit, Params());
 
     nGenProcLimit = nGenProcLimit >= 0 ? nGenProcLimit : numCores;
     std::string msg = std::to_string(nGenProcLimit) + " of " + std::to_string(numCores);
@@ -1059,6 +1231,7 @@ static const CRPCCommand commands[] =
     { "mining",             "prioritisetransaction",  &prioritisetransaction,  {"txid","dummy","fee_delta"} },
     { "mining",             "getblocktemplate",       &getblocktemplate,       {"template_request"} },
     { "mining",             "submitblock",            &submitblock,            {"hexdata","dummy"} },
+    { "mining",             "getauxblock",            &getauxblock,            {"hash","auxpow"} },
 
     /* Coin generation */
     { "generating",         "getgenerate",            &getgenerate,            {}  },

@@ -14,8 +14,71 @@
 #include "validation.h"
 #include "chainparams.h"
 #include "tinyformat.h"
+#include "auxpow/check.h"
 
 unsigned int static DarkGravityWave(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params) {
+    
+    /* current difficulty formula, dash - DarkGravity v3, written by Evan Duffield - evan@dashpay.io */
+    // Genesis block
+    const arith_uint256 nProofOfWorkLimit = UintToArith256(params.powLimit);
+    if (params.fPowNoRetargeting)
+        return pindexLast->nBits;
+    const CBlockIndex *BlockLastSolved = pindexLast;
+    const CBlockIndex *BlockReading = pindexLast;
+    int64_t nActualTimespan = 0;
+    int64_t LastBlockTime = 0;
+    int64_t PastBlocksMin = 24;
+    int64_t PastBlocksMax = 24;
+    int64_t CountBlocks = 0;
+    arith_uint256 PastDifficultyAverage;
+    arith_uint256 PastDifficultyAveragePrev;
+
+
+    if (BlockLastSolved == NULL || BlockLastSolved->nHeight == 0) {
+        return nProofOfWorkLimit.GetCompact();
+    }
+
+    for (unsigned int i = 1; BlockReading && BlockReading->nHeight > 0; i++) {
+        if (PastBlocksMax > 0 && i > PastBlocksMax) { break; }
+        CountBlocks++;
+
+        if(CountBlocks <= PastBlocksMin) {
+            if (CountBlocks == 1) { PastDifficultyAverage.SetCompact(BlockReading->nBits); }
+            else { PastDifficultyAverage = ((PastDifficultyAveragePrev * CountBlocks) + (arith_uint256().SetCompact(BlockReading->nBits))) / (CountBlocks + 1); }
+            PastDifficultyAveragePrev = PastDifficultyAverage;
+        }
+
+        if(LastBlockTime > 0){
+            int64_t Diff = (LastBlockTime - BlockReading->GetBlockTime());
+            nActualTimespan += Diff;
+        }
+        LastBlockTime = BlockReading->GetBlockTime();
+
+        if (BlockReading->pprev == NULL) { assert(BlockReading); break; }
+        BlockReading = BlockReading->pprev;
+    }
+
+    arith_uint256 bnNew(PastDifficultyAverage);
+
+    int64_t _nTargetTimespan = CountBlocks * params.nPowTargetSpacing;
+
+    if (nActualTimespan < _nTargetTimespan/3)
+        nActualTimespan = _nTargetTimespan/3;
+    if (nActualTimespan > _nTargetTimespan*3)
+        nActualTimespan = _nTargetTimespan*3;
+
+    // Retarget
+    bnNew *= nActualTimespan;
+    bnNew /= _nTargetTimespan;
+
+    if (bnNew > nProofOfWorkLimit){
+        bnNew = nProofOfWorkLimit;
+    }
+
+    return bnNew.GetCompact();
+}
+
+unsigned int static DarkGravityWave180(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params) {
     /* current difficulty formula, dash - DarkGravity v3, written by Evan Duffield - evan@dash.org */
     assert(pindexLast != nullptr);
 
@@ -123,6 +186,7 @@ unsigned int GetNextWorkRequiredBTC(const CBlockIndex* pindexLast, const CBlockH
 unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params)
 {
     int dgw = DarkGravityWave(pindexLast, pblock, params);
+    int dgw180 = DarkGravityWave180(pindexLast, pblock, params);
     int btc = GetNextWorkRequiredBTC(pindexLast, pblock, params);
     int64_t nPrevBlockTime = (pindexLast->pprev ? pindexLast->pprev->GetBlockTime() : pindexLast->GetBlockTime());
 
@@ -177,8 +241,37 @@ bool CheckProofOfWork(uint256 hash, unsigned int nBits, const Consensus::Params&
         return false;
 
     // Check proof of work matches claimed amount
-    if (UintToArith256(hash) > bnTarget)
-        return false;
+    return UintToArith256(hash) <= bnTarget;
 
+}
+
+bool CheckBlockProofOfWork(const CBlockHeader *pblock, const Consensus::Params& params)
+{
+    // LogPrint("txdb", "CheckBlockProofOfWork(): block: %s\n", pblock->ToString());  // LEDTMP
+
+    if (pblock->auxpow && (pblock->auxpow.get() != nullptr))
+    {
+        if (!CheckAuxpow(pblock->auxpow, pblock->GetHash(), pblock->GetChainID(), params))
+            return error("CheckBlockProofOfWork() : AUX POW is not valid");
+        // Check proof of work matches claimed amount
+        if (!CheckProofOfWork(pblock->auxpow->GetParentBlockHash(), pblock->nBits, params))
+            return error("CheckBlockProofOfWork() : AUX proof of work failed");
+    }
+    else
+    {
+        // Check proof of work matches claimed amount
+        if (!CheckProofOfWork(pblock->GetHash(), pblock->nBits, params))
+            return error("CheckBlockProofOfWork() : proof of work failed");
+    }
+    return true;
+}
+
+bool CheckAuxPowValidity(const CBlockHeader* pblock, const Consensus::Params& params)
+{
+    if (!params.fPowAllowMinDifficultyBlocks)
+    {
+        if (pblock->GetChainID() != params.nAuxpowChainId && pblock->GetChainID() != params.nAlternateChainId)
+            return error("CheckAuxPowValidity() : block does not have our chain ID");
+    }
     return true;
 }

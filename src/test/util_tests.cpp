@@ -10,7 +10,7 @@
 #include "sync.h"
 #include "utilstrencodings.h"
 #include "utilmoneystr.h"
-#include "test/test_raven.h"
+#include "test/test_bitcoin.h"
 
 #include <stdint.h>
 #include <vector>
@@ -654,9 +654,9 @@ BOOST_FIXTURE_TEST_SUITE(util_tests, BasicTestingSetup)
         BOOST_CHECK(!ParseFixedPoint("1.1e-", 8, &amount));
         BOOST_CHECK(!ParseFixedPoint("1.", 8, &amount));
 
-        BOOST_CHECK(ParseFixedPoint("21000000000", 8, &amount));
-        BOOST_CHECK(ParseFixedPoint("42000000000", 8, &amount));
-        BOOST_CHECK(!ParseFixedPoint("42000000001", 8, &amount));
+        BOOST_CHECK(ParseFixedPoint("64000000", 8, &amount));
+        BOOST_CHECK(ParseFixedPoint("128000000", 8, &amount));
+        BOOST_CHECK(!ParseFixedPoint("128000001", 8, &amount));
     }
 
 BOOST_AUTO_TEST_SUITE_END()

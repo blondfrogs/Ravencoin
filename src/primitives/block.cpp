@@ -5,16 +5,12 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "primitives/block.h"
-
+#include "primitives/pureheader.h"
 #include "hash.h"
 #include "tinyformat.h"
 #include "utilstrencodings.h"
 #include "crypto/common.h"
 
-uint256 CBlockHeader::GetHash() const
-{
-    return HashX16R(BEGIN(nVersion), END(nNonce), hashPrevBlock);
-}
 
 std::string CBlock::ToString() const
 {

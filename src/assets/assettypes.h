@@ -3,8 +3,8 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 // Created by Jeremy Anderson on 5/15/18.
 
-#ifndef RAVENCOIN_NEWASSET_H
-#define RAVENCOIN_NEWASSET_H
+#ifndef BLAST_NEWASSET_H
+#define BLAST_NEWASSET_H
 
 #include <string>
 #include <sstream>
@@ -460,4 +460,4 @@ private:
     size_t maxSize;
 };
 
-#endif //RAVENCOIN_NEWASSET_H
+#endif //BLAST_NEWASSET_H

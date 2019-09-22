@@ -1,13 +1,14 @@
 // Copyright (c) 2009-2016 The Bitcoin Core developers
 // Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The BLAST Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_NETBASE_H
-#define RAVEN_NETBASE_H
+#ifndef BITCOIN_NETBASE_H
+#define BITCOIN_NETBASE_H
 
 #if defined(HAVE_CONFIG_H)
-#include "config/raven-config.h"
+#include "config/bitcoin-config.h"
 #endif
 
 #include "compat.h"
@@ -53,6 +54,7 @@ bool Lookup(const char *pszName, std::vector<CService>& vAddr, int portDefault, 
 CService LookupNumeric(const char *pszName, int portDefault = 0);
 bool LookupSubNet(const char *pszName, CSubNet& subnet);
 bool ConnectSocketDirectly(const CService &addrConnect, SOCKET& hSocketRet, int nTimeout);
+bool ConnectSocket(const CService &addr, SOCKET& hSocketRet, int nTimeout, bool *outProxyConnectionFailed = 0);
 bool ConnectThroughProxy(const proxyType &proxy, const std::string& strDest, int port, SOCKET& hSocketRet, int nTimeout, bool *outProxyConnectionFailed);
 /** Return readable error string for a network error code */
 std::string NetworkErrorString(int err);
@@ -68,4 +70,4 @@ bool SetSocketNoDelay(const SOCKET& hSocket);
 struct timeval MillisToTimeval(int64_t nTimeout);
 void InterruptSocks5(bool interrupt);
 
-#endif // RAVEN_NETBASE_H
+#endif // BITCOIN_NETBASE_H

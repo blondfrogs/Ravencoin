@@ -1,6 +1,7 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
 // Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The BLAST Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -8,11 +9,11 @@
  * Server/client environment: argument handling, config file parsing,
  * logging, thread wrappers, startup time
  */
-#ifndef RAVEN_UTIL_H
-#define RAVEN_UTIL_H
+#ifndef BITCOIN_UTIL_H
+#define BITCOIN_UTIL_H
 
 #if defined(HAVE_CONFIG_H)
-#include "config/raven-config.h"
+#include "config/bitcoin-config.h"
 #endif
 
 #include "compat.h"
@@ -28,10 +29,25 @@
 #include <string>
 #include <vector>
 
+#include <boost/filesystem/path.hpp>
 #include <boost/signals2/signal.hpp>
+
+// Uncomment the following line to enable debugging messages
+// or enable on a per file basis prior to inclusion of util.h
+//#define ENABLE_BLAST_DEBUG
+#ifdef ENABLE_BLAST_DEBUG
+#define DBG( x ) x
+#else
+#define DBG( x ) 
+#endif
 
 // Application startup time (used for uptime calculation)
 int64_t GetStartupTime();
+
+extern bool fDebug;
+extern bool fMasternodeMode;
+extern bool fLiteMode;
+extern bool fUnitTest;
 
 static const bool DEFAULT_LOGTIMEMICROS = false;
 static const bool DEFAULT_LOGIPS        = false;
@@ -54,8 +70,8 @@ extern bool fLogIPs;
 extern std::atomic<bool> fReopenDebugLog;
 extern CTranslationInterface translationInterface;
 
-extern const char *const RAVEN_CONF_FILENAME;
-extern const char *const RAVEN_PID_FILENAME;
+extern const char *const BITCOIN_CONF_FILENAME;
+extern const char *const BITCOIN_PID_FILENAME;
 
 extern std::atomic<uint32_t> logCategories;
 
@@ -105,6 +121,10 @@ namespace BCLog
         COINDB = (1 << 18),
         QT = (1 << 19),
         LEVELDB = (1 << 20),
+        MASTERNODE = (1 << 21),
+        MNPAYMENT = (1 << 22),
+        SPORK = (1 << 23),
+        ALERT = (1 << 24),
         ALL = ~(uint32_t) 0,
     };
 }
@@ -141,6 +161,9 @@ static inline void MarkUsed(const T &t, const Args &... args)
     (void) t;
     MarkUsed(args...);
 }
+
+/** Return true if log accepts specified category */
+bool LogAcceptCategory(const char* category);
 
 #ifdef USE_COVERAGE
 #define LogPrintf(...) do { MarkUsed(__VA_ARGS__); } while(0)
@@ -192,6 +215,7 @@ const fs::path &GetDataDir(bool fNetSpecific = true);
 void ClearDatadirCache();
 
 fs::path GetConfigFile(const std::string &confPath);
+boost::filesystem::path GetMasternodeConfigFile();
 
 #ifndef WIN32
 
@@ -294,6 +318,7 @@ public:
     // Forces an arg setting. Called by SoftSetArg() if the arg hasn't already
     // been set. Also called directly in testing.
     void ForceSetArg(const std::string &strArg, const std::string &strValue);
+    void ForceSetMultiArgs(const std::string& strArg, const std::vector<std::string>& values);
 };
 
 extern ArgsManager gArgs;
@@ -323,6 +348,7 @@ std::string HelpMessageOpt(const std::string &option, const std::string &message
 int GetNumCores();
 
 void RenameThread(const char *name);
+std::string GetThreadName();
 
 /**
  * .. and a wrapper that just calls func once
@@ -330,7 +356,7 @@ void RenameThread(const char *name);
 template<typename Callable>
 void TraceThread(const char *name, Callable func)
 {
-    std::string s = strprintf("raven-%s", name);
+    std::string s = strprintf("blast-%s", name);
     RenameThread(s.c_str());
     try
     {
@@ -359,4 +385,30 @@ std::string CopyrightHolders(const std::string &strPrefix);
 
 void SetThreadPriority(int nPriority);
 
-#endif // RAVEN_UTIL_H
+/**
+ * @brief Converts version strings to 4-byte unsigned integer
+ * @param strVersion version in "x.x.x" format (decimal digits only)
+ * @return 4-byte unsigned integer, most significant byte is always 0
+ * Throws std::bad_cast if format doesn\t match.
+ */
+uint32_t StringVersionToInt(const std::string& strVersion);
+
+/**
+ * @brief Converts version as 4-byte unsigned integer to string
+ * @param nVersion 4-byte unsigned integer, most significant byte is always 0
+ * @return version string in "x.x.x" format (last 3 bytes as version parts)
+ * Throws std::bad_cast if format doesn\t match.
+ */
+std::string IntVersionToString(uint32_t nVersion);
+
+/**
+ * @brief Copy of the IntVersionToString, that returns "Invalid version" string
+ * instead of throwing std::bad_cast
+ * @param nVersion 4-byte unsigned integer, most significant byte is always 0
+ * @return version string in "x.x.x" format (last 3 bytes as version parts)
+ * or "Invalid version" if can't cast the given value
+ */
+std::string SafeIntVersionToString(uint32_t nVersion);
+
+
+#endif // BITCOIN_UTIL_H

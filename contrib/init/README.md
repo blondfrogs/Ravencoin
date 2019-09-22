@@ -1,11 +1,11 @@
 Sample configuration files for:
 ```
-SystemD: ravend.service
-Upstart: ravend.conf
-OpenRC:  ravend.openrc
-         ravend.openrcconf
-CentOS:  ravend.init
-OS X:    org.raven.ravend.plist
+SystemD: blastd.service
+Upstart: blastd.conf
+OpenRC:  blastd.openrc
+         blastd.openrcconf
+CentOS:  blastd.init
+OS X:    org.blast.blastd.plist
 ```
 have been made available to assist packagers in creating node packages here.
 

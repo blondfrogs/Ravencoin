@@ -27,6 +27,10 @@
 #include "util.h"
 #include "utilmoneystr.h"
 #include "validationinterface.h"
+#include "masternode-sync.h"
+#include "masternode-payments.h"
+#include "spork.h"
+#include "base58.h"
 
 #include "wallet/wallet.h"
 //#include "wallet/rpcwallet.h"
@@ -41,7 +45,7 @@
 extern std::vector<CWalletRef> vpwallets;
 //////////////////////////////////////////////////////////////////////////////
 //
-// RavenMiner
+// BlastMiner
 //
 
 //
@@ -140,11 +144,17 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     assert(pindexPrev != nullptr);
     nHeight = pindexPrev->nHeight + 1;
 
-    pblock->nVersion = ComputeBlockVersion(pindexPrev, chainparams.GetConsensus());
+    // BLAST
+    const int32_t nChainId = chainparams.GetConsensus().nAuxpowChainId;
+    const int32_t nnChainId = (nHeight > chainparams.GetConsensus().nChainIdUpgradeHeight) ? chainparams.GetConsensus().nAlternateChainId : nChainId;
+    const int32_t nVersion = ComputeBlockVersion(pindexPrev, chainparams.GetConsensus());
+    const uint32_t nnVersion = (nHeight > chainparams.GetConsensus().nBlockV4UpgradeHeight && nHeight < chainparams.GetConsensus().nBlockVersionRevertHeight) ? 4 : nVersion;
+    pblock->SetBaseVersion(nnVersion, nnChainId);
+
     // -regtest only: allow overriding block.nVersion with
     // -blockversion=N to test forking scenarios
     if (chainparams.MineBlocksOnDemand())
-        pblock->nVersion = gArgs.GetArg("-blockversion", pblock->nVersion);
+        pblock->SetBaseVersion(gArgs.GetArg("-blockversion", pblock->GetBaseVersion()), nnChainId);
 
     pblock->nTime = GetAdjustedTime();
     const int64_t nMedianTimePast = pindexPrev->GetMedianTimePast();
@@ -176,8 +186,46 @@ std::unique_ptr<CBlockTemplate> BlockAssembler::CreateNewBlock(const CScript& sc
     coinbaseTx.vin[0].prevout.SetNull();
     coinbaseTx.vout.resize(1);
     coinbaseTx.vout[0].scriptPubKey = scriptPubKeyIn;
-    coinbaseTx.vout[0].nValue = nFees + GetBlockSubsidy(nHeight, chainparams.GetConsensus());
+
     coinbaseTx.vin[0].scriptSig = CScript() << nHeight << OP_0;
+    if (!chainparams.MineBlocksOnDemand() && nHeight >= chainparams.GetConsensus().nMasternodePaymentsStartBlock && !IsInitialBlockDownload() && !fUnitTest) {
+		if (masternodeSync.IsFailed()) {
+			throw std::runtime_error("Masternode information has failed to sync, please restart your node!");
+		}
+		if (!masternodeSync.IsSynced()) {
+			throw std::runtime_error("Masternode information has not synced, please wait until it finishes before mining!");
+		}
+	}
+
+    // only pay masternodes and devs if the spork is active
+    if (nHeight >= chainparams.GetConsensus().nMasternodePaymentsStartBlock) {
+        // Update coinbase transaction with additional info about masternode and dev payments,
+        // get some info back to pass to getblocktemplate
+        const BlockSubsidies subsidies {GetTotalReward(nHeight, chainparams.GetConsensus())};
+        const auto& halfFees = nFees / 2;
+        if (mnpayments.FillBlockPayee(coinbaseTx, nHeight, subsidies.masternode + halfFees, pblocktemplate->txoutMasternode)) {
+            // found a masternode!
+            coinbaseTx.vout[0].nValue = subsidies.miner + halfFees;
+        } else {
+            // suitable masternode not found. give masternode's reward to the miner
+            coinbaseTx.vout[0].nValue = subsidies.miner + subsidies.masternode + nFees;
+        }
+
+        // add dev reward
+        CScript devScript = GetScriptForDestination(CBitcoinAddress(chainparams.GetConsensus().devWalletAddress).Get());
+        CTxOut devOut(subsidies.dev, devScript);
+        coinbaseTx.vout.push_back(devOut);
+
+        LogPrintf("CreateNewBlock -- nBlockHeight %d blockReward %lld txoutMasternode %s coinbaseTx %s",
+                         nHeight, subsidies.total, pblocktemplate->txoutMasternode.ToString(), coinbaseTx.ToString());
+    } else {
+        // give the miner the total reward
+        coinbaseTx.vout[0].nValue = GetTotalReward(nHeight, chainparams.GetConsensus());
+
+        LogPrintf("CreateNewBlock -- nBlockHeight %d blockReward %lld coinbaseTx %s",
+                        nHeight, coinbaseTx.vout[0].nValue, coinbaseTx.ToString());
+    }
+
     pblock->vtx[0] = MakeTransactionRef(std::move(coinbaseTx));
     pblocktemplate->vchCoinbaseCommitment = GenerateCoinbaseCommitment(*pblock, pindexPrev, chainparams.GetConsensus());
     pblocktemplate->vTxFees[0] = -nFees;
@@ -507,11 +555,11 @@ CWallet *GetFirstWallet() {
     return(vpwallets[0]);
 }
 
-void static RavenMiner(const CChainParams& chainparams)
+void static BlastMiner(const CChainParams& chainparams)
 {
-    LogPrintf("RavenMiner -- started\n");
+    LogPrintf("BlastMiner -- started\n");
     SetThreadPriority(THREAD_PRIORITY_LOWEST);
-    RenameThread("raven-miner");
+    RenameThread("blast-miner");
 
     unsigned int nExtraNonce = 0;
 
@@ -523,7 +571,7 @@ void static RavenMiner(const CChainParams& chainparams)
     #endif
 
     if (!EnsureWalletIsAvailable(pWallet, false)) {
-        LogPrintf("RavenMiner -- Wallet not available\n");
+        LogPrintf("BlastMiner -- Wallet not available\n");
     }
 
     if (pWallet == NULL)
@@ -583,13 +631,13 @@ void static RavenMiner(const CChainParams& chainparams)
 
             if (!pblocktemplate.get())
             {
-                LogPrintf("RavenMiner -- Keypool ran out, please call keypoolrefill before restarting the mining thread\n");
+                LogPrintf("BlastMiner -- Keypool ran out, please call keypoolrefill before restarting the mining thread\n");
                 return;
             }
             CBlock *pblock = &pblocktemplate->block;
             IncrementExtraNonce(pblock, pindexPrev, nExtraNonce);
 
-            LogPrintf("RavenMiner -- Running miner with %u transactions in block (%u bytes)\n", pblock->vtx.size(),
+            LogPrintf("BlastMiner -- Running miner with %u transactions in block (%u bytes)\n", pblock->vtx.size(),
                 ::GetSerializeSize(*pblock, SER_NETWORK, PROTOCOL_VERSION));
 
             //
@@ -608,7 +656,7 @@ void static RavenMiner(const CChainParams& chainparams)
                     {
                         // Found a solution
                         SetThreadPriority(THREAD_PRIORITY_NORMAL);
-                        LogPrintf("RavenMiner:\n  proof-of-work found\n  hash: %s\n  target: %s\n", hash.GetHex(), hashTarget.GetHex());
+                        LogPrintf("BlastMiner:\n  proof-of-work found\n  hash: %s\n  target: %s\n", hash.GetHex(), hashTarget.GetHex());
                         ProcessBlockFound(pblock, chainparams);
                         SetThreadPriority(THREAD_PRIORITY_LOWEST);
                         coinbaseScript->KeepScript();
@@ -655,17 +703,17 @@ void static RavenMiner(const CChainParams& chainparams)
     }
     catch (const boost::thread_interrupted&)
     {
-        LogPrintf("RavenMiner -- terminated\n");
+        LogPrintf("BlastMiner -- terminated\n");
         throw;
     }
     catch (const std::runtime_error &e)
     {
-        LogPrintf("RavenMiner -- runtime error: %s\n", e.what());
+        LogPrintf("BlastMiner -- runtime error: %s\n", e.what());
         return;
     }
 }
 
-int GenerateRavens(bool fGenerate, int nThreads, const CChainParams& chainparams)
+int GenerateBitcoins(bool fGenerate, int nThreads, const CChainParams& chainparams)
 {
 
     static boost::thread_group* minerThreads = NULL;
@@ -692,7 +740,7 @@ int GenerateRavens(bool fGenerate, int nThreads, const CChainParams& chainparams
     nHashesPerSec = 0;
 
     for (int i = 0; i < nThreads; i++){
-        minerThreads->create_thread(boost::bind(&RavenMiner, boost::cref(chainparams)));
+        minerThreads->create_thread(boost::bind(&BlastMiner, boost::cref(chainparams)));
     }
 
     return(numCores);

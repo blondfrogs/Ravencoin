@@ -4,7 +4,7 @@
 
 #include <assets/assets.h>
 
-#include <test/test_raven.h>
+#include <test/test_bitcoin.h>
 
 #include <boost/test/unit_test.hpp>
 
@@ -24,7 +24,7 @@ BOOST_FIXTURE_TEST_SUITE(serialization_tests, BasicTestingSetup)
         CNewAsset asset("SERIALIZATION", 100000000, 0, 0, 1, DecodeIPFS("QmacSRmrkVmvJfbCpmU6pK72furJ8E8fbKHindrLxmYMQo"));
 
         // Create destination
-        CTxDestination dest = DecodeDestination("mfe7MqgYZgBuXzrT2QTFqZwBXwRDqagHTp"); // Testnet Address
+        CTxDestination dest = DecodeDestination("bbkSM5HADMpvL5hc5TDLnzNw56Q5R5r6Yo"); // Testnet Address
 
         BOOST_CHECK(IsValidDestination(dest));
 
@@ -35,7 +35,7 @@ BOOST_FIXTURE_TEST_SUITE(serialization_tests, BasicTestingSetup)
         CNewAsset serializedAsset;
         std::string address;
         BOOST_CHECK_MESSAGE(AssetFromScript(scriptPubKey, serializedAsset, address), "Failed to get asset from script");
-        BOOST_CHECK_MESSAGE(address == "mfe7MqgYZgBuXzrT2QTFqZwBXwRDqagHTp", "Addresses weren't equal");
+        BOOST_CHECK_MESSAGE(address == "bbkSM5HADMpvL5hc5TDLnzNw56Q5R5r6Yo", "Addresses weren't equal");
         BOOST_CHECK_MESSAGE(serializedAsset.strName == "SERIALIZATION", "Asset names weren't equal");
         BOOST_CHECK_MESSAGE(serializedAsset.nAmount == 100000000, "Amount weren't equal");
         BOOST_CHECK_MESSAGE(serializedAsset.units == 0, "Units weren't equal");
@@ -49,7 +49,7 @@ BOOST_FIXTURE_TEST_SUITE(serialization_tests, BasicTestingSetup)
         asset2.ConstructTransaction(scriptPubKey);
         CNewAsset serializedAsset2;
         BOOST_CHECK_MESSAGE(AssetFromScript(scriptPubKey, serializedAsset2, address), "Failed to get asset from script");
-        BOOST_CHECK_MESSAGE(address == "mfe7MqgYZgBuXzrT2QTFqZwBXwRDqagHTp", "Addresses weren't equal");
+        BOOST_CHECK_MESSAGE(address == "bbkSM5HADMpvL5hc5TDLnzNw56Q5R5r6Yo", "Addresses weren't equal");
         BOOST_CHECK_MESSAGE(serializedAsset2.strName == "SERIALIZATION", "Asset names weren't equal");
         BOOST_CHECK_MESSAGE(serializedAsset2.nAmount == 100000000, "Amount weren't equal");
         BOOST_CHECK_MESSAGE(serializedAsset2.units == 0, "Units weren't equal");
@@ -69,7 +69,7 @@ BOOST_FIXTURE_TEST_SUITE(serialization_tests, BasicTestingSetup)
         CReissueAsset reissue(name, 100000000, 0, 0, DecodeIPFS("QmacSRmrkVmvJfbCpmU6pK72furJ8E8fbKHindrLxmYMQo"));
 
         // Create destination
-        CTxDestination dest = DecodeDestination("mfe7MqgYZgBuXzrT2QTFqZwBXwRDqagHTp"); // Testnet Address
+        CTxDestination dest = DecodeDestination("bbkSM5HADMpvL5hc5TDLnzNw56Q5R5r6Yo"); // Testnet Address
 
         BOOST_CHECK(IsValidDestination(dest));
 
@@ -80,7 +80,7 @@ BOOST_FIXTURE_TEST_SUITE(serialization_tests, BasicTestingSetup)
         CReissueAsset serializedAsset;
         std::string address;
         BOOST_CHECK_MESSAGE(ReissueAssetFromScript(scriptPubKey, serializedAsset, address), "Failed to get asset from script");
-        BOOST_CHECK_MESSAGE(address == "mfe7MqgYZgBuXzrT2QTFqZwBXwRDqagHTp", "Addresses weren't equal");
+        BOOST_CHECK_MESSAGE(address == "bbkSM5HADMpvL5hc5TDLnzNw56Q5R5r6Yo", "Addresses weren't equal");
         BOOST_CHECK_MESSAGE(serializedAsset.strName == "SERIALIZATION", "Asset names weren't equal");
         BOOST_CHECK_MESSAGE(serializedAsset.nAmount == 100000000, "Amount weren't equal");
         BOOST_CHECK_MESSAGE(EncodeIPFS(serializedAsset.strIPFSHash) == "QmacSRmrkVmvJfbCpmU6pK72furJ8E8fbKHindrLxmYMQo", "IPFSHash wasn't equal");
@@ -91,7 +91,7 @@ BOOST_FIXTURE_TEST_SUITE(serialization_tests, BasicTestingSetup)
         reissue2.ConstructTransaction(scriptPubKey);
         CReissueAsset serializedAsset2;
         BOOST_CHECK_MESSAGE(ReissueAssetFromScript(scriptPubKey, serializedAsset2, address), "Failed to get asset from script");
-        BOOST_CHECK_MESSAGE(address == "mfe7MqgYZgBuXzrT2QTFqZwBXwRDqagHTp", "Addresses weren't equal");
+        BOOST_CHECK_MESSAGE(address == "bbkSM5HADMpvL5hc5TDLnzNw56Q5R5r6Yo", "Addresses weren't equal");
         BOOST_CHECK_MESSAGE(serializedAsset2.strName == "SERIALIZATION", "Asset names weren't equal");
         BOOST_CHECK_MESSAGE(serializedAsset2.nAmount == 100000000, "Amount weren't equal");
         BOOST_CHECK_MESSAGE(serializedAsset2.strIPFSHash == "", "IPFSHash wasn't equal");
@@ -108,7 +108,7 @@ BOOST_FIXTURE_TEST_SUITE(serialization_tests, BasicTestingSetup)
         CNewAsset asset(name, 100000000);
 
         // Create destination
-        CTxDestination dest = DecodeDestination("mfe7MqgYZgBuXzrT2QTFqZwBXwRDqagHTp"); // Testnet Address
+        CTxDestination dest = DecodeDestination("bbkSM5HADMpvL5hc5TDLnzNw56Q5R5r6Yo"); // Testnet Address
 
         BOOST_CHECK(IsValidDestination(dest));
 
@@ -121,7 +121,7 @@ BOOST_FIXTURE_TEST_SUITE(serialization_tests, BasicTestingSetup)
         std::stringstream ownerName;
         ownerName << name << OWNER_TAG;
         BOOST_CHECK_MESSAGE(OwnerAssetFromScript(scriptPubKey, strOwnerName, address), "Failed to get asset from script");
-        BOOST_CHECK_MESSAGE(address == "mfe7MqgYZgBuXzrT2QTFqZwBXwRDqagHTp", "Addresses weren't equal");
+        BOOST_CHECK_MESSAGE(address == "bbkSM5HADMpvL5hc5TDLnzNw56Q5R5r6Yo", "Addresses weren't equal");
         BOOST_CHECK_MESSAGE(strOwnerName == ownerName.str(), "Asset names weren't equal");
     }
 

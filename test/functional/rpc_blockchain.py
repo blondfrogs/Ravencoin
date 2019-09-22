@@ -22,7 +22,7 @@ from decimal import Decimal
 import http.client
 import subprocess
 
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import BlastTestFramework
 from test_framework.util import (
     assert_equal,
     assert_greater_than,
@@ -33,7 +33,7 @@ from test_framework.util import (
     assert_is_hash_string,
 )
 
-class BlockchainTest(RavenTestFramework):
+class BlockchainTest(BlastTestFramework):
     def set_test_params(self):
         self.num_nodes = 1
         self.extra_args = [['-stopatheight=207', '-prune=1']]

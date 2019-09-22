@@ -19,28 +19,28 @@ else
 LIBUNIVALUE = $(UNIVALUE_LIBS)
 endif
 
-RAVEN_INCLUDES=-I$(builddir) -I$(builddir)/obj $(BDB_CPPFLAGS) $(BOOST_CPPFLAGS) $(LEVELDB_CPPFLAGS) $(CRYPTO_CFLAGS) $(SSL_CFLAGS)
+BLAST_INCLUDES=-I$(builddir) -I$(builddir)/obj $(BDB_CPPFLAGS) $(BOOST_CPPFLAGS) $(LEVELDB_CPPFLAGS) $(CRYPTO_CFLAGS) $(SSL_CFLAGS)
 
-RAVEN_INCLUDES += -I$(srcdir)/secp256k1/include
-RAVEN_INCLUDES += $(UNIVALUE_CFLAGS)
+BLAST_INCLUDES += -I$(srcdir)/secp256k1/include
+BLAST_INCLUDES += $(UNIVALUE_CFLAGS)
 
-LIBRAVEN_SERVER=libraven_server.a
-LIBRAVEN_COMMON=libraven_common.a
-LIBRAVEN_CONSENSUS=libraven_consensus.a
-LIBRAVEN_CLI=libraven_cli.a
-LIBRAVEN_UTIL=libraven_util.a
-LIBRAVEN_CRYPTO=crypto/libraven_crypto.a
-LIBRAVENQT=qt/libravenqt.a
+LIBBITCOIN_SERVER=libbitcoin_server.a
+LIBBITCOIN_COMMON=libbitcoin_common.a
+LIBBITCOIN_CONSENSUS=libbitcoin_consensus.a
+LIBBITCOIN_CLI=libbitcoin_cli.a
+LIBBITCOIN_UTIL=libbitcoin_util.a
+LIBBITCOIN_CRYPTO=crypto/libbitcoin_crypto.a
+LIBBITCOINQT=qt/libbitcoinqt.a
 LIBSECP256K1=secp256k1/libsecp256k1.la
 
 if ENABLE_ZMQ
-LIBRAVEN_ZMQ=libraven_zmq.a
+LIBBITCOIN_ZMQ=libbitcoin_zmq.a
 endif
-if BUILD_RAVEN_LIBS
-LIBRAVENCONSENSUS=libravenconsensus.la
+if BUILD_BITCOIN_LIBS
+LIBBITCOINCONSENSUS=libbitcoinconsensus.la
 endif
 if ENABLE_WALLET
-LIBRAVEN_WALLET=libraven_wallet.a
+LIBBITCOIN_WALLET=libbitcoin_wallet.a
 endif
 
 $(LIBSECP256K1): $(wildcard secp256k1/src/*) $(wildcard secp256k1/include/*)
@@ -49,48 +49,56 @@ $(LIBSECP256K1): $(wildcard secp256k1/src/*) $(wildcard secp256k1/include/*)
 # Make is not made aware of per-object dependencies to avoid limiting building parallelization
 # But to build the less dependent modules first, we manually select their order here:
 EXTRA_LIBRARIES += \
-  $(LIBRAVEN_CRYPTO) \
-  $(LIBRAVEN_UTIL) \
-  $(LIBRAVEN_COMMON) \
-  $(LIBRAVEN_CONSENSUS) \
-  $(LIBRAVEN_SERVER) \
-  $(LIBRAVEN_CLI) \
-  $(LIBRAVEN_WALLET) \
-  $(LIBRAVEN_ZMQ)
+  $(LIBBITCOIN_CRYPTO) \
+  $(LIBBITCOIN_UTIL) \
+  $(LIBBITCOIN_COMMON) \
+  $(LIBBITCOIN_CONSENSUS) \
+  $(LIBBITCOIN_SERVER) \
+  $(LIBBITCOIN_CLI) \
+  $(LIBBITCOIN_WALLET) \
+  $(LIBBITCOIN_ZMQ)
 
-lib_LTLIBRARIES = $(LIBRAVENCONSENSUS)
+lib_LTLIBRARIES = $(LIBBITCOINCONSENSUS)
 
 bin_PROGRAMS =
 noinst_PROGRAMS =
 TESTS =
 BENCHMARKS =
 
-if BUILD_RAVEND
-  bin_PROGRAMS += ravend
+if BUILD_BITCOIND
+  bin_PROGRAMS += blastd
 endif
 
-if BUILD_RAVEN_CLI
-  bin_PROGRAMS += raven-cli
+if BUILD_BITCOIN_CLI
+  bin_PROGRAMS += blast-cli
 endif
 
-if BUILD_RAVEN_TX
-  bin_PROGRAMS += raven-tx
+if BUILD_BITCOIN_TX
+  bin_PROGRAMS += blast-tx
 endif
 
 .PHONY: FORCE check-symbols check-security
-# raven core #
-RAVEN_CORE_H = \
+# blast core #
+BITCOIN_CORE_H = \
+  activemasternode.h \
   addrdb.h \
   addressindex.h \
+  alert.h \
   spentindex.h \
   timestampindex.h \
   addrman.h \
+  auxpow/auxpow.h \
+  auxpow/check.h \
+  auxpow/consensus.h \
+  auxpow/serialize.h \
   assets/assets.h \
   assets/assetdb.h \
   assets/assettypes.h \
   base58.h \
   bloom.h \
   blockencodings.h \
+  cachemap.h \
+  cachemultimap.h \
   chain.h \
   chainparams.h \
   chainparamsbase.h \
@@ -109,6 +117,8 @@ RAVEN_CORE_H = \
   core_io.h \
   core_memusage.h \
   cuckoocache.h \
+  dsnotificationinterface.h \
+  flat-database.h \
   fs.h \
   httprpc.h \
   httpserver.h \
@@ -118,14 +128,21 @@ RAVEN_CORE_H = \
   keystore.h \
   dbwrapper.h \
   limitedmap.h \
+  masternode.h \
+  masternode-payments.h \
+  masternode-sync.h \
+  masternodeman.h \
+  masternodeconfig.h \
   memusage.h \
   merkleblock.h \
+  messagesigner.h \
   miner.h \
   net.h \
   net_processing.h \
   netaddress.h \
   netbase.h \
   netmessagemaker.h \
+  netfulfilledman.h \
   noui.h \
   policy/feerate.h \
   policy/fees.h \
@@ -133,6 +150,7 @@ RAVEN_CORE_H = \
   policy/rbf.h \
   pow.h \
   protocol.h \
+  primitives/pureheader.h \
   random.h \
   reverse_iterator.h \
   reverselock.h \
@@ -148,6 +166,7 @@ RAVEN_CORE_H = \
   script/sign.h \
   script/standard.h \
   script/ismine.h \
+  spork.h \
   streams.h \
   support/allocators/secure.h \
   support/allocators/zeroafterfree.h \
@@ -189,28 +208,39 @@ obj/build.h: FORCE
 	@$(MKDIR_P) $(builddir)/obj
 	@$(top_srcdir)/share/genbuild.sh "$(abs_top_builddir)/src/obj/build.h" \
 	  "$(abs_top_srcdir)"
-libraven_util_a-clientversion.$(OBJEXT): obj/build.h
+libbitcoin_util_a-clientversion.$(OBJEXT): obj/build.h
 
-# server: shared between ravend and raven-qt
-libraven_server_a_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES) $(MINIUPNPC_CPPFLAGS) $(EVENT_CFLAGS) $(EVENT_PTHREADS_CFLAGS)
-libraven_server_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-libraven_server_a_SOURCES = \
+# server: shared between blastd and blast-qt
+libbitcoin_server_a_CPPFLAGS = $(AM_CPPFLAGS) $(BLAST_INCLUDES) $(MINIUPNPC_CPPFLAGS) $(EVENT_CFLAGS) $(EVENT_PTHREADS_CFLAGS)
+libbitcoin_server_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libbitcoin_server_a_SOURCES = \
+  activemasternode.cpp \
   addrdb.cpp \
   addrman.cpp \
+  alert.cpp \
+  auxpow/auxpow.cpp \
   bloom.cpp \
   blockencodings.cpp \
   chain.cpp \
   checkpoints.cpp \
   consensus/consensus.cpp \
   consensus/tx_verify.cpp \
+  dsnotificationinterface.cpp \
   httprpc.cpp \
   httpserver.cpp \
   init.cpp \
   dbwrapper.cpp \
+  masternode.cpp \
+  masternode-payments.cpp \
+  masternode-sync.cpp \
+  masternodeconfig.cpp \
+  masternodeman.cpp \
   merkleblock.cpp \
+  messagesigner.cpp \
   miner.cpp \
   net.cpp \
   net_processing.cpp \
+  netfulfilledman.cpp \
   noui.cpp \
   assets/assets.cpp \
   assets/assetdb.cpp \
@@ -222,6 +252,7 @@ libraven_server_a_SOURCES = \
   rest.cpp \
   rpc/assets.cpp \
   rpc/blockchain.cpp \
+  rpc/masternode.cpp \
   rpc/mining.cpp \
   rpc/misc.cpp \
   rpc/net.cpp \
@@ -230,6 +261,7 @@ libraven_server_a_SOURCES = \
   rpc/server.cpp \
   script/sigcache.cpp \
   script/ismine.cpp \
+  spork.cpp \
   timedata.cpp \
   torcontrol.cpp \
   txdb.cpp \
@@ -238,23 +270,23 @@ libraven_server_a_SOURCES = \
   validation.cpp \
   validationinterface.cpp \
   versionbits.cpp \
-  $(RAVEN_CORE_H)
+  $(BITCOIN_CORE_H)
 
 if ENABLE_ZMQ
-libraven_zmq_a_CPPFLAGS = $(RAVEN_INCLUDES) $(ZMQ_CFLAGS)
-libraven_zmq_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-libraven_zmq_a_SOURCES = \
+libbitcoin_zmq_a_CPPFLAGS = $(BLAST_INCLUDES) $(ZMQ_CFLAGS)
+libbitcoin_zmq_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libbitcoin_zmq_a_SOURCES = \
   zmq/zmqabstractnotifier.cpp \
   zmq/zmqnotificationinterface.cpp \
   zmq/zmqpublishnotifier.cpp
 endif
 
 
-# wallet: shared between ravend and raven-qt, but only linked
+# wallet: shared between blastd and blast-qt, but only linked
 # when wallet enabled
-libraven_wallet_a_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES)
-libraven_wallet_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-libraven_wallet_a_SOURCES = \
+libbitcoin_wallet_a_CPPFLAGS = $(AM_CPPFLAGS) $(BLAST_INCLUDES)
+libbitcoin_wallet_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libbitcoin_wallet_a_SOURCES = \
   wallet/crypter.cpp \
   wallet/db.cpp \
   wallet/feebumper.cpp \
@@ -264,12 +296,12 @@ libraven_wallet_a_SOURCES = \
   wallet/rpcwallet.cpp \
   wallet/wallet.cpp \
   wallet/walletdb.cpp \
-  $(RAVEN_CORE_H)
+  $(BITCOIN_CORE_H)
 
 # crypto primitives library
-crypto_libraven_crypto_a_CPPFLAGS = $(AM_CPPFLAGS)
-crypto_libraven_crypto_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-crypto_libraven_crypto_a_SOURCES = \
+crypto_libbitcoin_crypto_a_CPPFLAGS = $(AM_CPPFLAGS)
+crypto_libbitcoin_crypto_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+crypto_libbitcoin_crypto_a_SOURCES = \
   crypto/aes.cpp \
   crypto/aes.h \
   crypto/chacha20.h \
@@ -326,16 +358,17 @@ crypto_libraven_crypto_a_SOURCES = \
   crypto/sha512.h
 
 if USE_ASM
-crypto_libraven_crypto_a_SOURCES += crypto/sha256_sse4.cpp
+crypto_libbitcoin_crypto_a_SOURCES += crypto/sha256_sse4.cpp
 endif
 
 # consensus: shared between all executables that validate any consensus rules.
-libraven_consensus_a_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES)
-libraven_consensus_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-libraven_consensus_a_SOURCES = \
+libbitcoin_consensus_a_CPPFLAGS = $(AM_CPPFLAGS) $(BLAST_INCLUDES)
+libbitcoin_consensus_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libbitcoin_consensus_a_SOURCES = \
   amount.h \
   arith_uint256.cpp \
   arith_uint256.h \
+  auxpow/auxpow.cpp \
   consensus/merkle.cpp \
   consensus/merkle.h \
   consensus/params.h \
@@ -343,13 +376,17 @@ libraven_consensus_a_SOURCES = \
   hash.cpp \
   hash.h \
   prevector.h \
+  primitives/pureheader.cpp \
+  primitives/pureheader.h \
   primitives/block.cpp \
   primitives/block.h \
+  primitives/blockheader.cpp \
+  primitives/blockheader.h \
   primitives/transaction.cpp \
   primitives/transaction.h \
   pubkey.cpp \
   pubkey.h \
-  script/ravenconsensus.cpp \
+  script/bitcoinconsensus.cpp \
   script/interpreter.cpp \
   script/interpreter.h \
   script/script.cpp \
@@ -366,10 +403,10 @@ libraven_consensus_a_SOURCES = \
   utilstrencodings.h \
   version.h
 
-# common: shared between ravend, and raven-qt and non-server tools
-libraven_common_a_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES)
-libraven_common_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-libraven_common_a_SOURCES = \
+# common: shared between blastd, and blast-qt and non-server tools
+libbitcoin_common_a_CPPFLAGS = $(AM_CPPFLAGS) $(BLAST_INCLUDES)
+libbitcoin_common_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libbitcoin_common_a_SOURCES = \
   base58.cpp \
   chainparams.cpp \
   coins.cpp \
@@ -386,14 +423,14 @@ libraven_common_a_SOURCES = \
   script/sign.cpp \
   script/standard.cpp \
   warnings.cpp \
-  $(RAVEN_CORE_H)
+  $(BITCOIN_CORE_H)
 
 # util: shared between all executables.
 # This library *must* be included to make sure that the glibc
 # backward-compatibility objects and their sanity checks are linked.
-libraven_util_a_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES)
-libraven_util_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-libraven_util_a_SOURCES = \
+libbitcoin_util_a_CPPFLAGS = $(AM_CPPFLAGS) $(BLAST_INCLUDES)
+libbitcoin_util_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libbitcoin_util_a_SOURCES = \
   support/lockedpool.cpp \
   chainparamsbase.cpp \
   clientversion.cpp \
@@ -410,102 +447,102 @@ libraven_util_a_SOURCES = \
   utilmoneystr.cpp \
   utilstrencodings.cpp \
   utiltime.cpp \
-  $(RAVEN_CORE_H)
+  $(BITCOIN_CORE_H)
 
 if GLIBC_BACK_COMPAT
-libraven_util_a_SOURCES += compat/glibc_compat.cpp
+libbitcoin_util_a_SOURCES += compat/glibc_compat.cpp
 AM_LDFLAGS += $(COMPAT_LDFLAGS)
 endif
 
-# cli: shared between raven-cli and raven-qt
-libraven_cli_a_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES)
-libraven_cli_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-libraven_cli_a_SOURCES = \
+# cli: shared between blast-cli and blast-qt
+libbitcoin_cli_a_CPPFLAGS = $(AM_CPPFLAGS) $(BLAST_INCLUDES)
+libbitcoin_cli_a_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libbitcoin_cli_a_SOURCES = \
   rpc/client.cpp \
-  $(RAVEN_CORE_H)
+  $(BITCOIN_CORE_H)
 
-nodist_libraven_util_a_SOURCES = $(srcdir)/obj/build.h
+nodist_libbitcoin_util_a_SOURCES = $(srcdir)/obj/build.h
 #
 
-# ravend binary #
-ravend_SOURCES = ravend.cpp
-ravend_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES)
-ravend_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-ravend_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+# blastd binary #
+blastd_SOURCES = bitcoind.cpp
+blastd_CPPFLAGS = $(AM_CPPFLAGS) $(BLAST_INCLUDES)
+blastd_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+blastd_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
 if TARGET_WINDOWS
-ravend_SOURCES += ravend-res.rc
+blastd_SOURCES += bitcoind-res.rc
 endif
 
-ravend_LDADD = \
-  $(LIBRAVEN_SERVER) \
-  $(LIBRAVEN_COMMON) \
+blastd_LDADD = \
+  $(LIBBITCOIN_SERVER) \
+  $(LIBBITCOIN_COMMON) \
   $(LIBUNIVALUE) \
-  $(LIBRAVEN_UTIL) \
-  $(LIBRAVEN_WALLET) \
-  $(LIBRAVEN_ZMQ) \
-  $(LIBRAVEN_CONSENSUS) \
-  $(LIBRAVEN_CRYPTO) \
+  $(LIBBITCOIN_UTIL) \
+  $(LIBBITCOIN_WALLET) \
+  $(LIBBITCOIN_ZMQ) \
+  $(LIBBITCOIN_CONSENSUS) \
+  $(LIBBITCOIN_CRYPTO) \
   $(LIBLEVELDB) \
   $(LIBLEVELDB_SSE42) \
   $(LIBMEMENV) \
   $(LIBSECP256K1)
 
-ravend_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS)
+blastd_LDADD += $(BOOST_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(ZMQ_LIBS)
 
-# raven-cli binary #
-raven_cli_SOURCES = raven-cli.cpp
-raven_cli_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES) $(EVENT_CFLAGS)
-raven_cli_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-raven_cli_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+# blast-cli binary #
+blast_cli_SOURCES = bitcoin-cli.cpp
+blast_cli_CPPFLAGS = $(AM_CPPFLAGS) $(BLAST_INCLUDES) $(EVENT_CFLAGS)
+blast_cli_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+blast_cli_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
 if TARGET_WINDOWS
-raven_cli_SOURCES += raven-cli-res.rc
+blast_cli_SOURCES += bitcoin-cli-res.rc
 endif
 
-raven_cli_LDADD = \
-  $(LIBRAVEN_CLI) \
+blast_cli_LDADD = \
+  $(LIBBITCOIN_CLI) \
   $(LIBUNIVALUE) \
-  $(LIBRAVEN_UTIL) \
-  $(LIBRAVEN_CRYPTO)
+  $(LIBBITCOIN_UTIL) \
+  $(LIBBITCOIN_CRYPTO)
 
-raven_cli_LDADD += $(BOOST_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(EVENT_LIBS)
+blast_cli_LDADD += $(BOOST_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(EVENT_LIBS)
 #
 
-# raven-tx binary #
-raven_tx_SOURCES = raven-tx.cpp
-raven_tx_CPPFLAGS = $(AM_CPPFLAGS) $(RAVEN_INCLUDES)
-raven_tx_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
-raven_tx_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+# blast-tx binary #
+blast_tx_SOURCES = bitcoin-tx.cpp
+blast_tx_CPPFLAGS = $(AM_CPPFLAGS) $(BLAST_INCLUDES)
+blast_tx_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+blast_tx_LDFLAGS = $(RELDFLAGS) $(AM_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
 
 if TARGET_WINDOWS
-raven_tx_SOURCES += raven-tx-res.rc
+blast_tx_SOURCES += bitcoin-tx-res.rc
 endif
 
-raven_tx_LDADD = \
+blast_tx_LDADD = \
   $(LIBUNIVALUE) \
-  $(LIBRAVEN_COMMON) \
-  $(LIBRAVEN_UTIL) \
-  $(LIBRAVEN_CONSENSUS) \
-  $(LIBRAVEN_CRYPTO) \
+  $(LIBBITCOIN_COMMON) \
+  $(LIBBITCOIN_UTIL) \
+  $(LIBBITCOIN_CONSENSUS) \
+  $(LIBBITCOIN_CRYPTO) \
   $(LIBSECP256K1)
 
-raven_tx_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
+blast_tx_LDADD += $(BOOST_LIBS) $(CRYPTO_LIBS)
 #
 
-# ravenconsensus library #
-if BUILD_RAVEN_LIBS
-include_HEADERS = script/ravenconsensus.h
-libravenconsensus_la_SOURCES = $(crypto_libraven_crypto_a_SOURCES) $(libraven_consensus_a_SOURCES)
+# bitcoinconsensus library #
+if BUILD_BITCOIN_LIBS
+include_HEADERS = script/bitcoinconsensus.h
+libbitcoinconsensus_la_SOURCES = $(crypto_libbitcoin_crypto_a_SOURCES) $(libbitcoin_consensus_a_SOURCES)
 
 if GLIBC_BACK_COMPAT
-  libravenconsensus_la_SOURCES += compat/glibc_compat.cpp
+  libbitcoinconsensus_la_SOURCES += compat/glibc_compat.cpp
 endif
 
-libravenconsensus_la_LDFLAGS = $(AM_LDFLAGS) -no-undefined $(RELDFLAGS)
-libravenconsensus_la_LIBADD = $(LIBSECP256K1)
-libravenconsensus_la_CPPFLAGS = $(AM_CPPFLAGS) -I$(builddir)/obj -I$(srcdir)/secp256k1/include -DBUILD_RAVEN_INTERNAL
-libravenconsensus_la_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
+libbitcoinconsensus_la_LDFLAGS = $(AM_LDFLAGS) -no-undefined $(RELDFLAGS) $(BOOST_LDFLAGS)
+libbitcoinconsensus_la_LIBADD = $(LIBSECP256K1) $(BOOST_LIBS)
+libbitcoinconsensus_la_CPPFLAGS = $(AM_CPPFLAGS) -I$(builddir)/obj -I$(srcdir)/secp256k1/include -DBUILD_BITCOIN_INTERNAL
+libbitcoinconsensus_la_CXXFLAGS = $(AM_CXXFLAGS) $(PIE_FLAGS)
 
 endif
 #
@@ -535,12 +572,12 @@ CLEANFILES += obj/build.h
 EXTRA_DIST = $(CTAES_DIST)
 
 
-config/raven-config.h: config/stamp-h1
+config/bitcoin-config.h: config/stamp-h1
 	@$(MAKE) -C $(top_builddir) $(subdir)/$(@)
-config/stamp-h1: $(top_srcdir)/$(subdir)/config/raven-config.h.in $(top_builddir)/config.status
+config/stamp-h1: $(top_srcdir)/$(subdir)/config/bitcoin-config.h.in $(top_builddir)/config.status
 	$(AM_V_at)$(MAKE) -C $(top_builddir) $(subdir)/$(@)
-$(top_srcdir)/$(subdir)/config/raven-config.h.in:  $(am__configure_deps)
-	$(AM_V_at)$(MAKE) -C $(top_srcdir) $(subdir)/config/raven-config.h.in
+$(top_srcdir)/$(subdir)/config/bitcoin-config.h.in:  $(am__configure_deps)
+	$(AM_V_at)$(MAKE) -C $(top_srcdir) $(subdir)/config/bitcoin-config.h.in
 
 clean-local:
 	-$(MAKE) -C secp256k1 clean

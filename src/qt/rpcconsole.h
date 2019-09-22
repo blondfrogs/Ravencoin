@@ -1,10 +1,11 @@
 // Copyright (c) 2011-2016 The Bitcoin Core developers
 // Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The BLAST Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_QT_RPCCONSOLE_H
-#define RAVEN_QT_RPCCONSOLE_H
+#ifndef BITCOIN_QT_RPCCONSOLE_H
+#define BITCOIN_QT_RPCCONSOLE_H
 
 #include "guiutil.h"
 #include "peertablemodel.h"
@@ -28,7 +29,7 @@ class QMenu;
 class QItemSelection;
 QT_END_NAMESPACE
 
-/** Local Raven RPC console. */
+/** Local Bitcoin RPC console. */
 class RPCConsole: public QWidget
 {
     Q_OBJECT
@@ -95,6 +96,8 @@ public Q_SLOTS:
     void setNumConnections(int count);
     /** Set network state shown in the UI */
     void setNetworkActive(bool networkActive);
+    /** Set number of masternodes shown in the UI */
+    void setMasternodeCount(const QString &strMasternodes);
     /** Set number of blocks and last block date shown in the UI */
     void setNumBlocks(int count, const QDateTime& blockDate, double nVerificationProgress, bool headers);
     /** Set size (number of transactions and memory usage) of the mempool in the UI */
@@ -157,4 +160,4 @@ private:
     void updateNetworkState();
 };
 
-#endif // RAVEN_QT_RPCCONSOLE_H
+#endif // BITCOIN_QT_RPCCONSOLE_H

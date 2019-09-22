@@ -1,0 +1,8 @@
+/usr/bin/blast-cli		--	gen_context(system_u:object_r:blast_exec_t,s0)
+/usr/sbin/blastd		--	gen_context(system_u:object_r:blast_exec_t,s0)
+/usr/lib(64)?/blast/blastd		--	gen_context(system_u:object_r:blast_exec_t,s0)
+
+/etc/blast(/.*)?		gen_context(system_u:object_r:blast_conf_t,s0)
+/var/lib/blast(/.*)?		gen_context(system_u:object_r:blast_var_lib_t,s0)
+
+(/var)?/run/blastd(/.*)?   gen_context(system_u:object_r:blast_var_run_t,s0)

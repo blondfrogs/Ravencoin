@@ -7,12 +7,12 @@
 """
     ZMQ example using python3's asyncio
 
-    Raven should be started with the command line arguments:
-        ravend -testnet -daemon \
-                -zmqpubhashblock=tcp://127.0.0.1:28766 \
-                -zmqpubrawtx=tcp://127.0.0.1:28766 \
-                -zmqpubhashtx=tcp://127.0.0.1:28766 \
-                -zmqpubhashblock=tcp://127.0.0.1:28766
+    BLAST should be started with the command line arguments:
+        blastd -testnet -daemon \
+                -zmqpubhashblock=tcp://127.0.0.1:26464 \
+                -zmqpubrawtx=tcp://127.0.0.1:26464 \
+                -zmqpubhashtx=tcp://127.0.0.1:26464 \
+                -zmqpubhashblock=tcp://127.0.0.1:26464
 
     We use the asyncio library here.  `self.handle()` installs itself as a
     future at the end of the function.  Since it never returns with the event
@@ -24,7 +24,7 @@
     and `await` keywords respectively.
 
     A blocking example using python 2.7 can be obtained from the git history:
-    https://github.com/RavenProject/Ravencoin/blob/37a7fe9e440b83e2364d5498931253937abe9294/contrib/zmq/zmq_sub.py
+    https://github.com/bitcoin/bitcoin/blob/37a7fe9e440b83e2364d5498931253937abe9294/contrib/zmq/zmq_sub.py
 """
 
 import binascii
@@ -39,7 +39,7 @@ if not (sys.version_info.major >= 3 and sys.version_info.minor >= 4):
     print("This example only works with Python 3.4 and greater")
     sys.exit(1)
 
-port = 28766
+port = 26464
 
 class ZMQHandler():
     def __init__(self):

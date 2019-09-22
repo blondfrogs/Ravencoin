@@ -1,11 +1,12 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2016 The Bitcoin Core developers
 // Copyright (c) 2017 The Raven Core developers
+// Copyright (c) 2017-2019 The BLAST Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#ifndef RAVEN_SERIALIZE_H
-#define RAVEN_SERIALIZE_H
+#ifndef BITCOIN_SERIALIZE_H
+#define BITCOIN_SERIALIZE_H
 
 #include "compat/endian.h"
 
@@ -21,6 +22,7 @@
 #include <string.h>
 #include <utility>
 #include <vector>
+#include <list>
 
 #include "prevector.h"
 
@@ -789,7 +791,29 @@ void Unserialize(Stream& is, std::set<K, Pred, A>& m)
     }
 }
 
+/**
+ * list
+ */
+template<typename Stream, typename T, typename A>
+void Serialize(Stream& os, const std::list<T, A>& l)
+{
+    WriteCompactSize(os, l.size());
+    for (typename std::list<T, A>::const_iterator it = l.begin(); it != l.end(); ++it)
+        Serialize(os, (*it));
+}
 
+template<typename Stream, typename T, typename A>
+void Unserialize(Stream& is, std::list<T, A>& l)
+{
+    l.clear();
+    unsigned int nSize = ReadCompactSize(is);
+    for (unsigned int i = 0; i < nSize; i++)
+    {
+        T val;
+        Unserialize(is, val);
+        l.push_back(val);
+    }
+}
 
 /**
  * unique_ptr
@@ -975,4 +999,4 @@ size_t GetSerializeSize(const S& s, const T& t)
     return (CSizeComputer(s.GetType(), s.GetVersion()) << t).size();
 }
 
-#endif // RAVEN_SERIALIZE_H
+#endif // BITCOIN_SERIALIZE_H

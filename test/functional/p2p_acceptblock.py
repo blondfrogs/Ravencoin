@@ -59,16 +59,16 @@ work on its chain).
 """
 
 from test_framework.mininode import *
-from test_framework.test_framework import RavenTestFramework
+from test_framework.test_framework import BlastTestFramework
 from test_framework.util import *
 import time
 from test_framework.blocktools import create_block, create_coinbase
 
-class AcceptBlockTest(RavenTestFramework):
+class AcceptBlockTest(BlastTestFramework):
     def add_options(self, parser):
         parser.add_option("--testbinary", dest="testbinary",
-                          default=os.getenv("RAVEND", "ravend"),
-                          help="ravend binary to test")
+                          default=os.getenv("BLASTD", "blastd"),
+                          help="blastd binary to test")
 
     def set_test_params(self):
         self.setup_clean_chain = True
