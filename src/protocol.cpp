@@ -212,7 +212,7 @@ bool operator<(const CInv& a, const CInv& b)
 
 bool CInv::IsKnownType() const
 {
-    return (type >= 1 && type < (int)ARRAYLEN(ppszTypeName));
+    return (type >= 1 && type < (int)ARRAYLEN(ppszTypeName)) || type == MSG_WITNESS_BLOCK || type == MSG_WITNESS_TX;
 }
 
 std::string CInv::GetCommand() const
