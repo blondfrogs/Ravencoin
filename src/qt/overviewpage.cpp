@@ -613,7 +613,7 @@ void OverviewPage::showOutOfSyncWarning(bool fShow)
 
 void OverviewPage::showAssets()
 {
-    if (AreAssetsDeployed()) {
+//    if (AreAssetsDeployed()) {
         ui->assetFrame->show();
         ui->assetBalanceLabel->show();
         ui->labelAssetStatus->show();
@@ -621,7 +621,7 @@ void OverviewPage::showAssets()
         // Disable the vertical space so that listAssets goes to the bottom of the screen
         ui->assetVerticalSpaceWidget->hide();
         ui->assetVerticalSpaceWidget2->hide();
-    } else {
+/*    } else {
         ui->assetFrame->hide();
         ui->assetBalanceLabel->hide();
         ui->labelAssetStatus->hide();
@@ -630,6 +630,7 @@ void OverviewPage::showAssets()
         ui->assetVerticalSpaceWidget->show();
         ui->assetVerticalSpaceWidget2->show();
     }
+*/
 }
 
 void OverviewPage::assetSearchChanged()
