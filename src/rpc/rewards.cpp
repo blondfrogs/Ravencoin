@@ -144,6 +144,13 @@ UniValue requestsnapshot(const JSONRPCRequest& request) {
     if (ownershipAssetType == AssetType::UNIQUE || ownershipAssetType == AssetType::OWNER || ownershipAssetType == AssetType::MSGCHANNEL)
         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset_name: OWNER, UNQIUE, MSGCHANNEL assets are not allowed for this call"));
 
+    auto currentActiveAssetCache = GetCurrentAssetCache();
+    if (!currentActiveAssetCache)
+        return "_Couldn't get current asset cache.";
+    CNewAsset asset;
+    if (!currentActiveAssetCache->GetAssetMetaDataIfExists(asset_name, asset))
+        throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid asset_name: asset does not exist."));
+
     if (block_height <= chainActive.Height()) {
         throw JSONRPCError(RPC_INVALID_PARAMETER, std::string("Invalid block_height: block height should be greater than current active chain height"));
     }

@@ -497,11 +497,18 @@ class RewardsTest(RavenTestFramework):
 
         asset_name1 = "LISTME"
         block_height1 = n1.getblockcount() + 100
-        # TODO: shouldn't this fail if the asset doesn't exist?
-        n1.requestsnapshot(asset_name=asset_name1, block_height=block_height1)
 
         asset_name2 = "LISTME2"
         block_height2 = n1.getblockcount() + 200
+
+        # make sure a snapshot can't be created for a non-existent
+        assert_raises_rpc_error(-8, "asset does not exist",
+                                n1.requestsnapshot, asset_name1, block_height1)
+        n1.issue(asset_name1)
+        n1.issue(asset_name2)
+        n1.generate(1)
+
+        n1.requestsnapshot(asset_name=asset_name1, block_height=block_height1)
         n1.requestsnapshot(asset_name=asset_name1, block_height=block_height2)
         n1.requestsnapshot(asset_name=asset_name2, block_height=block_height2)
 
