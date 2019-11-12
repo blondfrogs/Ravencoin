@@ -347,10 +347,10 @@ UniValue distributereward(const JSONRPCRequest& request) {
                 "}\n"
 
                 "\nExamples:\n"
-                + HelpExampleCli("requestsnapshot", "\"TRONCO\" 12345 \"RVN\" 1000")
-                + HelpExampleCli("requestsnapshot", "\"PHATSTACKS\" 12345 \"DIVIDENDS\" 1000 \"mwN7xC3yomYdvJuVXkVC7ymY9wNBjWNduD,n4Rf18edydDaRBh7t6gHUbuByLbWEoWUTg\"")
-                + HelpExampleRpc("requestsnapshot", "\"TRONCO\" 34987 \"DIVIDENDS\" 100000")
-                + HelpExampleRpc("requestsnapshot", "\"PHATSTACKS\" 34987 \"RVN\" 100000 \"mwN7xC3yomYdvJuVXkVC7ymY9wNBjWNduD,n4Rf18edydDaRBh7t6gHUbuByLbWEoWUTg\"")
+                + HelpExampleCli("distributereward", "\"TRONCO\" 12345 \"RVN\" 1000")
+                + HelpExampleCli("distributereward", "\"PHATSTACKS\" 12345 \"DIVIDENDS\" 1000 \"mwN7xC3yomYdvJuVXkVC7ymY9wNBjWNduD,n4Rf18edydDaRBh7t6gHUbuByLbWEoWUTg\"")
+                + HelpExampleRpc("distributereward", "\"TRONCO\" 34987 \"DIVIDENDS\" 100000")
+                + HelpExampleRpc("distributereward", "\"PHATSTACKS\" 34987 \"RVN\" 100000 \"mwN7xC3yomYdvJuVXkVC7ymY9wNBjWNduD,n4Rf18edydDaRBh7t6gHUbuByLbWEoWUTg\"")
         );
 
     if (!fAssetIndex) {
