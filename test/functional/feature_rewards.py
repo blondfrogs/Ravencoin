@@ -370,7 +370,7 @@ class RewardsTest(RavenTestFramework):
         self.sync_all()
 
         self.log.info("Initiating failing reward payout")
-        assert_raises_rpc_error(-1, "Failed to distribute reward",
+        assert_raises_rpc_error(-1, "Failed to retrieve ownership snapshot",
             n0.distributereward, "STOCK3", tgtBlockHeight, "RVN", 2000, ownerAddr0)
 
     ## Attempts a payout for an invalid ownership asset

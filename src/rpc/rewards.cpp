@@ -550,7 +550,9 @@ UniValue distributereward(const JSONRPCRequest& request) {
     }
     else {
         LogPrint(BCLog::REWARDS, "Failed to retrieve ownership snapshot for '%s' at height %d!\n",
-            asset_name.c_str(), snapshot_height);                
+            asset_name.c_str(), snapshot_height);
+        throw JSONRPCError(RPC_MISC_ERROR, strprintf("Failed to retrieve ownership snapshot for '%s' at height %d!\n",
+                                                     asset_name.c_str(), snapshot_height));
     }
 
     throw JSONRPCError(RPC_MISC_ERROR, std::string("Failed to distribute reward"));
