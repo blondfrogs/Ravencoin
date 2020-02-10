@@ -882,3 +882,28 @@ void CHDChain::SetSeedFromSeedId()
 
     vchSeed = SecureVector(seed.begin(), seed.end());
 }
+
+bool CHDChain::SetMnemonic(const SecureString& ssMnemonic, const SecureString& ssMnemonicPassphrase, SecureVector& vchSeed)
+{
+    SecureString ssMnemonicTmp = ssMnemonic;
+
+    // can't (re)set mnemonic if seed was already set
+    if (!IsNull())
+        return false;
+
+    // empty mnemonic i.e. "generate a new one"
+    if (ssMnemonic.empty()) {
+        ssMnemonicTmp = CMnemonic::Generate(bUse_bip44 ? 128 : 256);
+    }
+    // NOTE: default mnemonic passphrase is an empty string
+    if (!CMnemonic::Check(ssMnemonicTmp)) {
+        throw std::runtime_error(std::string(__func__) + ": invalid mnemonic: `" + std::string(ssMnemonicTmp.c_str()) + "`");
+    }
+
+    CMnemonic::ToSeed(ssMnemonicTmp, ssMnemonicPassphrase, vchSeed);
+
+    vchMnemonic = SecureVector(ssMnemonicTmp.begin(), ssMnemonicTmp.end());
+    vchMnemonicPassphrase = SecureVector(ssMnemonicPassphrase.begin(), ssMnemonicPassphrase.end());
+
+    return true;
+}
