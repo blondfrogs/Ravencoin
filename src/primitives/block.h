@@ -19,6 +19,13 @@
  * of the block.
  */
 
+
+static const uint32_t MAINNET_X16RV2ACTIVATIONTIME = 1569945600;
+static const uint32_t TESTNET_X16RV2ACTIVATIONTIME = 1567533600;
+static const uint32_t REGTEST_X16RV2ACTIVATIONTIME = 1569931200;
+
+static const uint32_t REGTEST_ETHHASHACTIVATIONTIME = 1581453566;
+
 class BlockNetwork
 {
 public:
@@ -41,6 +48,7 @@ public:
     uint32_t nTime;
     uint32_t nBits;
     uint32_t nNonce;
+    int nHeight;
 
     CBlockHeader()
     {
@@ -57,6 +65,9 @@ public:
         READWRITE(nTime);
         READWRITE(nBits);
         READWRITE(nNonce);
+        if ((s.GetType() & SER_ETHHASH) == 0 && nTime > REGTEST_ETHHASHACTIVATIONTIME) {
+            READWRITE(nHeight);
+        }
     }
 
     void SetNull()
@@ -67,6 +78,7 @@ public:
         nTime = 0;
         nBits = 0;
         nNonce = 0;
+        nHeight = 0;
     }
 
     bool IsNull() const
@@ -134,6 +146,7 @@ public:
         block.nTime          = nTime;
         block.nBits          = nBits;
         block.nNonce         = nNonce;
+        block.nHeight        = nHeight;
         return block;
     }
 

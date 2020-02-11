@@ -126,6 +126,33 @@ RAVEN_CORE_H = \
   algo/sponge.cpp \
   algo/sph_sha2.c \
   algo/gost_streebog.c \
+  algo/siphash/siphash.c \
+  algo/siphash/siphash.h \
+  algo/siphash/siphash_org.c \
+  algo/siphash/siphash_org.h \
+  algo/siphash/test_siphash.c \
+  algo/siphash/siphash.c \
+  algo/ethhash/attributes.h \
+  algo/ethhash/bit_manipulation.h \
+  algo/ethhash/builtins.h \
+  algo/ethhash/endian.h \
+  algo/ethhash/endianness.hpp \
+  algo/ethhash/ethash.cpp \
+  algo/ethhash/ethash.h \
+  algo/ethhash/ethash.hpp \
+  algo/ethhash/ethash-internal.hpp \
+  algo/ethhash/hash_types.h \
+  algo/ethhash/hash_types.hpp \
+  algo/ethhash/helpers.hpp \
+  algo/ethhash/keccak.c \
+  algo/ethhash/keccak.h \
+  algo/ethhash/keccak.hpp \
+  algo/ethhash/keccakf800.c \
+  algo/ethhash/keccakf1600.c \
+  algo/ethhash/primes.c \
+  algo/ethhash/primes.h \
+  algo/ethhash/test_cases.hpp \
+  algo/ethhash/test_ethash_my.cpp \
   spentindex.h \
   timestampindex.h \
   addrman.h \

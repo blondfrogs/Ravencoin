@@ -1261,6 +1261,7 @@ static bool WriteBlockToDisk(const CBlock& block, CDiskBlockPos& pos, const CMes
     if (fileOutPos < 0)
         return error("WriteBlockToDisk: ftell failed");
     pos.nPos = (unsigned int)fileOutPos;
+    LogPrintf("Writing new block to disk: %s\n", block.GetHash().GetHex());
     fileout << block;
 
     return true;
@@ -1294,9 +1295,10 @@ bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex, const Consensus
 {
     if (!ReadBlockFromDisk(block, pindex->GetBlockPos(), consensusParams))
         return false;
-    if (block.GetHash() != pindex->GetBlockHash())
+    if (block.GetHash() != pindex->GetBlockHeader().GetHash()) {
         return error("ReadBlockFromDisk(CBlock&, CBlockIndex*): GetHash() doesn't match index for %s at %s",
-                pindex->ToString(), pindex->GetBlockPos().ToString());
+                     pindex->ToString(), pindex->GetBlockPos().ToString());
+    }
     return true;
 }
 
@@ -2372,8 +2374,15 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     AssertLockHeld(cs_main);
     assert(pindex);
     // pindex->phashBlock can be null if called by CreateNewBlock/TestBlockValidity
-    assert((pindex->phashBlock == nullptr) ||
-           (*pindex->phashBlock == block.GetHash()));
+    LogPrintf("%s: Block nHeight %d\n", __func__, block.nHeight);
+    bool fIsNull= false;
+    bool fAreSame = false;
+    uint256 hash = uint256();
+    uint256 block_hash = block.GetHash();
+    if(pindex->phashBlock) {
+        hash = *(pindex->phashBlock);
+    }
+    assert(pindex->phashBlock == nullptr || hash == block_hash);
     int64_t nTimeStart = GetTimeMicros();
 
     // Check it again in case a previous version let a bad block in

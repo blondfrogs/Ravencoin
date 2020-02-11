@@ -4,19 +4,15 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "versionbits.h"
+#include <algo/ethhash/ethash.hpp>
+#include <streams.h>
+#include "version.h"
 #include "primitives/block.h"
 
 #include "algo/hash_algos.h"
 #include "tinyformat.h"
 #include "utilstrencodings.h"
 #include "crypto/common.h"
-
-
-static const uint32_t MAINNET_X16RV2ACTIVATIONTIME = 1569945600;
-static const uint32_t TESTNET_X16RV2ACTIVATIONTIME = 1567533600;
-static const uint32_t REGTEST_X16RV2ACTIVATIONTIME = 1569931200;
-
 
 BlockNetwork bNetwork = BlockNetwork();
 
@@ -37,6 +33,20 @@ void BlockNetwork::SetNetwork(const std::string& net)
 
 uint256 CBlockHeader::GetHash() const
 {
+    if (bNetwork.fOnRegtest && nTime > REGTEST_ETHHASHACTIVATIONTIME) {
+        char * final_hash_str = new char [64];
+
+        CDataStream ssBlock(SER_ETHHASH, PROTOCOL_VERSION);
+        ssBlock << *this;
+        std::string strHex = HexStr(ssBlock.begin(), ssBlock.end());
+
+        ethash::hash(strHex.c_str(), nHeight, final_hash_str);
+        std::string copy = final_hash_str;
+        delete[] final_hash_str;
+
+        return uint256S(copy);
+    }
+
     uint32_t nTimeToUse = MAINNET_X16RV2ACTIVATIONTIME;
     if (bNetwork.fOnTestnet) {
         nTimeToUse = TESTNET_X16RV2ACTIVATIONTIME;
