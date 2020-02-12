@@ -25,6 +25,8 @@ static const uint32_t TESTNET_X16RV2ACTIVATIONTIME = 1567533600;
 static const uint32_t REGTEST_X16RV2ACTIVATIONTIME = 1569931200;
 
 static const uint32_t REGTEST_ETHHASHACTIVATIONTIME = 1581453566;
+static const uint32_t TESTNET_ETHHASHACTIVATIONTIME = 2581453566; // TODO update when ready
+static const uint32_t MAINNET_ETHHASHACTIVATIONTIME = 2581453566; // TODO update when ready
 
 class BlockNetwork
 {
@@ -33,6 +35,24 @@ public:
     bool fOnRegtest;
     bool fOnTestnet;
     void SetNetwork(const std::string& network);
+
+    uint32_t GetX16RV2ForkTime() {
+        if (fOnTestnet)
+            return TESTNET_X16RV2ACTIVATIONTIME;
+        else if (fOnRegtest)
+            return REGTEST_X16RV2ACTIVATIONTIME;
+        else
+            return MAINNET_X16RV2ACTIVATIONTIME;
+    }
+
+    uint32_t GetAlterHashForkTime() {
+        if (fOnTestnet)
+            return TESTNET_ETHHASHACTIVATIONTIME;
+        else if (fOnRegtest)
+            return REGTEST_ETHHASHACTIVATIONTIME;
+        else
+            return MAINNET_ETHHASHACTIVATIONTIME;
+    }
 };
 
 extern BlockNetwork bNetwork;
@@ -65,7 +85,9 @@ public:
         READWRITE(nTime);
         READWRITE(nBits);
         READWRITE(nNonce);
-        if ((s.GetType() & SER_ETHHASH) == 0 && nTime > REGTEST_ETHHASHACTIVATIONTIME) {
+
+        uint32_t nTimeToUse = bNetwork.GetAlterHashForkTime();
+        if ((s.GetType() & SER_ETHHASH) == 0 && nTime > nTimeToUse) {
             READWRITE(nHeight);
         }
     }
