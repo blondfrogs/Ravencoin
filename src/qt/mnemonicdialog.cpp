@@ -17,7 +17,8 @@ MnemonicDialog::MnemonicDialog(QWidget *parent) :
     setWindowFlags(Qt::Window | Qt::WindowTitleHint | Qt::CustomizeWindowHint);
     ui->setupUi(this);
 
-    QObject::connect(ui->btnCancel2, &QPushButton::clicked, this, &MnemonicDialog::on_btnCancel_clicked);
+    QObject::connect(ui->btnCancel, &QPushButton::clicked, this, &MnemonicDialog::on_btnCancel_clicked);
+    QObject::connect(ui->btnGenerate, &QPushButton::clicked, this, &MnemonicDialog::on_btnGenerate_clicked);
 
     ui->tbxMnemonic->installEventFilter(this);
 
@@ -26,8 +27,6 @@ MnemonicDialog::MnemonicDialog(QWidget *parent) :
 #if QT_VERSION >= 0x050200
     ui->tbxMnemonic->setPlaceholderText(tr("Enter your BIP39 compliant Recovery Phrase/Mnemonic."));
 #endif
-
-    GenerateWords();
 };
 
 bool MnemonicDialog::eventFilter(QObject *obj, QEvent *ev)
@@ -81,7 +80,7 @@ void MnemonicDialog::GenerateWords()
     SecureString words = CMnemonic::Generate(128);
     std::string str_words = std::string(words.begin(), words.end());
 #if QT_VERSION >= 0x050200
-    ui->tbxMnemonicOut->setText(QString::fromStdString(str_words));
+    ui->tbxMnemonic->setText(QString::fromStdString(str_words));
 #endif
 }
 
