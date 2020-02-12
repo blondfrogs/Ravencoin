@@ -109,7 +109,6 @@ BOOST_FIXTURE_TEST_SUITE(pow_tests, BasicTestingSetup)
     {
         BOOST_TEST_MESSAGE("Testing Alterhash");
         int test = 0;
-        char * final_hash_str = new char [32];
 
         /*int *pointer_acc {new int[POINTER_MEM_SIZE]{} };
         printf("Start: Initializing pointer memory \n");
@@ -142,14 +141,14 @@ BOOST_FIXTURE_TEST_SUITE(pow_tests, BasicTestingSetup)
             //    printf("Test case No %d Dataset is incorrrect\n",test);
             //    return 0;
             //}
-            ethash::hash(t.header_hash_hex, t.block_number, final_hash_str);
-            printf("%s\n", final_hash_str);
+            std::string final_string;
+            ethash::hash(t.header_hash_hex, t.block_number, final_string);
 
-            if (!strncmp(final_hash_str, t.final_hash_hex, 32))
+            if (!strncmp(final_string.c_str(), t.final_hash_hex, 64))
                 printf("Test case No %d Final hashes match\n",test);
             else
             {
-                printf("ERROR: Test case No %d Hash %s didn't match to Reference: %s\n", test, final_hash_str, t.final_hash_hex);
+                printf("ERROR: Test case No %d Hash %s didn't match to Reference: %s\n", test, final_string.c_str(), t.final_hash_hex);
             }
             //if (to_hex(r.mix_hash) == t.mix_hash_hex)
             //    printf("Test case No %d Mix hashes match\n",test);
@@ -157,8 +156,6 @@ BOOST_FIXTURE_TEST_SUITE(pow_tests, BasicTestingSetup)
             //{
             //    printf("ERROR: Test case No %d Mix hash %s didn't match to Reference: %s\n",test,to_hex(r.mix_hash).c_str(),t.mix_hash_hex);
             //}
-
-
         }
     }
 

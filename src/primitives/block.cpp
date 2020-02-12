@@ -34,17 +34,15 @@ void BlockNetwork::SetNetwork(const std::string& net)
 uint256 CBlockHeader::GetHash() const
 {
     if (bNetwork.fOnRegtest && nTime > REGTEST_ETHHASHACTIVATIONTIME) {
-        char * final_hash_str = new char [64];
+        std::string final_string;
 
         CDataStream ssBlock(SER_ETHHASH, PROTOCOL_VERSION);
         ssBlock << *this;
         std::string strHex = HexStr(ssBlock.begin(), ssBlock.end());
 
-        ethash::hash(strHex.c_str(), nHeight, final_hash_str);
-        std::string copy = final_hash_str;
-        delete[] final_hash_str;
+        ethash::hash(strHex.c_str(), nHeight, final_string);
 
-        return uint256S(copy);
+        return uint256S(final_string);
     }
 
     uint32_t nTimeToUse = MAINNET_X16RV2ACTIVATIONTIME;

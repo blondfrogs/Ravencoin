@@ -587,7 +587,7 @@ inline hash512 hash_kernel(
 }
 }  // namespace
 
-void hash(const char * header_hash_str, uint32_t block_number, char * final_hash_str) noexcept
+void hash(const char * header_hash_str, uint32_t block_number, std::string& final_string) noexcept
 {
     static const auto lazy_lookup = [](const epoch_context& ctx, uint32_t index) noexcept
     {
@@ -618,11 +618,10 @@ void hash(const char * header_hash_str, uint32_t block_number, char * final_hash
     const hash512 mix_hash = hash_kernel(*context, seed, x16r_algo, lazy_lookup);
     //printf("mix_hash == %s\n", to_hex(mix_hash).c_str());
 
-    hash512 final_hash = hash_final_512(seed, mix_hash);
+    hash256 final_hash = hash_final(seed, mix_hash);
 
-    //printf("final_hash == %s\n", to_hex(final_hash).c_str());
-
-    memcpy(final_hash_str, to_hex(final_hash).c_str(), 64);
+//    printf("final_hash == %s\n", to_hex(final_hash).c_str());
+    final_string = to_hex(final_hash);
 }
 
 

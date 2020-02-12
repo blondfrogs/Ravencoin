@@ -126,7 +126,7 @@ inline result hash(
     return ethash_hash(&context, &header_hash, nonce, pointer_acc);
 }*/
 
-void hash(const char * header_hash_str, uint32_t block_number, char * final_hash_str) noexcept;
+void hash(const char * header_hash_str, uint32_t block_number, std::string& final_string) noexcept;
 
 inline bool verify_final_hash(const hash256& header_hash, const hash256& mix_hash, uint64_t nonce,
     const hash256& boundary, uint8_t x16r_algo) noexcept

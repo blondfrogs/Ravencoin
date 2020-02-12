@@ -22,7 +22,7 @@ int main()
 {
     using namespace ethash;
     int test = 0;
-    char * final_hash_str = new char [32];
+    std::string final_string;
 
     /*int *pointer_acc {new int[POINTER_MEM_SIZE]{} };
     printf("Start: Initializing pointer memory \n");
@@ -58,13 +58,13 @@ int main()
         //    printf("Test case No %d Dataset is incorrrect\n",test);
         //    return 0;
         //}
-        hash(t.header_hash_hex, t.block_number, final_hash_str);
+        hash(t.header_hash_hex, t.block_number, final_string);
        
-        if (!strncmp(final_hash_str, t.final_hash_hex, 32))
+        if (!strncmp(final_string.c_str(), t.final_hash_hex, 64))
             printf("Test case No %d Final hashes match\n",test);
         else
         {
-            printf("ERROR: Test case No %d Hash %s didn't match to Reference: %s\n", test, final_hash_str, t.final_hash_hex);
+            printf("ERROR: Test case No %d Hash %s didn't match to Reference: %s\n", test, final_string.c_str(), t.final_hash_hex);
         }
         //if (to_hex(r.mix_hash) == t.mix_hash_hex)
         //    printf("Test case No %d Mix hashes match\n",test);
