@@ -931,6 +931,11 @@ public:
     bool AddCryptedKey(const CPubKey &vchPubKey, const std::vector<unsigned char> &vchCryptedSecret) override;
     //! Adds an encrypted key to the store, without saving it to disk (used by LoadWallet)
     bool LoadCryptedKey(const CPubKey &vchPubKey, const std::vector<unsigned char> &vchCryptedSecret);
+    bool LoadCryptedWords(const uint256& hash, const std::vector<unsigned char> &vchCryptedWords);
+    bool LoadCryptedPassphrase(const std::vector<unsigned char> &vchCryptedPassphrase);
+    bool LoadWords(const uint256& hash, const std::vector<unsigned char> &vchWords);
+    void GetBip39Data(uint256& hash, std::vector<unsigned char> &vchWords, std::vector<unsigned char> &vchPassphrase);
+    bool LoadPassphrase(const std::vector<unsigned char> &vchPassphrase);
     bool AddCScript(const CScript& redeemScript) override;
     bool LoadCScript(const CScript& redeemScript);
 

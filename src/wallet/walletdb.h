@@ -93,8 +93,6 @@ public:
 
         if(VERSION_HD_BIP44_BIP39 == nVersion) {
             READWRITE(bUse_bip44);
-            READWRITE(vchMnemonic);
-            READWRITE(vchMnemonicPassphrase);
             READWRITE(vchSeed);
         }
         else
@@ -282,6 +280,13 @@ public:
     bool ReadVersion(int& nVersion);
     //! Write wallet version
     bool WriteVersion(int nVersion);
+
+    bool WriteBip39Words(const uint256& hash, const std::vector<unsigned char>& vchWords, bool fEncrypted);
+    bool WriteBip39Passphrase(const std::vector<unsigned char>& vchPassphrase, bool fEncrypted);
+    bool ReadBip39Words(uint256& hash, std::vector<unsigned char>& vchWords, bool fEncrypted);
+    bool ReadBip39Passphrase(std::vector<unsigned char>& vchPassphrase, bool fEncrypted);
+    bool EraseBip39Words(bool fEncrypted);
+    bool EraseBip39Passphrase(bool fEncrypted);
 private:
     CDB batch;
     CWalletDBWrapper& m_dbw;

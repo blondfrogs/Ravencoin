@@ -315,6 +315,31 @@ bool CWallet::LoadCryptedKey(const CPubKey &vchPubKey, const std::vector<unsigne
     return CCryptoKeyStore::AddCryptedKey(vchPubKey, vchCryptedSecret);
 }
 
+bool CWallet::LoadCryptedWords(const uint256& hash, const std::vector<unsigned char> &vchCryptedWords)
+{
+    return CCryptoKeyStore::AddCryptedWords(hash, vchCryptedWords);
+}
+
+bool CWallet::LoadCryptedPassphrase(const std::vector<unsigned char> &vchCryptedPassphrase)
+{
+    return CCryptoKeyStore::AddCryptedPassphrase(vchCryptedPassphrase);
+}
+
+bool CWallet::LoadWords(const uint256& hash, const std::vector<unsigned char> &vchWords)
+{
+    return CCryptoKeyStore::AddWords(hash, vchWords);
+}
+
+bool CWallet::LoadPassphrase(const std::vector<unsigned char> &vchPassphrase)
+{
+    return CCryptoKeyStore::AddPassphrase(vchPassphrase);
+}
+
+void CWallet::GetBip39Data(uint256& hash, std::vector<unsigned char> &vchWords, std::vector<unsigned char> &vchPassphrase)
+{
+    CCryptoKeyStore::GetBip39Data(hash, vchWords, vchPassphrase );
+}
+
 /**
  * Update wallet first key creation time. This should be called whenever keys
  * are added to the wallet, with the oldest key creation time.
@@ -671,6 +696,34 @@ bool CWallet::EncryptWallet(const SecureString& strWalletPassphrase)
             assert(false);
         }
 
+        if(hdChain.IsBip44()) {
+            pwalletdbEncryption->EraseBip39Words( false);
+            pwalletdbEncryption->EraseBip39Passphrase(false);
+
+            if (!EncryptBip39(_vMasterKey))
+            {
+                pwalletdbEncryption->TxnAbort();
+                delete pwalletdbEncryption;
+                // We now probably have half of our keys encrypted in memory, and half not...
+                // die and let the user reload the unencrypted wallet.
+                assert(false);
+            }
+
+            if (!pwalletdbEncryption->WriteBip39Words(nWordHash, vchCryptedBip39Words, true)) {
+                pwalletdbEncryption->TxnAbort();
+                delete pwalletdbEncryption;
+                assert(false);
+            }
+
+            if (!vchCryptedBip39Passphrase.empty()) {
+                if (!pwalletdbEncryption->WriteBip39Passphrase(vchCryptedBip39Passphrase, true)) {
+                    pwalletdbEncryption->TxnAbort();
+                    delete pwalletdbEncryption;
+                    assert(false);
+                }
+            }
+        }
+
         // Encryption was introduced in version 0.4.0
         SetMinVersion(FEATURE_WALLETCRYPT, pwalletdbEncryption, true);
 
@@ -703,6 +756,12 @@ bool CWallet::EncryptWallet(const SecureString& strWalletPassphrase)
         // bits of the unencrypted private key in slack space in the database file.
         dbw->Rewrite();
 
+        if (hdChain.IsBip44()) {
+            CWalletDB walletdb(*dbw);
+            walletdb.WriteBip39Words(nWordHash, vchCryptedBip39Words, true);
+            if (!vchCryptedBip39Passphrase.empty())
+                walletdb.WriteBip39Passphrase(vchCryptedBip39Passphrase, true);
+        }
     }
     NotifyStatusChanged(this);
 
@@ -1453,7 +1512,7 @@ CPubKey CWallet::GenerateNewSeed()
     }
 
     if (!my_passphrase.empty()) {
-        strMnemonicPassphrase = my_words;
+        strMnemonicPassphrase = my_passphrase;
     }
 
 	SecureString vchMnemonic(strMnemonic.begin(), strMnemonic.end());
@@ -4716,6 +4775,7 @@ CWallet* CWallet::CreateWalletFromFile(const std::string walletFile)
             return nullptr;
         }
 
+
         std::cout << "The mnemonic words for this wallet are: " << std::endl;
         std::cout << std::string(walletInstance->hdChain.vchMnemonic.begin(), walletInstance->hdChain.vchMnemonic.end()) << std::endl;
 
@@ -4739,6 +4799,36 @@ CWallet* CWallet::CreateWalletFromFile(const std::string walletFile)
 
     // Try to top up keypool. No-op if the wallet is locked.
     walletInstance->TopUpKeyPool();
+
+    if (walletInstance->hdChain.IsBip44() && fFirstRun) {
+        CWalletDB walletdb(walletInstance->GetDBHandle());
+
+        std::string strWords(walletInstance->hdChain.vchMnemonic.begin(), walletInstance->hdChain.vchMnemonic.end());
+        std::vector<unsigned char> vchWords(walletInstance->hdChain.vchMnemonic.begin(), walletInstance->hdChain.vchMnemonic.end());
+
+        printf("These are my words: %s\n", strWords.c_str());
+        auto hash = Hash(strWords.begin(), strWords.end());
+        printf("These are my words hash: %s\n", hash.GetHex().c_str());
+        if (!walletdb.WriteBip39Words(hash, vchWords, false)) {
+            InitError(_("Error writing bip 39 words to database"));
+            return nullptr;
+        }
+
+        walletInstance->LoadWords(hash, vchWords);
+
+        if (!walletInstance->hdChain.vchMnemonicPassphrase.empty()) {
+            std::vector<unsigned char> vchPassphrase(walletInstance->hdChain.vchMnemonicPassphrase.begin(), walletInstance->hdChain.vchMnemonicPassphrase.end());
+            printf("This is my passphrase: %s\n", std::string(vchPassphrase.begin(), vchPassphrase.end()).c_str());
+            if (!walletdb.WriteBip39Passphrase(vchPassphrase, false)) {
+                InitError(_("Error writing bip 39 passphrase to database"));
+                return nullptr;
+            }
+
+            walletInstance->LoadPassphrase(vchPassphrase);
+        }
+
+
+    }
 
     CBlockIndex *pindexRescan = chainActive.Genesis();
     if (!gArgs.GetBoolArg("-rescan", false))
