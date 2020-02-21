@@ -339,20 +339,14 @@ bool CCryptoKeyStore::EncryptBip39(CKeyingMaterial& vMasterKeyIn)
     {
         LOCK(cs_KeyStore);
 
-        std::vector<unsigned char> vchCryptedSecretWords;
         CKeyingMaterial vchSecretWords(vchWords.begin(), vchWords.end());
         if (!EncryptSecret(vMasterKeyIn, vchSecretWords, nWordHash, vchCryptedBip39Words))
             return false;
 
-        vchCryptedBip39Words = vchCryptedSecretWords;
-
         if (!vchPassphrase.empty()) {
-            std::vector<unsigned char> vchCryptedSecretPassphrase;
             CKeyingMaterial vchSecretPassphrase(vchPassphrase.begin(), vchPassphrase.end());
             if (!EncryptSecret(vMasterKeyIn, vchSecretPassphrase, nWordHash, vchCryptedBip39Passphrase))
                 return false;
-
-            vchCryptedBip39Passphrase = vchCryptedSecretPassphrase;
 
             CKeyingMaterial vchDecryptedPassphrase;
             if (!DecryptSecret(vMasterKeyIn, vchCryptedBip39Passphrase, nWordHash, vchDecryptedPassphrase)) {
