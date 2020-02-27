@@ -297,7 +297,7 @@ public:
         pchMessageStart[0] = 0x52; // R
         pchMessageStart[1] = 0x56; // V
         pchMessageStart[2] = 0x4E; // N
-        pchMessageStart[3] = 0x54; // T
+        pchMessageStart[3] = 0x55; // T
         nDefaultPort = 11877;
         nPruneAfterHeight = 1000;
 
