@@ -243,6 +243,9 @@ public:
         nAssetActivationHeight = 435456; // Asset activated block height
         nMessagingActivationBlock = 0; // Messaging activated block height // TODO after messaging goes active on mainnet
         nRestrictedActivationBlock = 0; // Restricted activated block height // TODO after restricted goes active on mainnet
+
+        nKAAAWWWPOWActivationTime = 4294967295;
+        nKAWPOWActivationTime = nKAAAWWWPOWActivationTime;
         /** RVN End **/
     }
 };
@@ -439,6 +442,9 @@ public:
         nAssetActivationHeight = 0; // Asset activated block height
         nMessagingActivationBlock = 0; // Messaging activated block height
         nRestrictedActivationBlock = 0; // Restricted activated block height // TODO after restricted goes active on testnet
+
+        nKAAAWWWPOWActivationTime = 4294967295;
+        nKAWPOWActivationTime = nKAAAWWWPOWActivationTime;
         /** RVN End **/
     }
 };
@@ -620,6 +626,9 @@ public:
         nAssetActivationHeight = 0; // Asset activated block height
         nMessagingActivationBlock = 0; // Messaging activated block height
         nRestrictedActivationBlock = 0; // Restricted activated block height
+
+        nKAAAWWWPOWActivationTime = 1582830167;
+        nKAWPOWActivationTime = nKAAAWWWPOWActivationTime;
         /** RVN End **/
     }
 };

@@ -131,17 +131,26 @@ UniValue generateBlocks(std::shared_ptr<CReserveScript> coinbaseScript, int nGen
             LOCK(cs_main);
             IncrementExtraNonce(pblock, chainActive.Tip(), nExtraNonce);
         }
-        while (nMaxTries > 0 && pblock->nNonce < nInnerLoopCount && !CheckProofOfWork(pblock->GetHash(), pblock->nBits,
+        uint256 mix_hash;
+        while (nMaxTries > 0 && pblock->nNonce < nInnerLoopCount && !CheckProofOfWork(pblock->GetHash(mix_hash), pblock->nBits,
                                                                                       GetParams().GetConsensus())) {
-            ++pblock->nNonce;
+            if (pblock->nTime < nKAWPOWActivationTime) {
+                ++pblock->nNonce;
+            } else  {
+                ++pblock->nNonce64;
+            }
             --nMaxTries;
         }
         if (nMaxTries == 0) {
             break;
         }
-        if (pblock->nNonce == nInnerLoopCount) {
+        if (pblock->nNonce == nInnerLoopCount || pblock->nNonce64 == nInnerLoopCount) {
             continue;
         }
+
+        // KAWPOW Assign the mix_hash to the block that was found
+        pblock->mix_hash = mix_hash;
+
         std::shared_ptr<const CBlock> shared_pblock = std::make_shared<const CBlock>(*pblock);
         if (!ProcessNewBlock(GetParams(), shared_pblock, true, nullptr))
             throw JSONRPCError(RPC_INTERNAL_ERROR, "ProcessNewBlock, block not accepted");
