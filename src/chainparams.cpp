@@ -264,7 +264,7 @@ public:
         consensus.nSegwitEnabled = true;
         consensus.nCSVEnabled = true;
 
-        consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        consensus.powLimit = uint256S("0fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetTimespan = 2016 * 60; // 1.4 days
         consensus.nPowTargetSpacing = 1 * 60;
         consensus.fPowAllowMinDifficultyBlocks = true;
@@ -298,7 +298,7 @@ public:
         pchMessageStart[1] = 0x56; // V
         pchMessageStart[2] = 0x4E; // N
         pchMessageStart[3] = 0x54; // T
-        nDefaultPort = 18770;
+        nDefaultPort = 11877;
         nPruneAfterHeight = 1000;
 
         uint32_t nGenesisTime = 1537466400;  // Thursday, September 20, 2018 12:00:00 PM GMT-06:00
@@ -393,7 +393,6 @@ public:
 
         checkpointData = (CCheckpointData) {
             {
-                { 225, uint256S("0x000003465e3e0167322eb8269ce91246bbc211e293bc5fbf6f0a0d12c1ccb363")},
             }
         };
 
@@ -443,7 +442,7 @@ public:
         nMessagingActivationBlock = 0; // Messaging activated block height
         nRestrictedActivationBlock = 0; // Restricted activated block height // TODO after restricted goes active on testnet
 
-        nKAAAWWWPOWActivationTime = 4294967295;
+        nKAAAWWWPOWActivationTime = 1582830167;
         nKAWPOWActivationTime = nKAAAWWWPOWActivationTime;
         /** RVN End **/
     }
