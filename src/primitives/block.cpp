@@ -98,17 +98,28 @@ uint256 CBlockHeader::GetKAWPOWHeaderHash() const
     return SerializeHash(input);
 }
 
+std::string CBlockHeader::ToString() const
+{
+    std::stringstream s;
+    s << strprintf("CBlock(ver=0x%08x, hashPrevBlock=%s, hashMerkleRoot=%s, nTime=%u, nBits=%08x, nNonce=%u, nNonce64=%u, nHeight=%u)\n",
+                   nVersion,
+                   hashPrevBlock.ToString(),
+                   hashMerkleRoot.ToString(),
+                   nTime, nBits, nNonce, nNonce64, nHeight);
+    return s.str();
+}
+
 
 
 std::string CBlock::ToString() const
 {
     std::stringstream s;
-    s << strprintf("CBlock(hash=%s, ver=0x%08x, hashPrevBlock=%s, hashMerkleRoot=%s, nTime=%u, nBits=%08x, nNonce=%u, vtx=%u)\n",
+    s << strprintf("CBlock(hash=%s, ver=0x%08x, hashPrevBlock=%s, hashMerkleRoot=%s, nTime=%u, nBits=%08x, nNonce=%u, nNonce64=%u, vtx=%u)\n",
         GetHash().ToString(),
         nVersion,
         hashPrevBlock.ToString(),
         hashMerkleRoot.ToString(),
-        nTime, nBits, nNonce,
+        nTime, nBits, nNonce, nNonce64,
         vtx.size());
     for (const auto& tx : vtx) {
         s << "  " << tx->ToString() << "\n";

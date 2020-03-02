@@ -8,6 +8,7 @@
 #include "crypto/common.h"
 #include "crypto/hmac_sha512.h"
 #include "pubkey.h"
+#include "util.h"
 
 #include <crypto/ethash/include/ethash/progpow.hpp>
 
@@ -262,7 +263,7 @@ uint256 KAWPOWHash(const CBlockHeader& blockHeader, uint256& mix_hash)
     // Get the context from the block height
     const auto epoch_number = ethash::get_epoch_number(blockHeader.nHeight);
     if (!context || context->epoch_number != epoch_number)
-    context = ethash::create_epoch_context(epoch_number);
+        context = ethash::create_epoch_context(epoch_number);
 
     // Build the header_hash
     uint256 nHeaderHash = blockHeader.GetKAWPOWHeaderHash();

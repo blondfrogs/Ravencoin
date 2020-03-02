@@ -97,6 +97,7 @@ public:
 
     uint256 GetHash(uint256& mix_hash) const;
     uint256 GetKAWPOWHeaderHash() const;
+    std::string ToString() const;
 
     /// Use for testing algo switch
     uint256 TestTiger() const;

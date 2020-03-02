@@ -3925,8 +3925,9 @@ static bool CheckBlockHeader(const CBlockHeader& block, CValidationState& state,
 {
     uint256 mix_hash;
     // Check proof of work matches claimed amount
-    if (fCheckPOW && !CheckProofOfWork(block.GetHash(mix_hash), block.nBits, consensusParams))
+    if (fCheckPOW && !CheckProofOfWork(block.GetHash(mix_hash), block.nBits, consensusParams)) {
         return state.DoS(50, false, REJECT_INVALID, "high-hash", false, "proof of work failed");
+    }
 
     if (block.nTime >= nKAWPOWActivationTime) {
         if (mix_hash != block.mix_hash) {
