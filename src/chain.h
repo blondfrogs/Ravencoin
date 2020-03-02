@@ -443,6 +443,7 @@ public:
         block.nBits           = nBits;
         block.nNonce          = nNonce;
 
+        block.nHeight         = nHeight;
         block.nNonce64        = nNonce64;
         block.mix_hash        = mix_hash;
         return block.GetHash();
