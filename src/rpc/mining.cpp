@@ -716,10 +716,20 @@ UniValue getblocktemplate(const JSONRPCRequest& request)
     if (pblock->nTime > nKAWPOWActivationTime) {
         std::string address = gArgs.GetArg("-miningaddress", "");
         if (IsValidDestinationString(address)) {
+            static std::string lastheader = "";
+            if (mapRVNKAWBlockTemplates.count(lastheader)) {
+                if (pblock->nTime - 30 < mapRVNKAWBlockTemplates.at(lastheader).nTime) {
+                    result.pushKV("pprpcheader", lastheader);
+                    result.pushKV("pprpcepoch", ethash::get_epoch_number(pblock->nHeight));
+                    return result;
+                }
+            }
+
             pblock->hashMerkleRoot = BlockMerkleRoot(*pblock);
             result.pushKV("pprpcheader", pblock->GetKAWPOWHeaderHash().GetHex());
             result.pushKV("pprpcepoch", ethash::get_epoch_number(pblock->nHeight));
             mapRVNKAWBlockTemplates[pblock->GetKAWPOWHeaderHash().GetHex()] = *pblock;
+            lastheader = pblock->GetKAWPOWHeaderHash().GetHex();
         }
     }
 
