@@ -266,7 +266,7 @@ public:
 
         consensus.powLimit = uint256S("0fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
         consensus.nPowTargetTimespan = 2016 * 60; // 1.4 days
-        consensus.nPowTargetSpacing = 1 * 60;
+        consensus.nPowTargetSpacing = 1 * 10;
         consensus.fPowAllowMinDifficultyBlocks = true;
         consensus.fPowNoRetargeting = false;
         consensus.nRuleChangeActivationThreshold = 1310; // Approx 65% for testchains
