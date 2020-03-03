@@ -33,6 +33,7 @@
 #include <univalue.h>
 #include <crypto/ethash/include/ethash/ethash.hpp>
 #include <consensus/merkle.h>
+#include <crypto/ethash/include/ethash/progpow.hpp>
 
 extern uint64_t nHashesPerSec;
 
@@ -754,6 +755,77 @@ protected:
     }
 };
 
+static UniValue getkawpowhash(const JSONRPCRequest& request) {
+    if (request.fHelp || request.params.size() < 4) {
+        throw std::runtime_error(
+                "getkawpowhash \"header_hash\" \"mix_hash\" nonce, height, \"target\"\n"
+                "\nAttempts to submit new block to network mined by progpow gpu miner via rpc.\n"
+
+                "\nArguments\n"
+                "1. \"header_hash\"        (string, required) the prow_pow header hash that was given to the gpu miner from this rpc client\n"
+                "2. \"mix_hash\"           (string, required) the mix hash that was mined by the gpu miner via rpc\n"
+                "3. \"nonce\"              (number, required) the nonce of the block that hashed the valid block\n"
+                "4. \"height\"             (number, required) the height of the block data that is being hashed\n"
+                "5. \"target\"             (string, optional) the target of the block that is hash is trying to meet\n"
+                "\nResult:\n"
+                "\nExamples:\n"
+                + HelpExampleCli("getkawpowhash", "\"header_hash\" \"mix_hash\" 100000 2456")
+                + HelpExampleRpc("getkawpowhash", "\"header_hash\" \"mix_hash\" 100000 2456")
+        );
+    }
+
+    std::string str_header_hash = request.params[0].get_str();
+    std::string mix_hash = request.params[1].get_str();
+    uint64_t nNonce = request.params[2].get_int();
+    uint32_t nHeight = request.params[3].get_int();
+
+    const auto header_hash = to_hash256(str_header_hash);
+
+    uint256 target;
+    bool fCheckTarget = false;
+    if (request.params.size() == 5) {
+        target = uint256S(request.params[4].get_str());
+        fCheckTarget = true;
+    }
+
+    static ethash::epoch_context_ptr context{nullptr, nullptr};
+
+    // Get the context from the block height
+    const auto epoch_number = ethash::get_epoch_number(nHeight);
+    if (!context || context->epoch_number != epoch_number)
+        context = ethash::create_epoch_context(epoch_number);
+
+    // ProgPow hash
+    const auto result = progpow::hash(*context, nHeight, header_hash, nNonce);
+
+    uint256 mined_mix_hash = uint256S(to_hex(result.mix_hash));
+    uint256 mined_final_hash = uint256S(to_hex(result.final_hash));
+
+    bool mix_hash_match = false;
+    bool final_hash_meets_target = false;
+
+    if (mined_mix_hash == uint256S(mix_hash))
+        mix_hash_match = true;
+
+    if (fCheckTarget) {
+        arith_uint256 boundary = UintToArith256(target);
+        // Check proof of work matches claimed amount
+        if (UintToArith256(mined_final_hash) <= boundary)
+            final_hash_meets_target = true;
+    }
+
+    UniValue ret(UniValue::VOBJ);
+    ret.pushKV("result", mix_hash_match ? "true" : "false");
+    ret.pushKV("digest", mined_final_hash.GetHex());
+    ret.pushKV("mix_hash", mined_mix_hash.GetHex());
+    ret.pushKV("info", "");
+    if (fCheckTarget)
+        ret.pushKV("meets_target", final_hash_meets_target ? "true" : "false");
+
+
+    return ret;
+}
+
 static UniValue pprpcsb(const JSONRPCRequest& request) {
     if (request.fHelp || request.params.size() != 3) {
         throw std::runtime_error(
@@ -1199,6 +1271,7 @@ static const CRPCCommand commands[] =
     { "mining",             "getblocktemplate",       &getblocktemplate,       {"template_request"} },
     { "mining",             "submitblock",            &submitblock,            {"hexdata","dummy"} },
     { "mining",             "pprpcsb",                &pprpcsb,                {"header_hash","mix_hash", "nonce"} },
+    { "mining",             "getkawpowhash",          &getkawpowhash,          {"header_hash", "mix_hash", "nonce", "height"} },
 
     /* Coin generation */
     { "generating",         "getgenerate",            &getgenerate,            {}  },
