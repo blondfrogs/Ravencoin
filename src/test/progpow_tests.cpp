@@ -41,17 +41,19 @@ BOOST_AUTO_TEST_CASE(progpow_hash_empty)
 {
     auto& context = get_ethash_epoch_context_0();
 
-    printf("Starting block zero %u\n", GetTimeMillis());
+    printf("Starting block 1000 %u\n", GetTimeMillis());
     int count = 1000;
+    ethash_result result;
     while (count > 0) {
-        const auto result = progpow::hash(context, 0, {}, 0);
-        const auto mix_hex = "faeb1be51075b03a4ff44b335067951ead07a3b078539ace76fd56fc410557a3";
-        const auto final_hex = "63155f732f2bf556967f906155b510c917e48e99685ead76ea83f4eca03ab12b";
+        result = progpow::hash(context, count, {}, 0);
         --count;
     }
+
+    const auto mix_hex = "f4ac202715ded4136e72887c39e63a4738331c57fd9eb79f6ec421c281aa8743";
+    const auto final_hex = "b3bad9ca6f7c566cf0377d1f8cce29d6516a96562c122d924626281ec948ef02";
     printf("Ending block 0 %u\n", GetTimeMillis());
-//    BOOST_CHECK_EQUAL(to_hex(result.mix_hash), mix_hex);
-//    BOOST_CHECK_EQUAL(to_hex(result.final_hash), final_hex);
+    BOOST_CHECK_EQUAL(to_hex(result.mix_hash), mix_hex);
+    BOOST_CHECK_EQUAL(to_hex(result.final_hash), final_hex);
 }
 
 BOOST_AUTO_TEST_CASE(progpow_hash_30000)
@@ -77,8 +79,8 @@ BOOST_AUTO_TEST_CASE(progpow_hash_30000)
     }
     auto finished = GetTime() - nTime2;
     printf("Finished hashing %d seconds\n", finished);
-//        BOOST_CHECK_EQUAL(to_hex(result.mix_hash), mix_hex);
-//        BOOST_CHECK_EQUAL(to_hex(result.final_hash), final_hex);
+//    BOOST_CHECK_EQUAL(to_hex(result.mix_hash), mix_hex);
+//    BOOST_CHECK_EQUAL(to_hex(result.final_hash), final_hex);
 }
 
 BOOST_AUTO_TEST_CASE(progpow_hash_and_verify)
@@ -122,9 +124,9 @@ BOOST_AUTO_TEST_CASE(progpow_search)
     auto& ctxl = reinterpret_cast<const ethash::epoch_context&>(ctx);
 
     auto boundary = to_hash256("00ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-    auto sr = progpow::search(ctx, 0, {}, boundary, 0, 100);
-    auto srl = progpow::search_light(ctxl, 0, {}, boundary, 0, 100);
-
+    auto sr = progpow::search(ctx, 0, {}, boundary, 200, 100);
+    auto srl = progpow::search_light(ctxl, 0, {}, boundary, 200, 100);
+    
     BOOST_CHECK(sr.mix_hash == ethash::hash256{});
     BOOST_CHECK(sr.final_hash == ethash::hash256{});
     BOOST_CHECK(sr.nonce == 0x0);
@@ -132,17 +134,18 @@ BOOST_AUTO_TEST_CASE(progpow_search)
     BOOST_CHECK(sr.final_hash == srl.final_hash);
     BOOST_CHECK(sr.nonce == srl.nonce);
 
-    sr = progpow::search(ctx, 0, {}, boundary, 100, 100);
-    srl = progpow::search_light(ctxl, 0, {}, boundary, 100, 100);
+    // Switch it to a different starting nonce and find another solution
+    sr = progpow::search(ctx, 0, {}, boundary, 300, 100);
+    srl = progpow::search_light(ctxl, 0, {}, boundary, 300, 100);
 
     BOOST_CHECK(sr.mix_hash != ethash::hash256{});
     BOOST_CHECK(sr.final_hash != ethash::hash256{});
-    BOOST_CHECK(sr.nonce == 185);
+    BOOST_CHECK(sr.nonce == 394);
     BOOST_CHECK(sr.mix_hash == srl.mix_hash);
     BOOST_CHECK(sr.final_hash == srl.final_hash);
     BOOST_CHECK(sr.nonce == srl.nonce);
 
-    auto r = progpow::hash(ctx, 0, {}, 185);
+    auto r = progpow::hash(ctx, 0, {}, 394);
     BOOST_CHECK(sr.final_hash == r.final_hash);
     BOOST_CHECK(sr.mix_hash == r.mix_hash);
 }
