@@ -779,6 +779,9 @@ static UniValue getkawpowhash(const JSONRPCRequest& request) {
     uint64_t nNonce = request.params[2].get_int();
     uint32_t nHeight = request.params[3].get_int();
 
+    if (nHeight - 25 > chainActive.Height())
+        throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Block height is to large");
+
     const auto header_hash = to_hash256(str_header_hash);
 
     uint256 target;
@@ -941,9 +944,23 @@ UniValue submitblock(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Block decode failed");
     }
 
+    // TODO remove before mainnet release
+    std::cout << "time: " << block.nTime << std::endl;
+    std::cout << "height: " << block.nHeight << std::endl;
+    std::cout << "nBits: " << arith_uint256().SetCompact(block.nBits).GetHex() << std::endl;
+    std::cout << "nonce: " << block.nNonce64 << std::endl;
+    std::cout << "header_hash: " << block.GetKAWPOWHeaderHash().GetHex() << std::endl;
+
+    CDataStream data(PROTOCOL_VERSION, SER_GETHASH);
+    CKAWPOWInput input(block);
+    data << input;
+    std::cout << "hex of kawpow header: " << HexStr(data.begin(),data.end()) << std::endl;
     if (block.vtx.empty() || !block.vtx[0]->IsCoinBase()) {
         throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Block does not start with a coinbase");
     }
+
+    if (block.nHeight - 25 > chainActive.Height())
+        throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Block height is to large");
 
     uint256 hash = block.GetHash();
 

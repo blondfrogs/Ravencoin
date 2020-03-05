@@ -261,6 +261,7 @@ uint256 KAWPOWHash(const CBlockHeader& blockHeader, uint256& mix_hash)
 
     // Get the context from the block height
     const auto epoch_number = ethash::get_epoch_number(blockHeader.nHeight);
+
     if (!context || context->epoch_number != epoch_number)
         context = ethash::create_epoch_context(epoch_number);
 
