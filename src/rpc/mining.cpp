@@ -776,8 +776,8 @@ static UniValue getkawpowhash(const JSONRPCRequest& request) {
 
     std::string str_header_hash = request.params[0].get_str();
     std::string mix_hash = request.params[1].get_str();
-    uint64_t nNonce = request.params[2].get_int();
-    uint32_t nHeight = request.params[3].get_int();
+    uint64_t nNonce = request.params[2].get_uint64();
+    uint32_t nHeight = request.params[3].get_uint();
 
     if (nHeight - 25 > chainActive.Height())
         throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Block height is to large");
