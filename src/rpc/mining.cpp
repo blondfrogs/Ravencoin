@@ -764,20 +764,32 @@ static UniValue getkawpowhash(const JSONRPCRequest& request) {
                 "\nArguments\n"
                 "1. \"header_hash\"        (string, required) the prow_pow header hash that was given to the gpu miner from this rpc client\n"
                 "2. \"mix_hash\"           (string, required) the mix hash that was mined by the gpu miner via rpc\n"
-                "3. \"nonce\"              (number, required) the nonce of the block that hashed the valid block\n"
+                "3. \"nonce\"              (string, required) the hex nonce of the block that hashed the valid block\n"
                 "4. \"height\"             (number, required) the height of the block data that is being hashed\n"
                 "5. \"target\"             (string, optional) the target of the block that is hash is trying to meet\n"
                 "\nResult:\n"
                 "\nExamples:\n"
-                + HelpExampleCli("getkawpowhash", "\"header_hash\" \"mix_hash\" 100000 2456")
-                + HelpExampleRpc("getkawpowhash", "\"header_hash\" \"mix_hash\" 100000 2456")
+                + HelpExampleCli("getkawpowhash", "\"header_hash\" \"mix_hash\" \"0x100000\" 2456")
+                + HelpExampleRpc("getkawpowhash", "\"header_hash\" \"mix_hash\" \"0x100000\" 2456")
         );
     }
 
     std::string str_header_hash = request.params[0].get_str();
     std::string mix_hash = request.params[1].get_str();
-    uint64_t nNonce = request.params[2].get_uint64();
+    std::string hex_nonce = request.params[2].get_str();
     uint32_t nHeight = request.params[3].get_uint();
+
+    char *str, *end;
+    uint64_t nNonce;
+    errno = 0;
+    nNonce = strtoull(hex_nonce.c_str(), &end, 16);
+    if (nNonce == 0 && end == str) {
+        throw JSONRPCError(RPC_INVALID_PARAMS, "Nonce wasn't a string");
+    } else if (nNonce == ULLONG_MAX && errno) {
+        throw JSONRPCError(RPC_INVALID_PARAMS, "Hex value was out of range");
+    } else if (*end) {
+        throw JSONRPCError(RPC_INVALID_PARAMS, "Invalid hex string");
+    }
 
     if (nHeight > chainActive.Height() + 10)
         throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Block height is to large");
