@@ -49,7 +49,7 @@ bool ParseUInt32(const std::string& str, uint32_t *out)
         return false;
     char *endp = NULL;
     errno = 0; // strtoul will not set errno if valid
-    long int n = strtoul(str.c_str(), &endp, 10);
+    unsigned long int n = strtoul(str.c_str(), &endp, 10);
     if(out) *out = (uint32_t)n;
     // Note that strtoul returns a *long int*, so even if strtoul doesn't report a over/underflow
     // we still have to check that the returned value is within the range of an *int32_t*. On 64-bit
@@ -80,7 +80,7 @@ bool ParseUInt64(const std::string& str, uint64_t *out)
         return false;
     char *endp = NULL;
     errno = 0; // strtoull will not set errno if valid
-    long long int n = strtoull(str.c_str(), &endp, 10);
+    unsigned long long int n = strtoull(str.c_str(), &endp, 10);
     if(out) *out = (uint64_t)n;
     // Note that strtoull returns a *long long int*, so even if strtoull doesn't report a over/underflow
     // we still have to check that the returned value is within the range of an *uint64_t*.

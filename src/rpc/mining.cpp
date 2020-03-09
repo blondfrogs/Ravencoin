@@ -779,7 +779,7 @@ static UniValue getkawpowhash(const JSONRPCRequest& request) {
     uint64_t nNonce = request.params[2].get_uint64();
     uint32_t nHeight = request.params[3].get_uint();
 
-    if (nHeight - 25 > chainActive.Height())
+    if (nHeight > chainActive.Height() + 10)
         throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Block height is to large");
 
     const auto header_hash = to_hash256(str_header_hash);
@@ -959,7 +959,7 @@ UniValue submitblock(const JSONRPCRequest& request)
         throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Block does not start with a coinbase");
     }
 
-    if (block.nHeight - 25 > chainActive.Height())
+    if (block.nHeight > chainActive.Height() + 10)
         throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Block height is to large");
 
     uint256 hash = block.GetHash();
