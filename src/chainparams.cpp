@@ -124,7 +124,8 @@ public:
         consensus.nSegwitEnabled = true;
         consensus.nCSVEnabled = true;
         consensus.powLimit = uint256S("00000fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-        consensus.kawpowLimit = uint256S("000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"); consensus.nPowTargetTimespan = 2016 * 60; // 1.4 days
+        consensus.kawpowLimit = uint256S("000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        consensus.nPowTargetTimespan = 2016 * 60; // 1.4 days
         consensus.nPowTargetSpacing = 1 * 60;
 		consensus.fPowAllowMinDifficultyBlocks = false;
         consensus.fPowNoRetargeting = false;
