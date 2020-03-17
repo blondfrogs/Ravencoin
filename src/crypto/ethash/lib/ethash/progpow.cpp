@@ -143,6 +143,17 @@ inline void random_merge(uint32_t& a, uint32_t b, uint32_t selector) noexcept
     }
 }
 
+static const uint32_t round_constants[22] = {
+        0x00000001,0x00008082,0x0000808A,
+        0x80008000,0x0000808B,0x80000001,
+        0x80008081,0x00008009,0x0000008A,
+        0x00000088,0x80008009,0x8000000A,
+        0x8000808B,0x0000008B,0x00008089,
+        0x00008003,0x00008002,0x00000080,
+        0x0000800A,0x8000000A,0x80008081,
+        0x00008080,
+};
+
 using lookup_fn = hash2048 (*)(const epoch_context&, uint32_t);
 
 using mix_array = std::array<std::array<uint32_t, num_regs>, num_lanes>;
@@ -275,16 +286,19 @@ result hash(const epoch_context& context, int block_number, const hash256& heade
 
     {
         // Absorb phase for initial round of keccak
+        uint32_t state[25] = {0x0};     // Keccak's state
+
         // 1st fill with header data (8 words)
-        uint32_t state[25];     // Keccak's state
         for (int i = 0; i < 8; i++)
             state[i] = header_hash.word32s[i];
+
         // 2nd fill with nonce (2 words)
         state[8] = nonce;
         state[9] = nonce >> 32;
-        // 3rd all remaining elements to zero
-        for (int i = 10; i < 25; i++)
-            state[i] = 0;
+
+        // 3rd apply input constraints
+        state[10] = round_constants[0];
+        state[18] = round_constants[6];
 
         keccak_progpow_64(state);
 
@@ -296,19 +310,21 @@ result hash(const epoch_context& context, int block_number, const hash256& heade
     hash_seed[1] = state2[1];
     const hash256 mix_hash = hash_mix(context, block_number, hash_seed, calculate_dataset_item_2048);
 
-    uint32_t state[25];     // Keccak's state
+    // Absorb phase for last round of keccak (256 bits)
+
+    uint32_t state[25] = {0x0};     // Keccak's state
+
+    // 1st initial 8 words of state are kept as carry-over from initial keccak
     for (int i = 0; i < 8; i++)
         state[i] = state2[i];
 
-    // Absorb phase for last round of keccak (256 bits)
-    // 1st initial 8 words of state are kept as carry-over from initial keccak
     // 2nd subsequent 8 words are carried from digest/mix
     for (int i = 8; i < 16; i++)
         state[i] = mix_hash.word32s[i-8];
 
-    // 3rd all other elements to zero
-    for (int i = 16; i < 25; i++)
-        state[i] = 0;
+    // 3rd apply input constraints
+    state[17] = round_constants[0];
+    state[24] = round_constants[6];
 
     // Run keccak loop
     keccak_progpow_256(state);
@@ -343,16 +359,20 @@ result hash(const epoch_context_full& context, int block_number, const hash256& 
 
     {
         // Absorb phase for initial round of keccak
+
+        uint32_t state[25] = {0x0};     // Keccak's state
+
         // 1st fill with header data (8 words)
-        uint32_t state[25];     // Keccak's state
         for (int i = 0; i < 8; i++)
             state[i] = header_hash.word32s[i];
+
         // 2nd fill with nonce (2 words)
         state[8] = nonce;
         state[9] = nonce >> 32;
-        // 3rd all remaining elements to zero
-        for (int i = 10; i < 25; i++)
-            state[i] = 0;
+
+        // 3rd apply input constraints
+        state[10] = round_constants[0];
+        state[18] = round_constants[6];
 
         keccak_progpow_64(state);
 
@@ -365,19 +385,21 @@ result hash(const epoch_context_full& context, int block_number, const hash256& 
 
     const hash256 mix_hash = hash_mix(context, block_number, hash_seed, lazy_lookup);
 
-    uint32_t state[25];     // Keccak's state
+    // Absorb phase for last round of keccak (256 bits)
+
+    uint32_t state[25] = {0x0};     // Keccak's state
+
+    // 1st initial 8 words of state are kept as carry-over from initial keccak
     for (int i = 0; i < 8; i++)
         state[i] = state2[i];
 
-    // Absorb phase for last round of keccak (256 bits)
-    // 1st initial 8 words of state are kept as carry-over from initial keccak
     // 2nd subsequent 8 words are carried from digest/mix
     for (int i = 8; i < 16; i++)
         state[i] = mix_hash.word32s[i-8];
 
-    // 3rd all other elements to zero
-    for (int i = 16; i < 25; i++)
-        state[i] = 0;
+    // 3rd apply input constraints
+    state[17] = round_constants[0];
+    state[24] = round_constants[6];
 
     // Run keccak loop
     keccak_progpow_256(state);
@@ -397,16 +419,20 @@ bool verify(const epoch_context& context, int block_number, const hash256& heade
 
     {
         // Absorb phase for initial round of keccak
+
+        uint32_t state[25] = {0x0};     // Keccak's state
+
         // 1st fill with header data (8 words)
-        uint32_t state[25];     // Keccak's state
         for (int i = 0; i < 8; i++)
             state[i] = header_hash.word32s[i];
+
         // 2nd fill with nonce (2 words)
         state[8] = nonce;
         state[9] = nonce >> 32;
-        // 3rd all remaining elements to zero
-        for (int i = 10; i < 25; i++)
-            state[i] = 0;
+
+        // 3rd apply input constraints
+        state[10] = round_constants[0];
+        state[18] = round_constants[6];
 
         keccak_progpow_64(state);
 
@@ -417,19 +443,21 @@ bool verify(const epoch_context& context, int block_number, const hash256& heade
     hash_seed[0] = state2[0];
     hash_seed[1] = state2[1];
 
-    uint32_t state[25];     // Keccak's state
+    // Absorb phase for last round of keccak (256 bits)
+
+    uint32_t state[25] = {0x0};     // Keccak's state
+
+    // 1st initial 8 words of state are kept as carry-over from initial keccak
     for (int i = 0; i < 8; i++)
         state[i] = state2[i];
 
-    // Absorb phase for last round of keccak (256 bits)
-    // 1st initial 8 words of state are kept as carry-over from initial keccak
     // 2nd subsequent 8 words are carried from digest/mix
     for (int i = 8; i < 16; i++)
         state[i] = mix_hash.word32s[i-8];
 
-    // 3rd all other elements to zero
-    for (int i = 16; i < 25; i++)
-        state[i] = 0;
+    // 3rd apply input constraints
+    state[17] = round_constants[0];
+    state[24] = round_constants[6];
 
     // Run keccak loop
     keccak_progpow_256(state);
@@ -444,6 +472,7 @@ bool verify(const epoch_context& context, int block_number, const hash256& heade
 
     const hash256 expected_mix_hash =
         hash_mix(context, block_number, hash_seed, calculate_dataset_item_2048);
+
     return is_equal(expected_mix_hash, mix_hash);
 }
 
